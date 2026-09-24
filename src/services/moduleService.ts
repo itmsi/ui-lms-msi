@@ -1,9 +1,12 @@
 import { readEnvelope } from '@/helpers/apiEnvelope';
-import { apiPost } from '@/helpers/apiHelper';
+import { apiGet, apiPost } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import type {
     ApiFailureCode,
     LearningModule,
+    ModuleChapter,
+    ModuleDetail,
+    ModuleDetailOutcome,
     ModuleListOutcome,
     ModuleListQuery,
     ModuleListResult,
@@ -112,5 +115,69 @@ export const fetchModules = async (query: ModuleListQuery, signal?: AbortSignal)
         return { ok: true, data: result };
     } catch (error) {
         return { ok: false, code: toApiFailureCode(error) };
+    }
+};
+
+const detailPath = (id: string) => `modules/get/${encodeURIComponent(id)}`;
+
+const toChapter = (value: unknown, fallbackLine: number): ModuleChapter | null => {
+    if (isRecord(value) === false || typeof value.id !== 'string') {
+        return null;
+    }
+
+    return {
+        id: value.id,
+        title: readString(value.title) ?? '',
+        description: readString(value.description) ?? '',
+        linkMaterials: toLinkMaterials(value.link_materials),
+        line: typeof value.line === 'number' && Number.isFinite(value.line) ? value.line : fallbackLine,
+    };
+};
+
+const toDetail = (value: unknown): ModuleDetail | null => {
+    if (isRecord(value) === false || typeof value.id !== 'string') {
+        return null;
+    }
+
+    const rawChapters = Array.isArray(value.chapters) ? (value.chapters as unknown[]) : [];
+
+    return {
+        id: value.id,
+        title: readString(value.title) ?? '',
+        description: readString(value.description) ?? '',
+        banner: readString(value.banner),
+        linkMaterials: toLinkMaterials(value.link_materials),
+        category: readString(value.module_category),
+        // Diurutkan dari `line`, bukan dari urutan array — urutan belajar milik backend.
+        chapters: rawChapters
+            .map((chapter, index) => toChapter(chapter, index + 1))
+            .filter((chapter): chapter is ModuleChapter => chapter !== null)
+            .sort((left, right) => left.line - right.line),
+    };
+};
+
+/** Dipakai bersama oleh detail Perpustakaan, detail Materi, dan editor Materi. */
+export const fetchModuleDetail = async (id: string, signal?: AbortSignal): Promise<ModuleDetailOutcome> => {
+    if (navigator.onLine === false) {
+        return { ok: false, code: 'offline' };
+    }
+
+    try {
+        const { data: body } = await apiGet<unknown>(detailPath(id), undefined, { signal });
+        const envelope = readEnvelope(body);
+
+        if (envelope.ok === false) {
+            return envelope.message === null
+                ? { ok: false, code: 'not_found' }
+                : { ok: false, code: 'validation', message: envelope.message };
+        }
+
+        const detail = toDetail(envelope.data);
+
+        return detail === null ? { ok: false, code: 'not_found' } : { ok: true, data: detail };
+    } catch (error) {
+        const status = isRecord(error) && typeof error.status === 'number' ? error.status : null;
+
+        return status === 404 ? { ok: false, code: 'not_found' } : { ok: false, code: toApiFailureCode(error) };
     }
 };

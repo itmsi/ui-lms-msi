@@ -1,5 +1,6 @@
 import { ImageOff, Paperclip } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { Card } from '@/components/ui/Card';
 import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
@@ -14,16 +15,19 @@ interface MaterialCardProps {
  * Kartu katalog: thumbnail 16:9, judul dua baris, deskripsi dua baris, lalu satu baris
  * metadata. Tingginya sengaja ditahan supaya satu baris grid tetap sejajar dan padat.
  *
- * Belum bisa diklik: layar detail Perpustakaan belum ada dan endpoint-nya belum
- * dikonfirmasi. Karena itu tidak ada ikon panah — penanda yang tidak menuju ke mana pun
- * hanya menjanjikan sesuatu yang tak ada. Tidak ada progress bar, tombol "Lanjut",
- * maupun state terkunci: Perpustakaan memang bebas dijelajahi.
+ * Seluruh kartu adalah satu tautan ke detail materi. Tidak ada progress bar, tombol
+ * "Lanjut", maupun state terkunci: Perpustakaan memang bebas dijelajahi.
  */
 export const MaterialCard = ({ material }: MaterialCardProps) => {
     const [bannerFailed, setBannerFailed] = useState(false);
     const showBanner = material.banner !== null && bannerFailed === false;
 
     return (
+        <Link
+            to={`/library/${material.id}`}
+            aria-label={`${strings.library.openMaterial}: ${material.title}`}
+            className="rounded-card block h-full"
+        >
         <Card className="hover:border-neutral-line flex h-full flex-col overflow-hidden transition-colors p-1 bg-gradiend">
             {/* Rasio ditetapkan supaya tata letak tidak bergeser saat gambar selesai dimuat. */}
             <div className="bg-neutral-soft relative aspect-video w-full rounded-xl overflow-hidden">
@@ -63,5 +67,6 @@ export const MaterialCard = ({ material }: MaterialCardProps) => {
                 )}
             </div>
         </Card>
+        </Link>
     );
 };

@@ -86,6 +86,8 @@ export const strings = {
         clearFilters: 'Bersihkan filter',
         resultSuffix: 'materi',
         materialsSuffix: 'lampiran',
+        openMaterial: 'Buka materi',
+        backToLibrary: 'Kembali ke Perpustakaan',
         noBanner: 'Materi ini belum punya gambar sampul',
         emptyTitle: 'Belum ada materi di Perpustakaan',
         emptyBody: 'Materi akan muncul di sini begitu ditambahkan.',

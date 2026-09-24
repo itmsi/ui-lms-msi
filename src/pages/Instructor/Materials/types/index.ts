@@ -1,25 +1,8 @@
-/* --- Bentuk detail materi, dipetakan dari GET modules/get/:id --- */
+import type { ModuleChapter, ModuleDetail } from '@/types/module';
 
-export interface MaterialChapter {
-    id: string;
-    title: string;
-    /** HTML dari editor. Wajib dirender lewat `RichText`, tidak pernah langsung. */
-    description: string;
-    linkMaterials: string[];
-    /** Nomor urut dari backend; dipakai mengurutkan, bukan posisi di array. */
-    line: number;
-}
-
-export interface MaterialDetail {
-    id: string;
-    title: string;
-    /** HTML dari editor. Wajib dirender lewat `RichText`. */
-    description: string;
-    banner: string | null;
-    linkMaterials: string[];
-    category: string | null;
-    chapters: MaterialChapter[];
-}
+/** Detail dipakai juga oleh Perpustakaan, jadi bentuknya tinggal di `types/module`. */
+export type MaterialChapter = ModuleChapter;
+export type MaterialDetail = ModuleDetail;
 
 export interface LinkDraft {
     key: string;
