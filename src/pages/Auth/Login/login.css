@@ -1,0 +1,110 @@
+/**
+ * Gaya khusus halaman Login.
+ *
+ * Permukaan brand-nya (gradien, siluet pegunungan, partikel) sudah dipindah ke
+ * `components/ui/brand-panel.css` karena kini dipakai juga oleh sidebar aplikasi.
+ * Yang tersisa di sini benar-benar hanya milik layar Login.
+ */
+.login-page {
+    --lg-brand-300: #8ebde8;
+
+    --lg-field-bg: #f9fafb;
+    --lg-field-border: #e5e7eb;
+    --lg-field-icon: #9ca3af;
+}
+
+/* ---------- Masuknya elemen ---------- */
+
+.login-enter {
+    animation: login-rise 560ms cubic-bezier(0.16, 0.84, 0.44, 1) var(--enter-delay, 0ms) both;
+}
+
+@keyframes login-rise {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---------- Field dengan fokus berpendar ---------- */
+
+/**
+ * Selektor sengaja dibuat dua tingkat (`.login-page .login-field`) supaya
+ * menang telak atas utilitas Tailwind bawaan komponen Input, tanpa bergantung
+ * pada urutan pemuatan stylesheet.
+ *
+ * Padding 12px, dengan 44px di kiri sebagai ruang ikon 20px. Tinggi total
+ * jadi 48px sehingga target sentuh di mobile tetap memenuhi ambang minimum.
+ */
+.login-page .login-field {
+    background-color: var(--lg-field-bg);
+    border-color: var(--lg-field-border);
+    padding: 12px 12px 12px 44px;
+    transition:
+        border-color 300ms ease,
+        box-shadow 300ms ease,
+        background-color 300ms ease;
+}
+
+/* Field yang punya aksi di kanan, misalnya tombol lihat password. */
+.login-page .login-field--trailing {
+    padding-right: 48px;
+}
+
+.login-page .login-field:hover:not(:disabled) {
+    border-color: var(--lg-brand-300);
+}
+
+/**
+ * Outline bawaan diganti pendar. Penanda fokus utamanya adalah perubahan border
+ * dari #E5E7EB ke Primary — kontrasnya jauh di atas 3:1, jadi fokus tetap
+ * terbaca meski pendarnya sendiri lembut.
+ */
+.login-page .login-field:focus {
+    outline: none;
+    background-color: #fff;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgb(2 83 165 / 0.25);
+}
+
+.login-page .login-field-icon {
+    color: var(--lg-field-icon);
+}
+
+/* ---------- Tombol utama ---------- */
+
+.login-page .login-submit {
+    height: auto;
+    padding-block: 14px;
+    box-shadow:
+        0 10px 15px -3px rgb(2 83 165 / 0.3),
+        0 4px 6px -4px rgb(2 83 165 / 0.3);
+    transition:
+        transform 300ms ease,
+        box-shadow 300ms ease,
+        background-color 300ms ease;
+}
+
+.login-page .login-submit:hover:not(:disabled) {
+    transform: translateY(-4px);
+    box-shadow:
+        0 20px 25px -5px rgb(2 83 165 / 0.4),
+        0 8px 10px -6px rgb(2 83 165 / 0.4);
+}
+
+.login-page .login-submit:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.login-page .login-submit-arrow {
+    transition: transform 300ms ease;
+}
+
+.login-page .login-submit:hover:not(:disabled) .login-submit-arrow {
+    transform: translateX(4px);
+}

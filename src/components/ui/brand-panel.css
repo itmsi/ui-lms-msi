@@ -1,0 +1,61 @@
+/**
+ * Permukaan brand: gradien biru tua, siluet pegunungan berlapis, dan partikel.
+ *
+ * Dipakai oleh panel kiri halaman Login dan sidebar aplikasi. Warnanya mengikuti
+ * token global (Primary #0253A5, Primary Dark #013A73); yang di-scope di sini
+ * hanya dua tingkat yang lebih gelap dari Primary Dark dan satu aksen terang,
+ * karena ketiganya belum ada di design system.
+ */
+.brand-panel {
+    --bp-950: #011d3a;
+    --bp-900: #012a54;
+    --bp-300: #8ebde8;
+
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    color: #fff;
+    background:
+        radial-gradient(125% 95% at 18% 8%, var(--color-primary) 0%, transparent 58%),
+        linear-gradient(160deg, var(--bp-900) 0%, var(--bp-950) 100%);
+}
+
+/**
+ * Siluet pegunungan berlapis; dekoratif, jadi tidak pernah menerima pointer.
+ *
+ * Tingginya ditentukan `aspect-ratio`, bukan angka tetap. Dengan begitu skala SVG
+ * selalu ditentukan lebarnya saja: pegunungan membentang penuh selebar panel dengan
+ * proporsi asli, baik di panel Login yang lebar maupun di sidebar 280px. Tinggi tetap
+ * (cara sebelumnya) membuat faktor tinggi menang atas faktor lebar, sehingga gambarnya
+ * diperbesar lalu dipotong kiri-kanan — terlihat seperti bongkahan raksasa.
+ *
+ * `max-height` hanya berlaku di panel yang sangat pendek (pita brand di mobile);
+ * saat itu `xMidYMax slice` memotong dari atas, lebarnya tetap penuh.
+ */
+.brand-ridges {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+    width: 100%;
+    aspect-ratio: 1440 / 420;
+    max-height: 55%;
+}
+
+.brand-particle {
+    position: absolute;
+    border-radius: 9999px;
+    background: var(--bp-300);
+    animation: brand-drift var(--particle-duration) ease-in-out var(--particle-delay) infinite alternate;
+}
+
+@keyframes brand-drift {
+    from {
+        transform: translate3d(0, 0, 0);
+    }
+
+    to {
+        transform: translate3d(var(--particle-dx), var(--particle-dy), 0);
+    }
+}

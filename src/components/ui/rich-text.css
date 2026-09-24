@@ -1,0 +1,51 @@
+/**
+ * Gaya bersama untuk teks kaya: area menulis di editor dan hasil bacanya.
+ *
+ * Tailwind menghapus gaya daftar bawaan lewat preflight, jadi tanda titik dan nomor
+ * harus dikembalikan di sini — kalau tidak, daftar terlihat seperti paragraf biasa,
+ * baik saat diketik maupun saat dibaca kandidat.
+ *
+ * Kedua selektor ditulis berpasangan supaya yang tampil di editor dan yang tampil di
+ * layar baca tidak pernah berbeda.
+ */
+.rich-text,
+.rich-text-editor .ProseMirror {
+    overflow-wrap: anywhere;
+}
+
+.rich-text-editor .ProseMirror {
+    min-height: 7rem;
+    outline: none;
+}
+
+.rich-text > * + *,
+.rich-text-editor .ProseMirror > * + * {
+    margin-top: 0.5rem;
+}
+
+.rich-text ul,
+.rich-text-editor .ProseMirror ul {
+    padding-left: 1.25rem;
+    list-style: disc;
+}
+
+.rich-text ol,
+.rich-text-editor .ProseMirror ol {
+    padding-left: 1.25rem;
+    list-style: decimal;
+}
+
+.rich-text li > p,
+.rich-text-editor .ProseMirror li > p {
+    margin: 0;
+}
+
+.rich-text strong,
+.rich-text-editor .ProseMirror strong {
+    font-weight: 600;
+}
+
+.rich-text em,
+.rich-text-editor .ProseMirror em {
+    font-style: italic;
+}
