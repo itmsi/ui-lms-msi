@@ -44,3 +44,30 @@ export type ApiFailureCode = 'validation' | 'unauthorized' | 'offline' | 'unknow
 export type ModuleListOutcome =
     | { ok: true; data: ModuleListResult }
     | { ok: false; code: ApiFailureCode; message?: string };
+
+/* --- Detail Module, dipetakan dari GET modules/get/:id --- */
+
+export interface ModuleChapter {
+    id: string;
+    title: string;
+    /** HTML dari editor. Wajib dirender lewat `RichText`, tidak pernah langsung. */
+    description: string;
+    linkMaterials: string[];
+    /** Nomor urut dari backend; dipakai mengurutkan, bukan posisi di array. */
+    line: number;
+}
+
+export interface ModuleDetail {
+    id: string;
+    title: string;
+    /** HTML dari editor. Wajib dirender lewat `RichText`. */
+    description: string;
+    banner: string | null;
+    linkMaterials: string[];
+    category: string | null;
+    chapters: ModuleChapter[];
+}
+
+export type ModuleDetailOutcome =
+    | { ok: true; data: ModuleDetail }
+    | { ok: false; code: ApiFailureCode | 'not_found'; message?: string };

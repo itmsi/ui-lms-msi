@@ -1,5 +1,7 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useModuleList } from '@/hooks/useModuleList';
 import type { ModuleListState } from '@/hooks/useModuleList';
+import type { CandidateProgram } from '@/types/user';
 
 export type LibraryState = ModuleListState;
 
@@ -11,5 +13,31 @@ export type LibraryState = ModuleListState;
  */
 const PAGE_SIZE = 12;
 
-/** Perpustakaan menampilkan materi lintas-scope, jadi tidak dibatasi pembuatnya. */
-export const useLibrary = () => useModuleList({ createdBy: null, pageSize: PAGE_SIZE });
+/**
+ * Program akun (`group_name` dari login SSO) → `module_category` di `modules/get`.
+ * Ejaan backend untuk reguler adalah `reguler`; `regular` ditolak API.
+ *
+ * CONTRACT: `mt` sudah terbukti diterima filter ini. `reguler` diterima saat create,
+ * tetapi sebagai filter daftar belum diverifikasi — bila ditolak, backend membalasnya
+ * dengan envelope error dan layar menampilkan state error, bukan daftar kosong.
+ */
+const CATEGORY_BY_PROGRAM: Record<CandidateProgram, string> = {
+    mt: 'mt',
+    regular: 'reguler',
+};
+
+/**
+ * Perpustakaan menampilkan materi lintas pembuat, dibatasi ke program akun.
+ * Akun yang `group_name`-nya tidak dikenali tidak dibatasi kategorinya — lebih baik
+ * menampilkan semua materi daripada menebak programnya.
+ */
+export const useLibrary = () => {
+    const { user } = useAuth();
+    const program = user?.program ?? null;
+
+    return useModuleList({
+        createdBy: null,
+        pageSize: PAGE_SIZE,
+        fixedCategory: program === null ? null : CATEGORY_BY_PROGRAM[program],
+    });
+};

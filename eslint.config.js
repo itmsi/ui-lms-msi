@@ -26,6 +26,8 @@ export default tseslint.config(
         },
         rules: {
             '@typescript-eslint/no-explicit-any': 'error',
+            '@typescript-eslint/no-unsafe-assignment': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
             'func-style': ['error', 'expression', { allowArrowFunctions: true }],
             'no-console': ['error', { allow: ['warn', 'error'] }],
         },

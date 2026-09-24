@@ -14,6 +14,12 @@ interface UseModuleListOptions {
     /** null menampilkan semua modul; diisi id pengguna untuk membatasi ke miliknya. */
     createdBy: string | null;
     pageSize: number;
+    /**
+     * Kategori yang ditetapkan pemanggil, mis. dari program akun. Bila diisi, nilai
+     * `category` di URL diabaikan dan tidak dihitung sebagai filter yang bisa dibersihkan.
+     * `undefined` berarti kategori mengikuti URL; `null` berarti tidak dikirim.
+     */
+    fixedCategory?: string | null;
 }
 
 const parsePage = (value: string | null): number => {
@@ -32,13 +38,14 @@ const parseSort = (value: string | null): ModuleSort => (value === 'title' ? 'ti
  * Dipakai bersama oleh Perpustakaan (semua materi) dan Materi (hanya milik pengguna);
  * satu-satunya perbedaan keduanya adalah `createdBy`.
  */
-export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => {
+export const useModuleList = ({ createdBy, pageSize, fixedCategory }: UseModuleListOptions) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const page = parsePage(searchParams.get('page'));
     const search = searchParams.get('q') ?? '';
     const sort = parseSort(searchParams.get('sort'));
-    const category = searchParams.get('category');
+    const isCategoryFixed = fixedCategory !== undefined;
+    const category = isCategoryFixed ? fixedCategory : searchParams.get('category');
 
     const [reloadToken, setReloadToken] = useState(0);
 
@@ -142,9 +149,10 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
 
     const goToPage = useCallback(
         (next: number) => {
-            applyParams({ page: next, q: search, sort, category });
+            // Kategori tetap tidak ditulis ke URL: nilainya bukan pilihan pengguna.
+            applyParams({ page: next, q: search, sort, category: isCategoryFixed ? undefined : category });
         },
-        [applyParams, search, sort, category],
+        [applyParams, search, sort, category, isCategoryFixed],
     );
 
     const selectSort = useCallback(
@@ -169,7 +177,7 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
         clearFilters,
         goToPage,
         retry,
-        hasFilters: search !== '' || category !== null,
+        hasFilters: search !== '' || (isCategoryFixed === false && category !== null),
         pageSize,
     };
 };

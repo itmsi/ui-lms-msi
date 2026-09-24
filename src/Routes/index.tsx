@@ -15,6 +15,7 @@ const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
 const MaterialEditor = lazy(() => import('@/pages/Instructor/Materials/MaterialEditor'));
 const MaterialDetail = lazy(() => import('@/pages/Instructor/Materials/MaterialDetail'));
 const Library = lazy(() => import('@/pages/Candidate/Library/Library'));
+const LibraryDetail = lazy(() => import('@/pages/Candidate/Library/LibraryDetail'));
 const History = lazy(() => import('@/pages/Candidate/History/History'));
 const Profile = lazy(() => import('@/pages/Candidate/Profile/Profile'));
 const Forbidden = lazy(() => import('@/pages/Errors/Forbidden'));
@@ -40,6 +41,7 @@ export const AppRoutes = () => (
                         <Route path="/materials/:id" element={<MaterialDetail />} />
                         <Route path="/materials/:id/edit" element={<MaterialEditor />} />
                         <Route path="/library" element={<Library />} />
+                        <Route path="/library/:id" element={<LibraryDetail />} />
                         <Route path="/history" element={<History />} />
                         <Route path="/profile" element={<Profile />} />
                     </Route>
