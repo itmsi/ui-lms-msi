@@ -1,10 +1,3 @@
-/**
- * Gaya khusus halaman Login.
- *
- * Permukaan brand-nya (gradien, siluet pegunungan, partikel) sudah dipindah ke
- * `components/ui/brand-panel.css` karena kini dipakai juga oleh sidebar aplikasi.
- * Yang tersisa di sini benar-benar hanya milik layar Login.
- */
 .login-page {
     --lg-brand-300: #8ebde8;
 
@@ -12,8 +5,6 @@
     --lg-field-border: #e5e7eb;
     --lg-field-icon: #9ca3af;
 }
-
-/* ---------- Masuknya elemen ---------- */
 
 .login-enter {
     animation: login-rise 560ms cubic-bezier(0.16, 0.84, 0.44, 1) var(--enter-delay, 0ms) both;
@@ -31,16 +22,6 @@
     }
 }
 
-/* ---------- Field dengan fokus berpendar ---------- */
-
-/**
- * Selektor sengaja dibuat dua tingkat (`.login-page .login-field`) supaya
- * menang telak atas utilitas Tailwind bawaan komponen Input, tanpa bergantung
- * pada urutan pemuatan stylesheet.
- *
- * Padding 12px, dengan 44px di kiri sebagai ruang ikon 20px. Tinggi total
- * jadi 48px sehingga target sentuh di mobile tetap memenuhi ambang minimum.
- */
 .login-page .login-field {
     background-color: var(--lg-field-bg);
     border-color: var(--lg-field-border);
@@ -51,7 +32,6 @@
         background-color 300ms ease;
 }
 
-/* Field yang punya aksi di kanan, misalnya tombol lihat password. */
 .login-page .login-field--trailing {
     padding-right: 48px;
 }
@@ -60,11 +40,6 @@
     border-color: var(--lg-brand-300);
 }
 
-/**
- * Outline bawaan diganti pendar. Penanda fokus utamanya adalah perubahan border
- * dari #E5E7EB ke Primary — kontrasnya jauh di atas 3:1, jadi fokus tetap
- * terbaca meski pendarnya sendiri lembut.
- */
 .login-page .login-field:focus {
     outline: none;
     background-color: #fff;
@@ -75,8 +50,6 @@
 .login-page .login-field-icon {
     color: var(--lg-field-icon);
 }
-
-/* ---------- Tombol utama ---------- */
 
 .login-page .login-submit {
     height: auto;

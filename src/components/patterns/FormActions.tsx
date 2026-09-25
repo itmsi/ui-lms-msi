@@ -9,7 +9,6 @@ interface FormActionsProps {
     cancelLabel: string;
     onCancel: () => void;
     isSubmitting?: boolean;
-    /** Aksi tambahan, misalnya "Simpan draft". */
     children?: ReactNode;
 }
 
@@ -21,8 +20,6 @@ const FormActions = ({
     isSubmitting = false,
     children,
 }: FormActionsProps) => (
-
-    // <div className="flex justify-end gap-4 p-4 bg-white rounded-2xl shadow-sm mb-8"></div>
     <div className="border-line bg-surface sticky bottom-0 flex flex-wrap justify-end gap-2 border-t p-4 rounded-2xl shadow-sm">
         <Button type="button" variant="secondary" className='min-w-30' onClick={onCancel} disabled={isSubmitting}>
             {cancelLabel}

@@ -10,10 +10,6 @@ interface StatusBadgeProps {
     className?: string;
 }
 
-/**
- * Status selalu ikon + teks. Warna tidak boleh jadi satu-satunya pembawa makna,
- * dan tint dipakai supaya teks kecil tetap lolos kontras.
- */
 const STATUS_STYLE: Record<LearningStatus, { icon: LucideIcon; className: string }> = {
     completed: { icon: Check, className: 'bg-success-soft text-success-ink' },
     approved: { icon: CircleCheck, className: 'bg-success-soft text-success-ink' },

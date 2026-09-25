@@ -26,7 +26,6 @@ interface ButtonClassOptions {
     className?: string;
 }
 
-/** Dipakai bersama oleh Button dan LinkButton supaya keduanya tidak pernah berbeda tampilan. */
 export const getButtonClassName = ({
     variant = 'primary',
     size = 'md',

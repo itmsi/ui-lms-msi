@@ -50,7 +50,6 @@ export const Login = () => {
                         />
                     </div>
 
-                    {/* Teks statis, bukan tautan: tidak ada alur aktivasi maupun reset password. */}
                     <p
                         className="login-enter text-caption text-muted mt-7 text-center"
                         style={enterDelay('360ms')}

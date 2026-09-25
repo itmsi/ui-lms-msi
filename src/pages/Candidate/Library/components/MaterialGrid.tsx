@@ -4,14 +4,6 @@ import { strings } from '@/locales/id';
 import { MaterialCard } from '@/pages/Candidate/Library/components/MaterialCard';
 import type { LibraryModule } from '@/pages/Candidate/Library/types';
 
-/**
- * Definisi kolom tinggal di satu tempat dan dipakai grid isi maupun skeleton, supaya
- * tata letak tidak bergeser saat data selesai dimuat.
- *
- * Breakpoint memperhitungkan sidebar 280px: di 1280px lebar konten ~1000px (3 kolom),
- * di 1536px ~1250px (4 kolom). Kartu tetap di kisaran 300–330px — cukup padat, dan
- * tidak melebar berlebihan saat materinya sedikit.
- */
 const GRID_CLASS = 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4';
 
 interface MaterialGridProps {

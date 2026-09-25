@@ -4,7 +4,6 @@ type ProgressTone = 'primary' | 'success' | 'neutral';
 
 interface ProgressBarProps {
     value: number;
-    /** Label wajib: progress tidak boleh hanya berupa batang warna. */
     label: string;
     tone?: ProgressTone;
     showValue?: boolean;

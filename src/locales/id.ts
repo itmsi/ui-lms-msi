@@ -1,8 +1,3 @@
-/**
- * Satu-satunya tempat teks UI ditulis (siap i18n).
- * Bahasa Indonesia, nada mengobrol dan actionable — bukan pesan sistem.
- * Nama diri tetap apa adanya: MSI Learning, Onboarding Umum, MT Program, Capstone, WeDrive, WeCom.
- */
 export const strings = {
     app: {
         name: 'MSI Learning',
@@ -53,7 +48,6 @@ export const strings = {
         submit: 'Masuk',
         submitting: 'Sedang masuk…',
 
-        /** Teks statis, bukan tautan: tidak ada alur reset password. */
         forgotHelper: 'Lupa password? Silakan hubungi HR.',
 
         invalidCredentials: 'Email atau password yang Anda masukkan belum sesuai.',
@@ -136,6 +130,8 @@ export const strings = {
         categoryLabel: 'Kategori',
         bannerLabel: 'Banner',
         bannerHint: 'JPG, PNG, WEBP, atau GIF. Maksimal 5 MB.',
+        bannerSizeHint:
+            'Best view rasio 16:9, ex: 1024x576 px.',
         bannerChoose: 'Pilih gambar',
         bannerReplace: 'Ganti gambar',
         bannerRemove: 'Hapus gambar',
@@ -175,6 +171,7 @@ export const strings = {
         noDescription: 'Materi ini belum punya deskripsi.',
         noLinks: 'Belum ada tautan materi.',
         noLessons: 'Materi ini tidak dibagi ke dalam lesson.',
+        lessonPrefix: 'Lesson',
         openLinkHint: 'Terbuka di tab baru',
         embedTitle: 'Pratinjau',
         openIn: 'Buka di',

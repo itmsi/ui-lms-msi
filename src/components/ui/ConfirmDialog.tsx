@@ -9,19 +9,13 @@ interface ConfirmDialogProps {
     description: string;
     confirmLabel: string;
     cancelLabel: string;
-    /** Tombol konfirmasi memakai 'danger' untuk tindakan yang tidak bisa dibatalkan. */
     confirmVariant?: ButtonVariant;
-    /** Menonaktifkan kedua tombol dan menukar label konfirmasi — mencegah kirim ganda. */
     isConfirming?: boolean;
     confirmingLabel?: string;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-/**
- * Dibangun di atas elemen native `<dialog>`: fokus otomatis terkunci di dalamnya dan
- * tombol Escape sudah bekerja tanpa kode tambahan.
- */
 export const ConfirmDialog = ({
     open,
     title,
@@ -56,7 +50,6 @@ export const ConfirmDialog = ({
         <dialog
             ref={dialogRef}
             onCancel={(event) => {
-                // Escape memicu event 'cancel' bawaan — dialihkan ke handler yang sama dengan tombol Batal.
                 event.preventDefault();
 
                 if (isConfirming === false) {

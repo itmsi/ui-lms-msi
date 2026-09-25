@@ -6,11 +6,6 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuth } from '@/hooks/useAuth';
 import { strings } from '@/locales/id';
 
-/**
- * Ditampilkan saat pengguna berhasil masuk tetapi backend tidak mengirim satu pun
- * item menu yang dikenali. Lebih jujur daripada melempar ke 403, yang menyiratkan
- * pengguna mencoba membuka sesuatu yang terlarang.
- */
 export const NoMenuAccess = () => {
     const { user, signOut } = useAuth();
 

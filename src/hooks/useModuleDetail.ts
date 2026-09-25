@@ -9,18 +9,12 @@ type LoadedState =
 
 export type ModuleDetailState = { status: 'loading' } | LoadedState;
 
-/** Dipakai bersama oleh detail Perpustakaan (Candidate) dan detail Materi (Instructor). */
 export const useModuleDetail = (id: string | undefined) => {
     const [reloadToken, setReloadToken] = useState(0);
 
-    /**
-     * Sama seperti daftar: status "loading" diturunkan dari perbandingan kunci, bukan
-     * disetel di awal effect — supaya effect hanya menyetel state di dalam callback.
-     */
     const queryKey = `${id ?? ''}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedState } | null>(null);
 
-    // Tanpa id tidak ada yang bisa diminta; diturunkan langsung, bukan disetel lewat effect.
     const state: ModuleDetailState =
         id === undefined
             ? { status: 'error', code: 'not_found' }
@@ -38,7 +32,6 @@ export const useModuleDetail = (id: string | undefined) => {
         const run = async () => {
             const outcome = await fetchModuleDetail(id, controller.signal);
 
-            // Permintaan yang dibatalkan bukan kegagalan — jangan tampilkan errornya.
             if (controller.signal.aborted) {
                 return;
             }
