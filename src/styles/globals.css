@@ -32,12 +32,6 @@
     font-display: swap;
 }
 
-/**
- * Design token MSI Learning.
- * Sumber: PROJECT_INSTRUCTIONS §11 + docs/FIGMA_PROMPTS_v2.md (Prompt 1).
- * Arti warna: biru = aksi/progress, hijau = selesai, oranye = mendekati deadline,
- * merah = error, abu = terkunci/nonaktif. Jangan beri warna kuat berbeda per track.
- */
 @theme {
     --color-primary: #0253a5;
     --color-primary-dark: #013a73;
@@ -64,11 +58,6 @@
     --color-neutral-line: #98a2b3;
     --color-neutral-ink: #475467;
 
-    /**
-     * Teks navigasi non-aktif di sidebar. Dibuat terang karena latar sidebar
-     * bergradien: di bagian paling terangnya, abu yang lebih gelap tidak lolos
-     * kontras 4.5:1 untuk teks kecil.
-     */
     --color-sidebar-muted: #cbd5e1;
 
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -104,15 +93,10 @@
         @apply bg-background text-ink font-sans text-body antialiased;
     }
 
-    /* Fokus harus selalu terlihat; komponen tidak boleh menghapusnya. */
     :focus-visible {
         @apply outline-primary outline-2 outline-offset-2;
     }
 
-    /**
-     * Seluruh heading memakai font display. Huruf geometris terbaca terlalu renggang
-     * di ukuran besar, jadi tracking-nya dirapatkan sedikit.
-     */
     h1,
     h2,
     h3,
@@ -122,10 +106,6 @@
     }
 }
 
-/**
- * Motion dibuat dengan CSS transition/keyframe, bukan library animasi:
- * Framer Motion belum terpasang dan penambahannya butuh persetujuan.
- */
 @utility motion-rise {
     animation: rise 200ms ease-out both;
 }
@@ -143,7 +123,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {

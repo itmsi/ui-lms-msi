@@ -2,22 +2,10 @@ import type { ApiMenuItem, ApiSsoUser } from '@/types/auth';
 import { MENU_PERMISSIONS } from '@/types/common';
 import type { MenuPermission } from '@/types/common';
 
-/**
- * Dipakai bersama oleh authService (respons API) dan authSession (isi localStorage).
- * Keduanya sama-sama data tidak tepercaya: respons bisa berubah bentuk, dan isi
- * localStorage bisa disunting siapa pun lewat DevTools.
- */
 export const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 const readOptionalString = (value: unknown): string | null => (typeof value === 'string' ? value : null);
 
-/**
- * Validasi dan pemetaan digabung dalam satu fungsi supaya tidak ada celah antara
- * "sudah diperiksa" dan "sudah dipetakan" — pemanggil cukup memeriksa hasilnya null.
- *
- * Hanya id, username, dan email yang diwajibkan. Sisanya boleh kosong: akun yang
- * datanya belum lengkap tetap harus bisa masuk, bukan ditolak dengan error samar.
- */
 export const toSsoUser = (value: unknown): ApiSsoUser | null => {
     if (
         isRecord(value) === false ||

@@ -3,7 +3,6 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-    /** Wajib: tombol ikon tanpa teks tidak punya nama untuk dibacakan screen reader. */
     label: string;
     icon: ReactNode;
     tone?: 'neutral' | 'danger';

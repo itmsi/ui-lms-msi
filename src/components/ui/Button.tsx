@@ -7,7 +7,6 @@ import type { ButtonSize, ButtonVariant } from '@/components/ui/buttonStyles';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: ButtonVariant;
     size?: ButtonSize;
-    /** Menonaktifkan tombol seketika supaya aksi tidak terkirim dua kali. */
     loading?: boolean;
     loadingLabel?: string;
     fullWidth?: boolean;

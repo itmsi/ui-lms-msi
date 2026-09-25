@@ -18,7 +18,6 @@ interface LoginFormProps {
     onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
 }
 
-/** Label dibuat kecil dan berjarak huruf lebar mengikuti gaya editorial halaman ini. */
 const FIELD_CLASS =
     '[&>label]:text-caption [&>label]:font-semibold [&>label]:uppercase [&>label]:tracking-[0.1em] [&>label]:text-primary-dark';
 

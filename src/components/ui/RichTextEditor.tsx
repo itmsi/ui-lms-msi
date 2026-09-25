@@ -10,7 +10,6 @@ import '@/components/ui/rich-text.css';
 
 interface RichTextEditorProps {
     label: string;
-    /** HTML. String kosong berarti belum ada isi. */
     value: string;
     onChange: (html: string) => void;
     hint?: string;
@@ -18,15 +17,6 @@ interface RichTextEditorProps {
     className?: string;
 }
 
-/**
- * Editor teks kaya untuk deskripsi.
- *
- * Kemampuannya sengaja dipersempit ke tebal, miring, dan dua jenis daftar. Setiap
- * elemen yang bisa dihasilkan di sini nantinya harus dirender — dan disanitasi — di
- * sisi Candidate, jadi makin sedikit bentuk yang mungkin muncul, makin kecil permukaan
- * yang harus dijaga. Heading, kutipan, blok kode, dan tautan inline dimatikan; tautan
- * materi sudah punya field terstruktur sendiri.
- */
 export const RichTextEditor = ({ label, value, onChange, hint, error, className }: RichTextEditorProps) => {
     const fieldId = useId();
     const labelId = `${fieldId}-label`;
@@ -51,8 +41,6 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, className 
         ],
         content: value,
         onUpdate: ({ editor: instance }) => {
-            // Editor kosong menghasilkan "<p></p>"; simpan string kosong supaya
-            // pemeriksaan "ada isinya atau tidak" tetap sederhana di sisi lain.
             onChange(instance.isEmpty ? '' : instance.getHTML());
         },
         editorProps: {
@@ -66,11 +54,6 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, className 
         },
     });
 
-    /**
-     * `useEditor` tidak merender ulang pada tiap transaksi, jadi status aktif tombol
-     * dibaca lewat `useEditorState` — tanpa ini tombol tidak menyala saat kursor
-     * berpindah ke teks yang sudah tebal.
-     */
     const toolbarState = useEditorState({
         editor,
         selector: ({ editor: instance }) => ({

@@ -15,7 +15,6 @@ interface LinkButtonProps {
     children: ReactNode;
 }
 
-/** Navigasi yang tampil seperti tombol tetap memakai elemen <a>, bukan <button>. */
 export const LinkButton = ({
     to,
     variant,

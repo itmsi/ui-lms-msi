@@ -8,7 +8,6 @@ import { strings } from '@/locales/id';
 interface SearchBarProps {
     label: string;
     placeholder: string;
-    /** Nilai yang sedang berlaku, biasanya dari URL. */
     value: string;
     onSubmit: (value: string) => void;
     hasFilters: boolean;
@@ -16,15 +15,6 @@ interface SearchBarProps {
     disabled: boolean;
 }
 
-/**
- * Baris pencarian dibungkus panel bergaris supaya terbaca sebagai alat penjelajahan,
- * bukan formulir. Labelnya disembunyikan secara visual — placeholder sudah menjelaskan
- * isinya — tetapi tetap ada di DOM untuk screen reader.
- *
- * Field dibiarkan uncontrolled dan di-remount lewat `key` saat nilai berubah dari luar.
- * Itu membuat tombol Back dan "bersihkan" ikut mengatur isinya tanpa state bayangan
- * yang harus disinkronkan terus-menerus.
- */
 export const SearchBar = ({
     label,
     placeholder,

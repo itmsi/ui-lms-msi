@@ -5,20 +5,12 @@ import { cn } from '@/utils/cn';
 
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'className'> {
     label: string;
-    /**
-     * Menyembunyikan label secara visual tanpa menghapusnya dari DOM — dipakai saat
-     * placeholder sudah menjelaskan isinya, misalnya kotak pencarian. Screen reader
-     * tetap membacanya, jadi field tidak pernah kehilangan nama.
-     */
     hideLabel?: boolean;
     hint?: string;
     error?: string;
-    /** Ikon di sisi kiri field. Dekoratif, jadi tidak menerima pointer. */
     leading?: ReactNode;
-    /** Aksi di dalam field, misalnya tombol tampilkan/sembunyikan password. */
     trailing?: ReactNode;
     className?: string;
-    /** Penyesuaian tampilan field itu sendiri, misalnya gaya fokus khusus satu halaman. */
     inputClassName?: string;
 }
 

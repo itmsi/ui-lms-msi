@@ -11,11 +11,6 @@ interface Particle {
     opacity: number;
 }
 
-/**
- * Posisi ditulis tetap, bukan acak, supaya komposisinya terkontrol dan hasil render
- * selalu sama. Murni dekoratif — disembunyikan dari screen reader, dan berhenti
- * otomatis saat pengguna meminta gerak minimal (aturan di globals.css).
- */
 const PARTICLES: Particle[] = [
     { size: 6, left: '12%', top: '16%', dx: '22px', dy: '-26px', duration: '13s', delay: '0s', opacity: 0.35 },
     { size: 3, left: '24%', top: '32%', dx: '-16px', dy: '20px', duration: '17s', delay: '1.2s', opacity: 0.45 },

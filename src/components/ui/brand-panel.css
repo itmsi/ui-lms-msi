@@ -1,11 +1,3 @@
-/**
- * Permukaan brand: gradien biru tua, siluet pegunungan berlapis, dan partikel.
- *
- * Dipakai oleh panel kiri halaman Login dan sidebar aplikasi. Warnanya mengikuti
- * token global (Primary #0253A5, Primary Dark #013A73); yang di-scope di sini
- * hanya dua tingkat yang lebih gelap dari Primary Dark dan satu aksen terang,
- * karena ketiganya belum ada di design system.
- */
 .brand-panel {
     --bp-950: #011d3a;
     --bp-900: #012a54;
@@ -20,18 +12,6 @@
         linear-gradient(160deg, var(--bp-900) 0%, var(--bp-950) 100%);
 }
 
-/**
- * Siluet pegunungan berlapis; dekoratif, jadi tidak pernah menerima pointer.
- *
- * Tingginya ditentukan `aspect-ratio`, bukan angka tetap. Dengan begitu skala SVG
- * selalu ditentukan lebarnya saja: pegunungan membentang penuh selebar panel dengan
- * proporsi asli, baik di panel Login yang lebar maupun di sidebar 280px. Tinggi tetap
- * (cara sebelumnya) membuat faktor tinggi menang atas faktor lebar, sehingga gambarnya
- * diperbesar lalu dipotong kiri-kanan — terlihat seperti bongkahan raksasa.
- *
- * `max-height` hanya berlaku di panel yang sangat pendek (pita brand di mobile);
- * saat itu `xMidYMax slice` memotong dari atas, lebarnya tetap penuh.
- */
 .brand-ridges {
     position: absolute;
     right: 0;

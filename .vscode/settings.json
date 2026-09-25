@@ -2,6 +2,8 @@
     "editor.detectIndentation": false,
     "editor.tabSize": 4,
     "editor.formatOnSave": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
     "peacock.color": "#1857a4",
     "workbench.colorCustomizations": {
         // "activityBar.activeBackground": "#1f6fd0",

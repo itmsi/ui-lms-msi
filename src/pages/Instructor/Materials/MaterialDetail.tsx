@@ -104,13 +104,12 @@ export const MaterialDetail = () => {
                 actions={actions}
             />
 
-            {/* Kategori sudah tampil di header, jadi tidak diulang di atas banner. */}
             <ModuleDetailView
                 state={state}
                 onRetry={retry}
                 backTo="/materials"
                 backLabel={strings.materialDetail.backToList}
-                showCategoryBadge={false}
+                variant="manage"
             />
 
             <ConfirmDialog

@@ -29,13 +29,6 @@ const failureMessage = (outcome: Extract<SaveMaterialOutcome, { ok: false }>): s
     return outcome.code === 'offline' ? strings.materialEditor.saveOffline : strings.materialEditor.saveFailed;
 };
 
-/**
- * CONTRACT: ejaannya **`reguler`**, bukan `regular` — itu nilai yang dikirim dan
- * dikembalikan `modules/create-all`. Ejaan Inggris akan ditolak backend.
- *
- * Perhatikan bahwa filter di `modules/get` menolak `regular`; apakah ia menerima
- * `reguler` belum diuji, jadi materi berkategori ini mungkin belum bisa difilter.
- */
 const CATEGORY_OPTIONS: SelectOption[] = [
     { value: 'reguler', label: strings.library.categoryRegular },
     { value: 'mt', label: strings.library.categoryMt },
@@ -45,7 +38,6 @@ const DEFAULT_CATEGORY = 'reguler';
 
 const isHttpUrl = (value: string) => /^https?:\/\/\S+$/i.test(value.trim());
 
-/** Error dipetakan ke key baris supaya tidak berpindah saat baris diurutkan ulang. */
 const validate = (draft: MaterialDraft): DraftErrors => {
     const errors: DraftErrors = {};
 
@@ -78,27 +70,17 @@ type LoadedEditorState =
     | { status: 'ready' }
     | { status: 'error'; code: Extract<MaterialDetailOutcome, { ok: false }>['code']; message?: string };
 
-/** Sebelum materi lama selesai dimuat tidak ada isian yang layak ditampilkan. */
 export type EditorLoadState = { status: 'loading' } | LoadedEditorState;
 
-/**
- * Satu hook untuk buat dan ubah. Tanpa `materialId` formulirnya kosong; dengan
- * `materialId` isinya diambil dari materi tersimpan dan simpan memakai update-all.
- */
 export const useMaterialEditor = (materialId?: string) => {
     const navigate = useNavigate();
 
     const [draft, setDraft] = useState<MaterialDraft>(() => createMaterialDraft(DEFAULT_CATEGORY));
     const [errors, setErrors] = useState<DraftErrors>({});
 
-    /** URL banner yang sudah tersimpan. Hanya tergantikan bila pengguna memilih berkas baru. */
     const [currentBanner, setCurrentBanner] = useState<string | null>(null);
     const [reloadToken, setReloadToken] = useState(0);
 
-    /*
-     * Pola yang sama dengan daftar dan detail: "loading" diturunkan dari perbandingan
-     * kunci, bukan disetel di awal effect — supaya effect hanya menyetel state setelah await.
-     */
     const queryKey = `${materialId ?? ''}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedEditorState } | null>(null);
 
@@ -148,11 +130,6 @@ export const useMaterialEditor = (materialId?: string) => {
         setReloadToken((token) => token + 1);
     }, []);
 
-    /**
-     * Formulirnya panjang, jadi isian yang gagal validasi bisa berada jauh di luar
-     * layar. Setiap percobaan kirim yang gagal memindahkan fokus ke isian bermasalah
-     * pertama — tanpa ini pengguna hanya melihat toast tanpa tahu harus melihat ke mana.
-     */
     const formRef = useRef<HTMLFormElement>(null);
     const [failedAttempt, setFailedAttempt] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,7 +149,6 @@ export const useMaterialEditor = (materialId?: string) => {
     const setBanner = useCallback((file: File | null, error: string | null) => {
         setDraft((current) => ({ ...current, banner: file }));
 
-        // Berkas baru (atau dihapus secara sengaja) menggantikan banner lama di pratinjau.
         if (error === null) {
             setCurrentBanner(null);
         }
@@ -203,7 +179,6 @@ export const useMaterialEditor = (materialId?: string) => {
                 return;
             }
 
-            // Penjaga kirim ganda; tombolnya juga sudah dinonaktifkan saat menyimpan.
             if (isSubmitting) {
                 return;
             }
@@ -220,10 +195,6 @@ export const useMaterialEditor = (materialId?: string) => {
                     return;
                 }
 
-                /*
-                 * Isian sengaja tidak dibersihkan saat gagal: pekerjaan pengguna tetap
-                 * utuh dan tinggal dicoba kirim ulang.
-                 */
                 setIsSubmitting(false);
                 toast.error(failureMessage(outcome));
             };

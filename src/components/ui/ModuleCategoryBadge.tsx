@@ -2,40 +2,44 @@ import { strings } from '@/locales/id';
 import { cn } from '@/utils/cn';
 
 interface ModuleCategoryBadgeProps {
-    /** Nilai `module_category` apa adanya dari API. */
     category: string;
     className?: string;
 }
 
-const LABEL_BY_CATEGORY: Record<string, string> = {
-    mt: strings.library.categoryMt,
-    regular: strings.library.categoryRegular,
+type CategoryTone = 'mt' | 'reguler';
+
+const TONE_BY_CATEGORY: Record<string, CategoryTone> = {
+    mt: 'mt',
+    reguler: 'reguler',
+    regular: 'reguler',
 };
 
-/**
- * Menandai program materi (MT atau Reguler).
- *
- * Semua kategori memakai perlakuan visual yang sama — tidak ada warna kuat berbeda
- * per program, sesuai aturan design system. Yang membedakan hanya labelnya.
- *
- * Kategori yang belum dikenali tetap ditampilkan apa adanya supaya nilai baru dari
- * backend terlihat, bukan hilang diam-diam.
- */
+const LABEL_BY_TONE: Record<CategoryTone, string> = {
+    mt: strings.library.categoryMt,
+    reguler: strings.library.categoryRegular,
+};
+
+const TONE_CLASS: Record<CategoryTone, string> = {
+    mt: 'bg-warning-soft border-warning/50 text-warning-ink',
+    reguler: 'bg-surface border-primary/40 text-primary-dark',
+};
+
+const UNKNOWN_CLASS = 'bg-neutral-soft border-neutral-line text-neutral-ink';
+
 export const ModuleCategoryBadge = ({ category, className }: ModuleCategoryBadgeProps) => {
-    const key = category.trim().toLowerCase();
+    const tone = TONE_BY_CATEGORY[category.trim().toLowerCase()];
 
     return (
         <span
             className={cn(
-                'inline-flex items-center rounded-full border border-white/25 px-2.5 py-1',
-                // Latar gelap pekat supaya tetap terbaca di atas banner terang mana pun.
-                'bg-ink/80 text-white backdrop-blur-sm',
+                'inline-flex min-w-18 shrink-0 items-center justify-center rounded-full border px-2.5 py-1',
                 'text-[11px] leading-4 font-bold tracking-[0.03em]',
+                tone === undefined ? UNKNOWN_CLASS : TONE_CLASS[tone],
                 className,
             )}
         >
             <span className="sr-only">{strings.library.categoryLabel} </span>
-            {LABEL_BY_CATEGORY[key] ?? category.toUpperCase()}
+            {tone === undefined ? category.toUpperCase() : LABEL_BY_TONE[tone]}
         </span>
     );
 };

@@ -8,7 +8,6 @@ import { HomeLanding } from '@/Routes/HomeLanding';
 import { MenuRoute } from '@/Routes/MenuRoute';
 import { ProtectedRoute } from '@/Routes/ProtectedRoute';
 
-/** Dipecah per rute supaya halaman yang tak dibuka tidak ikut diunduh. */
 const Login = lazy(() => import('@/pages/Auth/Login/Login'));
 const Dashboard = lazy(() => import('@/pages/Candidate/Dashboard/Dashboard'));
 const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
@@ -36,7 +35,6 @@ export const AppRoutes = () => (
                     <Route element={<MenuRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
                         <Route path="/materials" element={<Materials />} />
-                        {/* Ruas statis didahulukan React Router, jadi '/new' tidak tertangkap ':id'. */}
                         <Route path="/materials/new" element={<MaterialEditor />} />
                         <Route path="/materials/:id" element={<MaterialDetail />} />
                         <Route path="/materials/:id/edit" element={<MaterialEditor />} />

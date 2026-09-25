@@ -11,22 +11,14 @@ const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 interface BannerFieldProps {
     file: File | null;
     error?: string;
-    /** URL banner yang sudah tersimpan di server — hanya dipakai di mode ubah. */
     currentUrl?: string | null;
     onChange: (file: File | null, error: string | null) => void;
 }
 
-/**
- * Validasi tipe dan ukuran dilakukan sebelum berkas diterima, jadi pengguna tahu
- * saat memilih — bukan setelah menekan simpan. Ini tetap hanya kenyamanan;
- * pemeriksaan sesungguhnya ada di server.
- */
 export const BannerField = ({ file, error, currentUrl = null, onChange }: BannerFieldProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Dihitung saat render, bukan disimpan sebagai state, supaya tidak ada setState di effect.
     const previewUrl = useMemo(() => (file === null ? null : URL.createObjectURL(file)), [file]);
-    // Berkas baru selalu diutamakan; banner lama hanya tampil selama belum digantikan.
     const displayUrl = previewUrl ?? currentUrl;
     const hasBanner = file !== null || currentUrl !== null;
 
@@ -42,7 +34,6 @@ export const BannerField = ({ file, error, currentUrl = null, onChange }: Banner
     const handlePick = (event: ChangeEvent<HTMLInputElement>) => {
         const picked = event.target.files?.[0] ?? null;
 
-        // Nilai input dikosongkan supaya memilih berkas sama dua kali tetap memicu change.
         event.target.value = '';
 
         if (picked === null) {
@@ -109,6 +100,7 @@ export const BannerField = ({ file, error, currentUrl = null, onChange }: Banner
                             ? strings.materialEditor.bannerCurrentHint
                             : strings.materialEditor.bannerHint}
                     </p>
+                    <p className="text-caption text-muted">{strings.materialEditor.bannerSizeHint}</p>
                     {file === null ? null : <p className="text-caption text-ink truncate">{file.name}</p>}
                 </div>
             </div>

@@ -5,20 +5,13 @@ import { cn } from '@/utils/cn';
 
 interface LockedStateProps {
     title?: string;
-    /** Kenapa bagian ini terkunci. */
     reason: string;
-    /** Apa yang harus diselesaikan kandidat supaya terbuka. */
     requirement: string;
-    /** Apa yang terjadi setelah terbuka. */
     unlocks: string;
     variant?: 'card' | 'inline';
     className?: string;
 }
 
-/**
- * Tiga penjelasan di bawah ini WAJIB oleh tipe, bukan opsional:
- * gembok tanpa alasan dilarang di seluruh aplikasi.
- */
 export const LockedState = ({
     title = strings.states.lockedTitle,
     reason,

@@ -15,7 +15,6 @@ import { MaterialList, MaterialListSkeleton } from '@/pages/Instructor/Materials
 import { useMaterials } from '@/pages/Instructor/Materials/hooks/useMaterials';
 import type { MaterialsState } from '@/pages/Instructor/Materials/hooks/useMaterials';
 
-/** Menerjemahkan kegagalan jadi jawaban atas: apa yang terjadi, bisa apa, lalu apa. */
 const renderError = (state: Extract<MaterialsState, { status: 'error' }>, onRetry: () => void) => {
     if (state.code === 'unauthorized') {
         return (
@@ -83,7 +82,6 @@ export const Materials = () => {
                 onSelectSort={selectSort}
                 disabled={isLoading}
                 action={
-                    /* Disembunyikan, bukan dinonaktifkan: tombol yang selalu ditolak hanya jadi gangguan. */
                     canCreate ? (
                         <LinkButton
                             to="/materials/new"

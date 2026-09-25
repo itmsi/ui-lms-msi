@@ -1,6 +1,8 @@
 import { ImageOff } from 'lucide-react';
+import type { CSSProperties } from 'react';
 
 import { MaterialLinkList } from '@/components/patterns/MaterialLinkList';
+import { Accordion } from '@/components/ui/Accordion';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -10,21 +12,61 @@ import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
 import { RichText } from '@/components/ui/RichText';
 import type { ModuleDetailState } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
+import { cn } from '@/utils/cn';
 
 interface ModuleDetailViewProps {
     state: ModuleDetailState;
     onRetry: () => void;
-    /** Tujuan tombol kembali saat materi tidak ditemukan. */
     backTo: string;
     backLabel: string;
-    /**
-     * Tingkat judul materi di atas banner. Halaman tanpa header sendiri (Perpustakaan)
-     * memakai `h1`, supaya halaman tetap punya judul utama bagi pembaca layar.
-     */
     titleAs?: 'h1' | 'h3';
-    /** Matikan bila halaman sudah menampilkan kategori di tempat lain, mis. di header. */
-    showCategoryBadge?: boolean;
+    variant: 'library' | 'manage';
 }
+
+type Chapter = Extract<ModuleDetailState, { status: 'success' }>['detail']['chapters'][number];
+
+const LessonBody = ({ chapter }: { chapter: Chapter }) => (
+    <>
+        <div className="mt-3">
+            <MaterialLinkList links={chapter.linkMaterials} />
+        </div>
+
+        {chapter.description === '' ? null : <RichText html={chapter.description} className="mt-2" />}
+    </>
+);
+
+const REVEAL_STEP_MS = 80;
+const REVEAL_ITEM_STEP_MS = 40;
+const REVEAL_MAX_STAGGERED = 6;
+
+const revealFor = (variant: ModuleDetailViewProps['variant']) =>
+    variant === 'library'
+        ? {
+              className: 'motion-rise',
+              style: (delayMs: number): CSSProperties => ({ animationDelay: `${String(delayMs)}ms` }),
+          }
+        : { className: undefined, style: (): CSSProperties => ({}) };
+
+interface LessonAccordionItemProps {
+    chapter: Chapter;
+    index: number;
+    revealDelayMs: number;
+}
+
+const LessonAccordionItem = ({ chapter, index, revealDelayMs }: LessonAccordionItemProps) => (
+    <li className="motion-rise" style={{ animationDelay: `${String(revealDelayMs)}ms` }}>
+        <Accordion
+            title={chapter.title}
+            eyebrow={
+                chapter.linkMaterials.length === 0
+                    ? `${strings.materialDetail.lessonPrefix} ${String(index + 1)}`
+                    : `${strings.materialDetail.lessonPrefix} ${String(index + 1)} · ${String(chapter.linkMaterials.length)} ${strings.library.materialsSuffix}`
+            }
+        >
+            <LessonBody chapter={chapter} />
+        </Accordion>
+    </li>
+);
 
 const renderError = (
     state: Extract<ModuleDetailState, { status: 'error' }>,
@@ -82,18 +124,13 @@ const renderError = (
     return <ErrorState onRetry={onRetry} />;
 };
 
-/**
- * Isi halaman detail Module: banner, judul, deskripsi, materi pendukung, dan lesson.
- * Dipakai bersama detail Perpustakaan dan detail Materi; yang membedakan keduanya
- * hanya header dan aksi di sekelilingnya.
- */
 export const ModuleDetailView = ({
     state,
     onRetry,
     backTo,
     backLabel,
     titleAs: TitleTag = 'h3',
-    showCategoryBadge = true,
+    variant,
 }: ModuleDetailViewProps) => {
     if (state.status === 'loading') {
         return (
@@ -111,10 +148,11 @@ export const ModuleDetailView = ({
     }
 
     const { detail } = state;
+    const reveal = revealFor(variant);
 
     return (
         <>
-            <Card className="flex flex-col gap-5">
+            <Card className={cn('flex flex-col gap-5', reveal.className)} style={reveal.style(0)}>
                 <div className="bg-neutral-soft relative aspect-video w-full overflow-hidden rounded-lg">
                     {detail.banner === null ? (
                         <div className="text-neutral-line flex size-full items-center justify-center">
@@ -124,52 +162,59 @@ export const ModuleDetailView = ({
                     ) : (
                         <img src={detail.banner} alt="" loading="lazy" className="size-full object-cover" />
                     )}
-
-                    {/* Ditempel di atas banner supaya tetap terlihat walau gambarnya gagal dimuat. */}
-                    {showCategoryBadge && detail.category !== null ? (
-                        <ModuleCategoryBadge category={detail.category} className="absolute top-3 left-3" />
-                    ) : null}
                 </div>
 
                 <div
-                    className="bg-gradiend z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center"
-                    style={{ marginTop: '-68px' }}
+                    className={cn(
+                        'bg-gradiend z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center',
+                        reveal.className,
+                    )}
+                    style={{ marginTop: '-68px', ...reveal.style(REVEAL_STEP_MS) }}
                 >
                     <TitleTag className="text-card font-display line-clamp-2 text-xl font-medium text-white uppercase">
                         {detail.title}
                     </TitleTag>
                 </div>
 
+                {variant === 'library' && detail.category !== null ? (
+                    <div className='px-5 relative'>
+                        <ModuleCategoryBadge category={detail.category} className="absolute top-0 left-3" />
+                    </div>
+                ) : null}
                 {detail.description === '' ? (
                     <p className="text-body text-muted">{strings.materialDetail.noDescription}</p>
                 ) : (
                     <RichText className="p-5" html={detail.description} />
                 )}
+                <div className='p-5'>
+                    <MaterialLinkList links={detail.linkMaterials} />
+                </div>
             </Card>
 
-            <Card className="flex flex-col gap-3 p-5">
-                <h2 className="text-section">{strings.materialDetail.sectionLinks}</h2>
-                <MaterialLinkList links={detail.linkMaterials} />
-            </Card>
-
-            <Card className="flex flex-col gap-4 p-5">
+            <Card className={cn('flex flex-col gap-4 p-5', reveal.className)} style={reveal.style(REVEAL_STEP_MS * 2)}>
                 <h2 className="text-section">{strings.materialDetail.sectionLessons}</h2>
 
                 {detail.chapters.length === 0 ? (
                     <p className="text-body text-muted">{strings.materialDetail.noLessons}</p>
+                ) : variant === 'library' ? (
+                    <ol className="flex flex-col gap-3">
+                        {detail.chapters.map((chapter, index) => (
+                            <LessonAccordionItem
+                                key={chapter.id}
+                                chapter={chapter}
+                                index={index}
+                                revealDelayMs={
+                                    REVEAL_STEP_MS * 3 + Math.min(index, REVEAL_MAX_STAGGERED) * REVEAL_ITEM_STEP_MS
+                                }
+                            />
+                        ))}
+                    </ol>
                 ) : (
                     <ol className="flex flex-col gap-4">
                         {detail.chapters.map((chapter) => (
                             <li key={chapter.id} className="border-line rounded-card border p-4">
                                 <h3 className="text-card text-ink">{chapter.title}</h3>
-
-                                <div className="mt-3">
-                                    <MaterialLinkList links={chapter.linkMaterials} />
-                                </div>
-
-                                {chapter.description === '' ? null : (
-                                    <RichText html={chapter.description} className="mt-2" />
-                                )}
+                                <LessonBody chapter={chapter} />
                             </li>
                         ))}
                     </ol>

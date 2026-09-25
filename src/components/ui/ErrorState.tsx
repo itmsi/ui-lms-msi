@@ -6,18 +6,14 @@ import { cn } from '@/utils/cn';
 
 interface ErrorStateProps {
     title?: string;
-    /** Apa yang terjadi. */
     whatHappened?: string;
-    /** Apa yang bisa dilakukan pengguna sekarang. */
     whatYouCanDo?: string;
-    /** Apa yang terjadi selanjutnya kalau tetap gagal. */
     whatIsNext?: string;
     onRetry?: () => void;
     retrying?: boolean;
     className?: string;
 }
 
-/** Error selalu menjawab tiga hal: apa yang terjadi, bisa apa, lalu apa. */
 export const ErrorState = ({
     title = strings.states.errorTitle,
     whatHappened = strings.states.errorWhatHappened,

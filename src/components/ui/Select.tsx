@@ -17,10 +17,6 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'
     className?: string;
 }
 
-/**
- * Memakai `<select>` asli, bukan dropdown kustom: keyboard, pencarian ketik, dan
- * pemilih bawaan perangkat mobile langsung bekerja tanpa harus ditiru ulang.
- */
 export const Select = ({ label, options, hint, error, className, ...rest }: SelectProps) => {
     const fieldId = useId();
     const hintId = `${fieldId}-hint`;

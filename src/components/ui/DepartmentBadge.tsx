@@ -6,10 +6,6 @@ interface DepartmentBadgeProps {
     className?: string;
 }
 
-/**
- * Chip outline netral yang menyebut department SUMBER sebuah materi.
- * Bukan kategori, bukan status — karena itu tidak diberi warna status.
- */
 export const DepartmentBadge = ({ department, className }: DepartmentBadgeProps) => (
     <span
         className={cn(
