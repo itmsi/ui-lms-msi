@@ -1,7 +1,7 @@
 import { BookOpen, Plus, SearchX } from 'lucide-react';
 
 import { ListToolbar } from '@/components/patterns/ListToolbar';
-import { PageHeader } from '@/components/patterns/PageHeader';
+import { ModuleRowList, ModuleRowListSkeleton } from '@/components/patterns/ModuleRowList';
 import { Pagination } from '@/components/patterns/Pagination';
 import { SearchBar } from '@/components/patterns/SearchBar';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +11,6 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { LinkButton } from '@/components/ui/LinkButton';
 import { useMaterialsAccess } from '@/hooks/useMaterialsAccess';
 import { strings } from '@/locales/id';
-import { MaterialList, MaterialListSkeleton } from '@/pages/Instructor/Materials/components/MaterialList';
 import { useMaterials } from '@/pages/Instructor/Materials/hooks/useMaterials';
 import type { MaterialsState } from '@/pages/Instructor/Materials/hooks/useMaterials';
 
@@ -63,7 +62,6 @@ export const Materials = () => {
 
     return (
         <section className="flex flex-col gap-5">
-            <PageHeader title={strings.nav.materials} description={strings.materials.subtitle} />
 
             <SearchBar
                 label={strings.materials.searchLabel}
@@ -94,7 +92,7 @@ export const Materials = () => {
                 }
             />
 
-            {isLoading ? <MaterialListSkeleton count={pageSize} /> : null}
+            {isLoading ? <ModuleRowListSkeleton count={pageSize} /> : null}
 
             {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
 
@@ -117,7 +115,7 @@ export const Materials = () => {
 
             {state.status === 'success' && state.result.items.length > 0 ? (
                 <>
-                    <MaterialList materials={state.result.items} />
+                    <ModuleRowList materials={state.result.items} toBuilder={(id) => `/materials/${id}`} />
                     <Pagination pagination={state.result.pagination} onChangePage={goToPage} disabled={isLoading} />
                 </>
             ) : null}

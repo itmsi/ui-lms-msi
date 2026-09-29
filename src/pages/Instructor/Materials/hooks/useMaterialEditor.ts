@@ -32,6 +32,7 @@ const failureMessage = (outcome: Extract<SaveMaterialOutcome, { ok: false }>): s
 const CATEGORY_OPTIONS: SelectOption[] = [
     { value: 'reguler', label: strings.library.categoryRegular },
     { value: 'mt', label: strings.library.categoryMt },
+    { value: 'onboarding', label: strings.library.categoryOnBoard },
 ];
 
 const DEFAULT_CATEGORY = 'reguler';
@@ -88,8 +89,8 @@ export const useMaterialEditor = (materialId?: string) => {
         materialId === undefined
             ? { status: 'ready' }
             : loaded !== null && loaded.key === queryKey
-              ? loaded.value
-              : { status: 'loading' };
+                ? loaded.value
+                : { status: 'loading' };
 
     useEffect(() => {
         if (materialId === undefined) {

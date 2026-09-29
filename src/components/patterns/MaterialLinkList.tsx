@@ -66,9 +66,9 @@ const EmbedCard = ({ link, source }: EmbedCardProps) => {
 };
 
 export const MaterialLinkList = ({ links }: MaterialLinkListProps) => {
-    if (links.length === 0) {
-        return <p className="text-body text-muted">{strings.materialDetail.noLinks}</p>;
-    }
+    // if (links.length === 0) {
+    //     return <p className="text-body text-muted">{strings.materialDetail.noLinks}</p>;
+    // }
 
     return (
         <ul className="flex flex-col gap-2">

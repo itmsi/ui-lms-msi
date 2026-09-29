@@ -18,6 +18,10 @@ const NAV_BY_MENU_NAME: Record<string, NavItem> = {
 
 const ALWAYS_ALLOWED_ROUTES = ['/profile', '/history', '/403'];
 
+const NESTED_ROUTES: Record<string, string> = {
+    '/tracks': '/dashboard',
+};
+
 const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g, ' ');
 
 const isUnder = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`);
@@ -27,9 +31,21 @@ export const getNavItems = (menu: UserMenuItem[]): NavItem[] =>
         .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
         .filter((item): item is NavItem => item !== undefined);
 
-export const canOpenRoute = (menu: UserMenuItem[], pathname: string): boolean =>
-    ALWAYS_ALLOWED_ROUTES.some((route) => isUnder(pathname, route)) ||
-    getNavItems(menu).some((item) => isUnder(pathname, item.to));
+export const canOpenRoute = (menu: UserMenuItem[], pathname: string): boolean => {
+    if (ALWAYS_ALLOWED_ROUTES.some((route) => isUnder(pathname, route))) {
+        return true;
+    }
+
+    const navItems = getNavItems(menu);
+
+    if (navItems.some((item) => isUnder(pathname, item.to))) {
+        return true;
+    }
+
+    return Object.entries(NESTED_ROUTES).some(
+        ([prefix, parentRoute]) => isUnder(pathname, prefix) && navItems.some((item) => item.to === parentRoute),
+    );
+};
 
 export const getPageLabel = (menu: UserMenuItem[], pathname: string): string =>
     getNavItems(menu).find((item) => isUnder(pathname, item.to))?.label ?? strings.app.name;

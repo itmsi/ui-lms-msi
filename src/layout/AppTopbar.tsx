@@ -20,7 +20,7 @@ export const AppTopbar = () => {
                 </span>
                 <p className="text-card text-ink truncate">
                     <span className="lg:hidden">{strings.app.name}</span>
-                    <span className="hidden lg:inline">{getPageLabel(user?.menu ?? [], pathname)}</span>
+                    <span className="hidden font-serif text-xl tracking-wide text-black lg:inline">{getPageLabel(user?.menu ?? [], pathname)}</span>
                 </p>
             </div>
 

@@ -13,6 +13,7 @@ import { RichText } from '@/components/ui/RichText';
 import type { ModuleDetailState } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
 import { cn } from '@/utils/cn';
+import { staggerDelayMs } from '@/utils/motion';
 
 interface ModuleDetailViewProps {
     state: ModuleDetailState;
@@ -42,9 +43,9 @@ const REVEAL_MAX_STAGGERED = 6;
 const revealFor = (variant: ModuleDetailViewProps['variant']) =>
     variant === 'library'
         ? {
-              className: 'motion-rise',
-              style: (delayMs: number): CSSProperties => ({ animationDelay: `${String(delayMs)}ms` }),
-          }
+            className: 'motion-rise',
+            style: (delayMs: number): CSSProperties => ({ animationDelay: `${String(delayMs)}ms` }),
+        }
         : { className: undefined, style: (): CSSProperties => ({}) };
 
 interface LessonAccordionItemProps {
@@ -191,35 +192,39 @@ export const ModuleDetailView = ({
                 </div>
             </Card>
 
-            <Card className={cn('flex flex-col gap-4 p-5', reveal.className)} style={reveal.style(REVEAL_STEP_MS * 2)}>
-                <h2 className="text-section">{strings.materialDetail.sectionLessons}</h2>
+            {detail.chapters.length > 0 &&
+                <Card className={cn('flex flex-col gap-4 p-5', reveal.className)} style={reveal.style(REVEAL_STEP_MS * 2)}>
+                    <h2 className="text-section">{strings.materialDetail.sectionLessons}</h2>
 
-                {detail.chapters.length === 0 ? (
-                    <p className="text-body text-muted">{strings.materialDetail.noLessons}</p>
-                ) : variant === 'library' ? (
-                    <ol className="flex flex-col gap-3">
-                        {detail.chapters.map((chapter, index) => (
-                            <LessonAccordionItem
-                                key={chapter.id}
-                                chapter={chapter}
-                                index={index}
-                                revealDelayMs={
-                                    REVEAL_STEP_MS * 3 + Math.min(index, REVEAL_MAX_STAGGERED) * REVEAL_ITEM_STEP_MS
-                                }
-                            />
-                        ))}
-                    </ol>
-                ) : (
-                    <ol className="flex flex-col gap-4">
-                        {detail.chapters.map((chapter) => (
-                            <li key={chapter.id} className="border-line rounded-card border p-4">
-                                <h3 className="text-card text-ink">{chapter.title}</h3>
-                                <LessonBody chapter={chapter} />
-                            </li>
-                        ))}
-                    </ol>
-                )}
-            </Card>
+                    {detail.chapters.length === 0 ? (
+                        <p className="text-body text-muted">{strings.materialDetail.noLessons}</p>
+                    ) : variant === 'library' ? (
+                        <ol className="flex flex-col gap-3">
+                            {detail.chapters.map((chapter, index) => (
+                                <LessonAccordionItem
+                                    key={chapter.id}
+                                    chapter={chapter}
+                                    index={index}
+                                    revealDelayMs={staggerDelayMs(index, {
+                                        baseMs: REVEAL_STEP_MS * 3,
+                                        stepMs: REVEAL_ITEM_STEP_MS,
+                                        maxStaggered: REVEAL_MAX_STAGGERED,
+                                    })}
+                                />
+                            ))}
+                        </ol>
+                    ) : (
+                        <ol className="flex flex-col gap-4">
+                            {detail.chapters.map((chapter) => (
+                                <li key={chapter.id} className="border-line rounded-card border p-4">
+                                    <h3 className="text-card text-ink">{chapter.title}</h3>
+                                    <LessonBody chapter={chapter} />
+                                </li>
+                            ))}
+                        </ol>
+                    )}
+                </Card>
+            }
         </>
     );
 };

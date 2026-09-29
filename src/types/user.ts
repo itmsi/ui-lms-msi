@@ -1,6 +1,6 @@
 import type { MenuPermission } from './common';
 
-export type CandidateProgram = 'mt' | 'regular';
+export type CandidateProgram = 'mt' | 'regular' | 'onboarding';
 
 export interface UserMenuItem {
     name: string;
