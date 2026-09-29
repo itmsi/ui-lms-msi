@@ -6,22 +6,24 @@ interface ModuleCategoryBadgeProps {
     className?: string;
 }
 
-type CategoryTone = 'mt' | 'reguler';
+type CategoryTone = 'mt' | 'reguler' | 'onboarding';
 
 const TONE_BY_CATEGORY: Record<string, CategoryTone> = {
     mt: 'mt',
     reguler: 'reguler',
-    regular: 'reguler',
+    onboarding: 'onboarding',
 };
 
 const LABEL_BY_TONE: Record<CategoryTone, string> = {
     mt: strings.library.categoryMt,
     reguler: strings.library.categoryRegular,
+    onboarding: strings.library.categoryOnBoard,
 };
 
 const TONE_CLASS: Record<CategoryTone, string> = {
     mt: 'bg-warning-soft border-warning/50 text-warning-ink',
     reguler: 'bg-surface border-primary/40 text-primary-dark',
+    onboarding: 'bg-success-soft border-success/40 text-success-ink',
 };
 
 const UNKNOWN_CLASS = 'bg-neutral-soft border-neutral-line text-neutral-ink';

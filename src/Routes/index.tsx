@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/Routes/ProtectedRoute';
 
 const Login = lazy(() => import('@/pages/Auth/Login/Login'));
 const Dashboard = lazy(() => import('@/pages/Candidate/Dashboard/Dashboard'));
+const TrackDetail = lazy(() => import('@/pages/Candidate/TrackDetail/TrackDetail'));
 const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
 const MaterialEditor = lazy(() => import('@/pages/Instructor/Materials/MaterialEditor'));
 const MaterialDetail = lazy(() => import('@/pages/Instructor/Materials/MaterialDetail'));
@@ -34,6 +35,7 @@ export const AppRoutes = () => (
 
                     <Route element={<MenuRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/tracks/:category" element={<TrackDetail />} />
                         <Route path="/materials" element={<Materials />} />
                         <Route path="/materials/new" element={<MaterialEditor />} />
                         <Route path="/materials/:id" element={<MaterialDetail />} />

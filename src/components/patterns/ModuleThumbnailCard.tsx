@@ -5,22 +5,25 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
 import { strings } from '@/locales/id';
-import type { LibraryModule } from '@/pages/Candidate/Library/types';
+import type { LearningModule } from '@/types/module';
 
 import './sticky-note.css';
 
-interface MaterialCardProps {
-    material: LibraryModule;
+interface ModuleThumbnailCardProps {
+    material: LearningModule;
+    to: string;
+    ariaLabel?: string;
+    showCategoryBadge?: boolean;
 }
 
-export const MaterialCard = ({ material }: MaterialCardProps) => {
+export const ModuleThumbnailCard = ({ material, to, ariaLabel, showCategoryBadge = true }: ModuleThumbnailCardProps) => {
     const [bannerFailed, setBannerFailed] = useState(false);
     const showBanner = material.banner !== null && bannerFailed === false;
 
     return (
         <Link
-            to={`/library/${material.id}`}
-            aria-label={`${strings.library.openMaterial}: ${material.title}`}
+            to={to}
+            aria-label={ariaLabel ?? `${strings.library.openMaterial}: ${material.title}`}
             className="sticky-note block h-full"
         >
             <Card className="flex h-full flex-col overflow-hidden border-0 p-1 shadow-none bg-gradiend">
@@ -49,11 +52,11 @@ export const MaterialCard = ({ material }: MaterialCardProps) => {
                         <p className="text-body text-white">{material.descriptionClean}</p>
                     )}
 
-                    {material.category === null ? null : (
+                    {showCategoryBadge && material.category !== null ? (
                         <div>
                             <ModuleCategoryBadge category={material.category} />
                         </div>
-                    )}
+                    ) : null}
                 </div>
             </Card>
         </Link>

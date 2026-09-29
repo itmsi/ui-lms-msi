@@ -10,11 +10,12 @@ const PAGE_SIZE = 12;
 const CATEGORY_BY_PROGRAM: Record<CandidateProgram, string> = {
     mt: 'mt',
     regular: 'reguler',
+    onboarding: 'onboarding',
 };
 
-export type LibraryCategoryFilter = 'all' | 'reguler' | 'mt';
+export type LibraryCategoryFilter = 'all' | 'reguler' | 'mt' | 'onboarding';
 
-const FILTER_CATEGORIES = [CATEGORY_BY_PROGRAM.regular, CATEGORY_BY_PROGRAM.mt] as const;
+const FILTER_CATEGORIES = [CATEGORY_BY_PROGRAM.regular, CATEGORY_BY_PROGRAM.mt, CATEGORY_BY_PROGRAM.onboarding] as const;
 
 export const useLibrary = () => {
     const { user } = useAuth();
@@ -30,7 +31,7 @@ export const useLibrary = () => {
     });
 
     const categoryFilter: LibraryCategoryFilter =
-        list.category === 'reguler' || list.category === 'mt' ? list.category : 'all';
+        list.category === 'reguler' || list.category === 'mt' || list.category === 'onboarding' ? list.category : 'all';
 
     return {
         ...list,

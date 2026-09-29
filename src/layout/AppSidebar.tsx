@@ -30,10 +30,10 @@ export const AppSidebar = ({ items }: AppSidebarProps) => (
                     to={to}
                     className={({ isActive }) =>
                         cn(
-                            'text-body flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                            'text-body font-serif flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
                             'focus-visible:outline-white',
                             isActive
-                                ? 'bg-white/15 font-semibold text-white'
+                                ? 'bg-white/15 text-white'
                                 : 'text-sidebar-muted hover:bg-white/5 hover:text-white',
                         )
                     }

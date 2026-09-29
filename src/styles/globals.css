@@ -123,6 +123,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -132,7 +133,8 @@
     }
 }
 
-.login-serif {
+.login-serif,
+.font-serif {
     font-family: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
 }
 

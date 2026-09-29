@@ -87,7 +87,7 @@ export const fetchModules = async (query: ModuleListQuery, signal?: AbortSignal)
                 sort_by: SORT_REQUEST[query.sort].sortBy,
                 sort_order: SORT_REQUEST[query.sort].sortOrder,
                 search: query.search,
-                ...(query.category === null ? {} : { module_category: query.category }),
+                ...(query.category === null ? {} : { module_category: [query.category] }),
                 ...(query.createdBy === null ? {} : { created_by: query.createdBy }),
             },
             { signal },
