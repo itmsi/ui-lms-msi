@@ -24,14 +24,7 @@ export const LessonListField = ({ lessons, errors, onChange }: LessonListFieldPr
 
     return (
         <div className="flex flex-col gap-3">
-            {/*
-          * Kosong adalah kondisi yang sah di sini, bukan kekurangan. Teksnya menyatakan
-          * itu secara eksplisit, dan tombolnya ikut di dalam kotak yang sama supaya di
-          * keadaan ini hanya ada satu aksi yang mungkin ditekan.
-          */}
             {lessons.length === 0 ? (
-
-                // <div className="border-line rounded-card border border-dashed px-4 py-6 text-center">
                 <Card className="flex flex-col gap-3 p-5 text-center px-4 py-6">
                     <p className="text-card text-ink">{strings.materialEditor.lessonsEmptyTitle}</p>
                     <p className="text-body text-muted mx-auto mt-1 max-w-md">
@@ -73,18 +66,10 @@ export const LessonListField = ({ lessons, errors, onChange }: LessonListFieldPr
                                     disabled={index === lessons.length - 1}
                                     onClick={() => onChange(moveItem(lessons, index, index + 1))}
                                 />
-                                {/*
-                              * Diberi teks, bukan ikon telanjang: ini aksi paling merusak
-                              * di halaman ini — satu klik menghapus judul, deskripsi, dan
-                              * seluruh tautan lesson tersebut, tanpa jalan kembali.
-                              */}
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onChange(removeAt(lessons, index))}
-                                    // `text-body` ditulis ulang: tailwind-merge menganggap token
-                                    // ukuran dan warna kita satu golongan `text-*`, jadi warna
-                                    // yang menimpa ikut membuang ukurannya.
                                     className="text-body text-danger-ink hover:bg-danger-soft ml-1"
                                     leadingIcon={<Trash2 aria-hidden="true" className="size-4" />}
                                 >
@@ -120,11 +105,6 @@ export const LessonListField = ({ lessons, errors, onChange }: LessonListFieldPr
                 );
             })}
 
-            {/*
-          * Berbentuk blok penuh bergaris putus-putus, bukan tombol biasa: bentuknya
-          * menyatakan "tambahkan satu blok lagi di sini", jadi tidak tertukar dengan
-          * tombol teks kecil "Tambah tautan" yang berada di dalam kartu lesson.
-          */}
             {lessons.length === 0 ? null : (
                 <button
                     type="button"

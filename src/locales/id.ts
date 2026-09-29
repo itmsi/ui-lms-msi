@@ -1,8 +1,3 @@
-/**
- * Satu-satunya tempat teks UI ditulis (siap i18n).
- * Bahasa Indonesia, nada mengobrol dan actionable — bukan pesan sistem.
- * Nama diri tetap apa adanya: MSI Learning, Onboarding Umum, MT Program, Capstone, WeDrive, WeCom.
- */
 export const strings = {
     app: {
         name: 'MSI Learning',
@@ -53,13 +48,29 @@ export const strings = {
         submit: 'Masuk',
         submitting: 'Sedang masuk…',
 
-        /** Teks statis, bukan tautan: tidak ada alur reset password. */
         forgotHelper: 'Lupa password? Silakan hubungi HR.',
 
         invalidCredentials: 'Email atau password yang Anda masukkan belum sesuai.',
         validationFallback: 'Periksa kembali email dan password Anda.',
         offline: 'Anda sedang offline. Periksa koneksi internet, lalu coba masuk kembali.',
         unexpectedError: 'Login belum dapat diproses. Silakan coba lagi.',
+    },
+    dashboard: {
+        greetingPrefix: 'Halo',
+        subtitle: 'Berikut ringkasan materi belajar Anda.',
+        sectionEmptyTitle: 'Belum ada materi di sini',
+        sectionEmptyBody: 'Materi akan muncul di sini begitu tersedia.',
+        unauthorizedTitle: 'Sesi Anda tidak bisa membuka Dashboard',
+        viewAll: 'Lihat semua',
+    },
+    trackDetail: {
+        descriptionOnboarding: 'Materi wajib untuk semua karyawan baru.',
+        descriptionMt: 'Materi khusus program Management Trainee.',
+        descriptionFunctional: 'Materi sesuai peran Anda.',
+        unavailableToast: 'Track ini belum tersedia untuk Anda.',
+        unauthorizedTitle: 'Sesi Anda tidak bisa membuka Track ini',
+        capstoneTitle: 'Capstone belum tersedia',
+        capstoneBody: 'Capstone akan terbuka setelah modul rotasi Anda selesai. Fitur ini sedang dikembangkan.',
     },
     loginBrand: {
         eyebrow: 'Onboarding & Management Trainee',
@@ -82,10 +93,13 @@ export const strings = {
         categoryLabel: 'Kategori',
         categoryAll: 'Semua',
         categoryMt: 'MT',
+        categoryOnBoard: 'On Boarding',
         categoryRegular: 'Reguler',
         clearFilters: 'Bersihkan filter',
         resultSuffix: 'materi',
         materialsSuffix: 'lampiran',
+        openMaterial: 'Buka materi',
+        backToLibrary: 'Kembali ke Perpustakaan',
         noBanner: 'Materi ini belum punya gambar sampul',
         emptyTitle: 'Belum ada materi di Perpustakaan',
         emptyBody: 'Materi akan muncul di sini begitu ditambahkan.',
@@ -134,6 +148,8 @@ export const strings = {
         categoryLabel: 'Kategori',
         bannerLabel: 'Banner',
         bannerHint: 'JPG, PNG, WEBP, atau GIF. Maksimal 5 MB.',
+        bannerSizeHint:
+            'Best view rasio 16:9, ex: 1024x576 px.',
         bannerChoose: 'Pilih gambar',
         bannerReplace: 'Ganti gambar',
         bannerRemove: 'Hapus gambar',
@@ -173,6 +189,7 @@ export const strings = {
         noDescription: 'Materi ini belum punya deskripsi.',
         noLinks: 'Belum ada tautan materi.',
         noLessons: 'Materi ini tidak dibagi ke dalam lesson.',
+        lessonPrefix: 'Lesson',
         openLinkHint: 'Terbuka di tab baru',
         embedTitle: 'Pratinjau',
         openIn: 'Buka di',

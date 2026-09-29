@@ -1,30 +1,42 @@
+import { ModuleRow } from '@/components/patterns/ModuleRow';
 import { Card } from '@/components/ui/Card';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { strings } from '@/locales/id';
-import { MaterialRow } from '@/pages/Instructor/Materials/components/MaterialRow';
 import type { LearningModule } from '@/types/module';
+import { staggerDelayMs } from '@/utils/motion';
 
 const LIST_CLASS = 'flex flex-col gap-3';
 
-interface MaterialListProps {
+const REVEAL_STEP_MS = 30;
+const REVEAL_MAX_STAGGERED = 9;
+
+interface ModuleRowListProps {
     materials: LearningModule[];
+    toBuilder: (id: string) => string;
+    showCategoryBadge?: boolean;
 }
 
-export const MaterialList = ({ materials }: MaterialListProps) => (
+export const ModuleRowList = ({ materials, toBuilder, showCategoryBadge = true }: ModuleRowListProps) => (
     <ul className={LIST_CLASS}>
-        {materials.map((material) => (
-            <li key={material.id}>
-                <MaterialRow material={material} />
+        {materials.map((material, index) => (
+            <li
+                key={material.id}
+                className="motion-rise"
+                style={{
+                    animationDelay: `${String(staggerDelayMs(index, { stepMs: REVEAL_STEP_MS, maxStaggered: REVEAL_MAX_STAGGERED }))}ms`,
+                }}
+            >
+                <ModuleRow material={material} to={toBuilder(material.id)} showCategoryBadge={showCategoryBadge} />
             </li>
         ))}
     </ul>
 );
 
-interface MaterialListSkeletonProps {
+interface ModuleRowListSkeletonProps {
     count: number;
 }
 
-export const MaterialListSkeleton = ({ count }: MaterialListSkeletonProps) => (
+export const ModuleRowListSkeleton = ({ count }: ModuleRowListSkeletonProps) => (
     <LoadingBlock label={strings.common.loading} className={LIST_CLASS}>
         {Array.from({ length: count }, (_, index) => (
             <Card key={index} className="flex items-start gap-4 p-3">

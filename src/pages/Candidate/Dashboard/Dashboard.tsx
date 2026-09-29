@@ -1,16 +1,31 @@
-import { ComingSoon } from '@/components/patterns/ComingSoon';
+import { PageHeader } from '@/components/patterns/PageHeader';
+import { useAuth } from '@/hooks/useAuth';
 import { strings } from '@/locales/id';
+import { TrackSection } from '@/pages/Candidate/Dashboard/components/TrackSection';
 
 export const Dashboard = () => {
-    return (<>
-        <iframe
-            src="https://cloud.inlinegroupdc.com/s/4Dm4qCY64mpZYnx/embed"
-            title="motorsight"
-            width="100%"
-            height="600"
-        />
-        <ComingSoon title={strings.nav.dashboard} />
-    </>)
+    const { user } = useAuth();
+
+    if (user === null) {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col gap-8">
+            <PageHeader
+                title={`${strings.dashboard.greetingPrefix}, ${user.name}`}
+                description={strings.dashboard.subtitle}
+            />
+
+            <TrackSection title={strings.progress.onboarding} category="onboarding" />
+
+            {user.program === 'mt' ? (
+                <TrackSection title={strings.progress.mt} category="mt" />
+            ) : (
+                <TrackSection title={strings.progress.functional} category="reguler" />
+            )}
+        </div>
+    );
 };
 
 export default Dashboard;

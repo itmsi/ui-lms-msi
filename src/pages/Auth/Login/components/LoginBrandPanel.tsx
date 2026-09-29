@@ -1,10 +1,6 @@
 import { BrandPanelDecor } from '@/components/ui/BrandPanelDecor';
 import { strings } from '@/locales/id';
 
-/**
- * Kolom visual kiri. Di mobile menyusut jadi pita pengenal di atas form,
- * sehingga form tetap mendapat ruang terbesar.
- */
 export const LoginBrandPanel = () => (
     <aside className="brand-panel flex flex-col justify-between px-6 py-8 lg:min-h-dvh lg:px-12 lg:py-14 xl:px-16">
         <BrandPanelDecor />

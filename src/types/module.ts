@@ -1,14 +1,8 @@
-/**
- * Bentuk Module setelah dipetakan dari respons API.
- *
- * Dipakai bersama oleh Perpustakaan (Candidate) dan Materi (Instructor): keduanya
- * membaca endpoint yang sama, jadi bentuk dan parsingnya tinggal di satu tempat
- * supaya tidak berkembang ke arah berbeda.
- */
 export interface LearningModule {
     id: string;
     title: string;
     description: string | null;
+    descriptionClean: string | null;
     banner: string | null;
     linkMaterials: string[];
     category: string | null;
@@ -33,9 +27,7 @@ export interface ModuleListQuery {
     limit: number;
     search: string;
     sort: ModuleSort;
-    /** null berarti `module_category` tidak dikirim sama sekali — parameternya opsional. */
     category: string | null;
-    /** Membatasi hasil ke modul buatan pengguna ini. null berarti tidak dibatasi. */
     createdBy: string | null;
 }
 
@@ -44,3 +36,25 @@ export type ApiFailureCode = 'validation' | 'unauthorized' | 'offline' | 'unknow
 export type ModuleListOutcome =
     | { ok: true; data: ModuleListResult }
     | { ok: false; code: ApiFailureCode; message?: string };
+
+export interface ModuleChapter {
+    id: string;
+    title: string;
+    description: string;
+    linkMaterials: string[];
+    line: number;
+}
+
+export interface ModuleDetail {
+    id: string;
+    title: string;
+    description: string;
+    banner: string | null;
+    linkMaterials: string[];
+    category: string | null;
+    chapters: ModuleChapter[];
+}
+
+export type ModuleDetailOutcome =
+    | { ok: true; data: ModuleDetail }
+    | { ok: false; code: ApiFailureCode | 'not_found'; message?: string };

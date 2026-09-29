@@ -7,7 +7,6 @@ import { strings } from '@/locales/id';
 
 interface PermissionDeniedProps {
     title?: string;
-    /** Jelaskan siapa yang bisa memberi izinnya, bukan hanya bahwa aksesnya ditolak. */
     description: string;
     action?: ReactNode;
 }

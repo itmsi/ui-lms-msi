@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
 interface PopoverProps {
-    /** Label aksesibilitas untuk tombol pemicu. */
     label: string;
     trigger: ReactNode;
     children: (close: () => void) => ReactNode;
@@ -43,7 +42,6 @@ export const Popover = ({
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 setOpen(false);
-                // Fokus dikembalikan ke pemicu supaya urutan keyboard tidak hilang.
                 triggerRef.current?.focus();
             }
         };

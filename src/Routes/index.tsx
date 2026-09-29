@@ -8,13 +8,14 @@ import { HomeLanding } from '@/Routes/HomeLanding';
 import { MenuRoute } from '@/Routes/MenuRoute';
 import { ProtectedRoute } from '@/Routes/ProtectedRoute';
 
-/** Dipecah per rute supaya halaman yang tak dibuka tidak ikut diunduh. */
 const Login = lazy(() => import('@/pages/Auth/Login/Login'));
 const Dashboard = lazy(() => import('@/pages/Candidate/Dashboard/Dashboard'));
+const TrackDetail = lazy(() => import('@/pages/Candidate/TrackDetail/TrackDetail'));
 const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
 const MaterialEditor = lazy(() => import('@/pages/Instructor/Materials/MaterialEditor'));
 const MaterialDetail = lazy(() => import('@/pages/Instructor/Materials/MaterialDetail'));
 const Library = lazy(() => import('@/pages/Candidate/Library/Library'));
+const LibraryDetail = lazy(() => import('@/pages/Candidate/Library/LibraryDetail'));
 const History = lazy(() => import('@/pages/Candidate/History/History'));
 const Profile = lazy(() => import('@/pages/Candidate/Profile/Profile'));
 const Forbidden = lazy(() => import('@/pages/Errors/Forbidden'));
@@ -34,12 +35,13 @@ export const AppRoutes = () => (
 
                     <Route element={<MenuRoute />}>
                         <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/tracks/:category" element={<TrackDetail />} />
                         <Route path="/materials" element={<Materials />} />
-                        {/* Ruas statis didahulukan React Router, jadi '/new' tidak tertangkap ':id'. */}
                         <Route path="/materials/new" element={<MaterialEditor />} />
                         <Route path="/materials/:id" element={<MaterialDetail />} />
                         <Route path="/materials/:id/edit" element={<MaterialEditor />} />
                         <Route path="/library" element={<Library />} />
+                        <Route path="/library/:id" element={<LibraryDetail />} />
                         <Route path="/history" element={<History />} />
                         <Route path="/profile" element={<Profile />} />
                     </Route>

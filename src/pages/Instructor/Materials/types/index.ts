@@ -1,25 +1,7 @@
-/* --- Bentuk detail materi, dipetakan dari GET modules/get/:id --- */
+import type { ModuleChapter, ModuleDetail } from '@/types/module';
 
-export interface MaterialChapter {
-    id: string;
-    title: string;
-    /** HTML dari editor. Wajib dirender lewat `RichText`, tidak pernah langsung. */
-    description: string;
-    linkMaterials: string[];
-    /** Nomor urut dari backend; dipakai mengurutkan, bukan posisi di array. */
-    line: number;
-}
-
-export interface MaterialDetail {
-    id: string;
-    title: string;
-    /** HTML dari editor. Wajib dirender lewat `RichText`. */
-    description: string;
-    banner: string | null;
-    linkMaterials: string[];
-    category: string | null;
-    chapters: MaterialChapter[];
-}
+export type MaterialChapter = ModuleChapter;
+export type MaterialDetail = ModuleDetail;
 
 export interface LinkDraft {
     key: string;
@@ -43,7 +25,6 @@ export interface MaterialDraft {
     lessons: LessonDraft[];
 }
 
-/** Dipetakan dengan key: 'title', 'banner', atau key dari LinkDraft/LessonDraft. */
 export type DraftErrors = Record<string, string>;
 
 export const createKey = (): string => crypto.randomUUID();
@@ -60,11 +41,6 @@ export const createLessonDraft = (): LessonDraft => ({
 
 const toLinkDrafts = (values: string[]): LinkDraft[] => values.map((value) => ({ key: createKey(), value }));
 
-/**
- * Menyiapkan form dari materi yang sudah tersimpan.
- * Banner tidak ikut: yang tersimpan berupa URL, sedangkan form memegang berkas baru —
- * banner lama ditampilkan terpisah dan hanya tergantikan bila pengguna memilih gambar.
- */
 export const toMaterialDraft = (detail: MaterialDetail): MaterialDraft => ({
     title: detail.title,
     description: detail.description,
@@ -80,10 +56,6 @@ export const toMaterialDraft = (detail: MaterialDetail): MaterialDraft => ({
     })),
 });
 
-/**
- * Dimulai tanpa lesson: materi ringkas cukup diisi informasi dan tautannya saja.
- * Membuka form dengan satu lesson kosong membuat lesson terasa wajib padahal bukan.
- */
 export const createMaterialDraft = (category: string): MaterialDraft => ({
     title: '',
     description: '',

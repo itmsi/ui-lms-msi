@@ -4,7 +4,6 @@ interface SkeletonProps {
     className?: string;
 }
 
-/** Skeleton, bukan spinner besar: bentuk halaman tetap terbaca selama memuat. */
 export const Skeleton = ({ className }: SkeletonProps) => (
     <div aria-hidden="true" className={cn('bg-neutral-soft animate-pulse rounded-md', className)} />
 );
@@ -23,7 +22,6 @@ export const SkeletonText = ({ lines = 3, className }: SkeletonTextProps) => (
 );
 
 interface LoadingBlockProps {
-    /** Dibacakan screen reader supaya status memuat tidak hanya terlihat secara visual. */
     label: string;
     className?: string;
     children: React.ReactNode;

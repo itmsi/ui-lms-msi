@@ -1,18 +1,19 @@
 import { LibraryBig, SearchX } from 'lucide-react';
 
 import { ListToolbar } from '@/components/patterns/ListToolbar';
+import { ModuleThumbnailGrid, ModuleThumbnailGridSkeleton } from '@/components/patterns/ModuleThumbnailGrid';
 import { Pagination } from '@/components/patterns/Pagination';
 import { SearchBar } from '@/components/patterns/SearchBar';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import type { SegmentedOption } from '@/components/ui/SegmentedControl';
 import { strings } from '@/locales/id';
-import { MaterialGrid, MaterialGridSkeleton } from '@/pages/Candidate/Library/components/MaterialGrid';
 import { useLibrary } from '@/pages/Candidate/Library/hooks/useLibrary';
-import type { LibraryState } from '@/pages/Candidate/Library/hooks/useLibrary';
+import type { LibraryCategoryFilter, LibraryState } from '@/pages/Candidate/Library/hooks/useLibrary';
 
-/** Menerjemahkan kegagalan jadi jawaban atas: apa yang terjadi, bisa apa, lalu apa. */
 const renderError = (state: Extract<LibraryState, { status: 'error' }>, onRetry: () => void) => {
     if (state.code === 'unauthorized') {
         return (
@@ -50,9 +51,29 @@ const renderError = (state: Extract<LibraryState, { status: 'error' }>, onRetry:
     return <ErrorState onRetry={onRetry} />;
 };
 
+const CATEGORY_FILTER_OPTIONS: SegmentedOption<LibraryCategoryFilter>[] = [
+    { value: 'all', label: strings.library.categoryAll },
+    { value: 'reguler', label: strings.library.categoryRegular },
+    { value: 'mt', label: strings.library.categoryMt },
+    { value: 'onboarding', label: strings.library.categoryOnBoard },
+];
+
 export const Library = () => {
-    const { state, search, sort, submitSearch, selectSort, clearFilters, goToPage, retry, hasFilters, pageSize } =
-        useLibrary();
+    const {
+        state,
+        search,
+        sort,
+        submitSearch,
+        selectSort,
+        clearFilters,
+        goToPage,
+        retry,
+        hasFilters,
+        pageSize,
+        canFilterCategory,
+        categoryFilter,
+        selectCategoryFilter,
+    } = useLibrary();
 
     const isLoading = state.status === 'loading';
     const total = state.status === 'success' ? state.result.pagination.total : null;
@@ -60,7 +81,6 @@ export const Library = () => {
 
     return (
         <section className="flex flex-col gap-5">
-            {/* <PageHeader title={strings.nav.library} description={strings.library.subtitle} /> */}
 
             <SearchBar
                 label={strings.library.searchLabel}
@@ -73,14 +93,25 @@ export const Library = () => {
             />
 
             <ListToolbar
-                title={hasFilters ? strings.library.sectionTitleSearch : strings.library.sectionTitle}
+                title={search === '' ? strings.library.sectionTitle : strings.library.sectionTitleSearch}
                 total={total}
                 sort={sort}
                 onSelectSort={selectSort}
                 disabled={isLoading}
+                filter={
+                    canFilterCategory ? (
+                        <SegmentedControl
+                            label={strings.library.categoryLabel}
+                            options={CATEGORY_FILTER_OPTIONS}
+                            value={categoryFilter}
+                            onChange={selectCategoryFilter}
+                            disabled={isLoading}
+                        />
+                    ) : undefined
+                }
             />
 
-            {isLoading ? <MaterialGridSkeleton count={pageSize} /> : null}
+            {isLoading ? <ModuleThumbnailGridSkeleton count={pageSize} /> : null}
 
             {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
 
@@ -103,7 +134,7 @@ export const Library = () => {
 
             {state.status === 'success' && state.result.items.length > 0 ? (
                 <>
-                    <MaterialGrid materials={state.result.items} />
+                    <ModuleThumbnailGrid materials={state.result.items} toBuilder={(id) => `/library/${id}`} />
                     <Pagination
                         pagination={state.result.pagination}
                         onChangePage={goToPage}

@@ -6,10 +6,9 @@ import { ChevronLeft } from 'lucide-react';
 
 interface PageHeaderProps {
     title: string;
-    backPath: string | (() => void); // Bisa berupa string atau fungsi untuk navigasi kembali
+    backPath: string | (() => void);
     subtitle?: ReactNode | null;
 
-    // Slot untuk konten kanan (badge, tombol, dll)
     actions?: ReactNode;
 }
 
@@ -23,8 +22,6 @@ export default function PageHeaderDetail({ title, backPath, subtitle, actions }:
                     size='sm'
                     onClick={() => {
                         if (typeof backPath === 'string') {
-                            // `navigate` mengembalikan Promise di React Router v7; tidak ada
-                            // yang perlu ditunggu di sini, jadi ditandai sengaja diabaikan.
                             void navigate(backPath);
                         } else if (typeof backPath === 'function') {
                             backPath();

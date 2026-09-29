@@ -42,22 +42,17 @@ export const useLogin = () => {
 
         if (result.ok) {
             const state = location.state as LocationState | null;
-            // Tujuan default dibiarkan ke '/' supaya HomeLanding yang menentukan
-            // halaman pertama dari item menu pertama yang dikirim backend.
             void navigate(state?.from ?? '/', { replace: true });
             return;
         }
 
-        // Nilai form sengaja dipertahankan supaya pengguna tidak mengetik ulang.
         setSubmitting(false);
-        // Pesan validasi datang dari server dan sudah berbahasa Indonesia.
         setErrorMessage(result.message ?? ERROR_MESSAGE[result.code]);
     };
 
     const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        // Penjaga kirim ganda: tombol juga sudah dinonaktifkan saat submitting.
         if (canSubmit === false || submitting) {
             return;
         }

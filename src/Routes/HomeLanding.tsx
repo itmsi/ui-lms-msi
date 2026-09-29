@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { getLandingRoute } from '@/layout/navigation';
 import { NoMenuAccess } from '@/pages/Errors/NoMenuAccess';
 
-/** Halaman pertama setelah masuk ditentukan item menu pertama dari backend. */
 export const HomeLanding = () => {
     const { user } = useAuth();
 

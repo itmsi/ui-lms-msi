@@ -3,7 +3,6 @@ import type { HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
-    /** Angkat kartu sedikit saat hover. Hanya untuk kartu yang benar-benar bisa diklik. */
     interactive?: boolean;
 }
 

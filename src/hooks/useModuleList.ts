@@ -11,9 +11,10 @@ type LoadedState =
 export type ModuleListState = { status: 'loading' } | LoadedState;
 
 interface UseModuleListOptions {
-    /** null menampilkan semua modul; diisi id pengguna untuk membatasi ke miliknya. */
     createdBy: string | null;
     pageSize: number;
+    fixedCategory?: string | null;
+    categoryOptions?: readonly string[];
 }
 
 const parsePage = (value: string | null): number => {
@@ -22,31 +23,24 @@ const parsePage = (value: string | null): number => {
     return Number.isFinite(page) && page > 0 ? page : 1;
 };
 
-/** Nilai `sort` dari URL bisa disunting siapa saja, jadi hanya yang dikenali dipakai. */
 const parseSort = (value: string | null): ModuleSort => (value === 'title' ? 'title' : 'latest');
 
-/**
- * Daftar Module dengan pencarian, pengurutan, dan paginasi yang disimpan di URL —
- * sehingga tombol Back berfungsi dan tautannya bisa dibagikan.
- *
- * Dipakai bersama oleh Perpustakaan (semua materi) dan Materi (hanya milik pengguna);
- * satu-satunya perbedaan keduanya adalah `createdBy`.
- */
-export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => {
+export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOptions }: UseModuleListOptions) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const page = parsePage(searchParams.get('page'));
     const search = searchParams.get('q') ?? '';
     const sort = parseSort(searchParams.get('sort'));
-    const category = searchParams.get('category');
+    const isCategoryFixed = fixedCategory !== undefined;
+    const urlCategory = searchParams.get('category');
+    const category = isCategoryFixed
+        ? fixedCategory
+        : categoryOptions === undefined || (urlCategory !== null && categoryOptions.includes(urlCategory))
+          ? urlCategory
+          : null;
 
     const [reloadToken, setReloadToken] = useState(0);
 
-    /**
-     * Status "loading" diturunkan dari perbandingan kunci, bukan disimpan sebagai state
-     * yang disetel di awal effect. Dengan begitu effect hanya menyetel state di dalam
-     * callback setelah permintaan selesai — tidak ada render beruntun.
-     */
     const queryKey = `${String(page)}|${search}|${sort}|${category ?? ''}|${createdBy ?? ''}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedState } | null>(null);
 
@@ -61,7 +55,6 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
                 controller.signal,
             );
 
-            // Permintaan yang dibatalkan bukan kegagalan — jangan tampilkan errornya.
             if (controller.signal.aborted) {
                 return;
             }
@@ -96,7 +89,6 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
                     }
 
                     if (changes.sort !== undefined) {
-                        // 'latest' adalah default, jadi tidak perlu mengotori URL.
                         if (changes.sort === 'latest') {
                             next.delete('sort');
                         } else {
@@ -112,7 +104,6 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
                         }
                     }
 
-                    // Filter berubah tanpa halaman disebut berarti kembali ke halaman pertama.
                     const nextPage = changes.page ?? 1;
 
                     if (nextPage <= 1) {
@@ -142,14 +133,21 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
 
     const goToPage = useCallback(
         (next: number) => {
-            applyParams({ page: next, q: search, sort, category });
+            applyParams({ page: next, q: search, sort, category: isCategoryFixed ? undefined : category });
         },
-        [applyParams, search, sort, category],
+        [applyParams, search, sort, category, isCategoryFixed],
     );
 
     const selectSort = useCallback(
         (next: ModuleSort) => {
             applyParams({ sort: next });
+        },
+        [applyParams],
+    );
+
+    const selectCategory = useCallback(
+        (next: string | null) => {
+            applyParams({ category: next });
         },
         [applyParams],
     );
@@ -166,10 +164,11 @@ export const useModuleList = ({ createdBy, pageSize }: UseModuleListOptions) => 
         category,
         submitSearch,
         selectSort,
+        selectCategory,
         clearFilters,
         goToPage,
         retry,
-        hasFilters: search !== '' || category !== null,
+        hasFilters: search !== '' || (isCategoryFixed === false && category !== null),
         pageSize,
     };
 };

@@ -11,7 +11,6 @@ interface MaterialLinkListProps {
 }
 
 interface EmbedCardProps {
-    /** Tautan asli dari instruktur — tujuan tombol "Buka di …", bukan alamat iframe. */
     link: string;
     source: EmbedSource;
 }
@@ -51,7 +50,6 @@ const EmbedCard = ({ link, source }: EmbedCardProps) => {
                         {strings.materialDetail.reloadPreview}
                     </Button>
 
-                    {/* `rel="noopener noreferrer"` wajib pada tautan bertarget baru. */}
                     <a
                         href={link}
                         target="_blank"
@@ -68,23 +66,18 @@ const EmbedCard = ({ link, source }: EmbedCardProps) => {
 };
 
 export const MaterialLinkList = ({ links }: MaterialLinkListProps) => {
-    if (links.length === 0) {
-        return <p className="text-body text-muted">{strings.materialDetail.noLinks}</p>;
-    }
+    // if (links.length === 0) {
+    //     return <p className="text-body text-muted">{strings.materialDetail.noLinks}</p>;
+    // }
 
     return (
         <ul className="flex flex-col gap-2">
             {links.map((link, index) => {
-                // Berbasis posisi juga: tautan yang sama bisa tersimpan dua kali dalam satu daftar.
                 const key = `${String(index)}:${link}`;
                 const source = resolveEmbed(link);
 
                 return source === null ? (
                     <li key={key}>
-                        {/*
-                          * `rel="noopener noreferrer"` wajib pada tautan bertarget baru:
-                          * tanpa itu halaman tujuan bisa mengakses `window.opener`.
-                          */}
                         <a
                             href={link}
                             target="_blank"

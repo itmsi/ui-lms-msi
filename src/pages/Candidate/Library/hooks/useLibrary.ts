@@ -1,15 +1,42 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useModuleList } from '@/hooks/useModuleList';
 import type { ModuleListState } from '@/hooks/useModuleList';
+import type { CandidateProgram } from '@/types/user';
 
 export type LibraryState = ModuleListState;
 
-/**
- * Dipilih 12 karena habis dibagi 2 dan 3 — baris terakhir selalu penuh di semua
- * lebar grid. Ukuran halaman sengaja tidak mengikuti tinggi viewport: nilainya ikut
- * tersimpan di URL, dan mengubahnya saat jendela diubah ukurannya akan memicu
- * pengambilan ulang serta membuat tautan yang dibagikan tidak konsisten.
- */
 const PAGE_SIZE = 12;
 
-/** Perpustakaan menampilkan materi lintas-scope, jadi tidak dibatasi pembuatnya. */
-export const useLibrary = () => useModuleList({ createdBy: null, pageSize: PAGE_SIZE });
+const CATEGORY_BY_PROGRAM: Record<CandidateProgram, string> = {
+    mt: 'mt',
+    regular: 'reguler',
+    onboarding: 'onboarding',
+};
+
+export type LibraryCategoryFilter = 'all' | 'reguler' | 'mt' | 'onboarding';
+
+const FILTER_CATEGORIES = [CATEGORY_BY_PROGRAM.regular, CATEGORY_BY_PROGRAM.mt, CATEGORY_BY_PROGRAM.onboarding] as const;
+
+export const useLibrary = () => {
+    const { user } = useAuth();
+    const program = user?.program ?? null;
+    const canFilterCategory = program === 'regular' || program === null;
+
+    const list = useModuleList({
+        createdBy: null,
+        pageSize: PAGE_SIZE,
+        ...(canFilterCategory
+            ? { categoryOptions: FILTER_CATEGORIES }
+            : { fixedCategory: program === null ? null : CATEGORY_BY_PROGRAM[program] }),
+    });
+
+    const categoryFilter: LibraryCategoryFilter =
+        list.category === 'reguler' || list.category === 'mt' || list.category === 'onboarding' ? list.category : 'all';
+
+    return {
+        ...list,
+        canFilterCategory,
+        categoryFilter,
+        selectCategoryFilter: (next: LibraryCategoryFilter) => list.selectCategory(next === 'all' ? null : next),
+    };
+};

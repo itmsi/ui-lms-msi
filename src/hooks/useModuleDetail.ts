@@ -1,27 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { fetchMaterialDetail } from '@/pages/Instructor/Materials/services/materialService';
-import type { MaterialDetailOutcome } from '@/pages/Instructor/Materials/services/materialService';
-import type { MaterialDetail } from '@/pages/Instructor/Materials/types';
+import { fetchModuleDetail } from '@/services/moduleService';
+import type { ModuleDetail, ModuleDetailOutcome } from '@/types/module';
 
 type LoadedState =
-    | { status: 'success'; detail: MaterialDetail }
-    | { status: 'error'; code: Extract<MaterialDetailOutcome, { ok: false }>['code']; message?: string };
+    | { status: 'success'; detail: ModuleDetail }
+    | { status: 'error'; code: Extract<ModuleDetailOutcome, { ok: false }>['code']; message?: string };
 
-export type MaterialDetailState = { status: 'loading' } | LoadedState;
+export type ModuleDetailState = { status: 'loading' } | LoadedState;
 
-export const useMaterialDetail = (id: string | undefined) => {
+export const useModuleDetail = (id: string | undefined) => {
     const [reloadToken, setReloadToken] = useState(0);
 
-    /**
-     * Sama seperti daftar: status "loading" diturunkan dari perbandingan kunci, bukan
-     * disetel di awal effect — supaya effect hanya menyetel state di dalam callback.
-     */
     const queryKey = `${id ?? ''}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedState } | null>(null);
 
-    // Tanpa id tidak ada yang bisa diminta; diturunkan langsung, bukan disetel lewat effect.
-    const state: MaterialDetailState =
+    const state: ModuleDetailState =
         id === undefined
             ? { status: 'error', code: 'not_found' }
             : loaded !== null && loaded.key === queryKey
@@ -36,9 +30,8 @@ export const useMaterialDetail = (id: string | undefined) => {
         const controller = new AbortController();
 
         const run = async () => {
-            const outcome = await fetchMaterialDetail(id, controller.signal);
+            const outcome = await fetchModuleDetail(id, controller.signal);
 
-            // Permintaan yang dibatalkan bukan kegagalan — jangan tampilkan errornya.
             if (controller.signal.aborted) {
                 return;
             }

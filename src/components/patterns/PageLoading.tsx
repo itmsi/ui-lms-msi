@@ -1,7 +1,6 @@
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { strings } from '@/locales/id';
 
-/** Fallback saat kode halaman masih diunduh (code splitting per rute). */
 export const PageLoading = () => (
     <LoadingBlock label={strings.common.loading} className="mx-auto w-full max-w-[1200px] px-4 py-8 lg:px-8">
         <Skeleton className="h-8 w-56" />

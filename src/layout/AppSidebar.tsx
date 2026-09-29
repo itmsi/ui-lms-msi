@@ -9,14 +9,6 @@ interface AppSidebarProps {
     items: NavItem[];
 }
 
-/**
- * Lebar tetap 280px dan tidak ikut menggulung: yang menggulung hanya <main>.
- * Permukaannya memakai tema brand yang sama dengan panel kiri halaman Login.
- *
- * Karena latarnya bergradien — bagian kiri atas mendekati Primary — teks non-aktif
- * dan cincin fokus dibuat terang. Warna gelap atau outline Primary tidak cukup
- * kontras di atas permukaan ini.
- */
 export const AppSidebar = ({ items }: AppSidebarProps) => (
     <aside className="brand-panel hidden w-70 shrink-0 flex-col lg:flex">
         <BrandPanelDecor />
@@ -38,10 +30,10 @@ export const AppSidebar = ({ items }: AppSidebarProps) => (
                     to={to}
                     className={({ isActive }) =>
                         cn(
-                            'text-body flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                            'text-body font-serif flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
                             'focus-visible:outline-white',
                             isActive
-                                ? 'bg-white/15 font-semibold text-white'
+                                ? 'bg-white/15 text-white'
                                 : 'text-sidebar-muted hover:bg-white/5 hover:text-white',
                         )
                     }

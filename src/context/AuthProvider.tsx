@@ -12,8 +12,6 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    // Cache localStorage dipakai sebagai tampilan awal supaya muat ulang tidak berkedip.
-    // Nilainya tetap diverifikasi ke server di efek di bawah.
     const [cachedUser] = useState(() => authService.readSessionFromCache());
     const [user, setUser] = useState<AuthUser | null>(cachedUser);
     const [status, setStatus] = useState<AuthStatus>(cachedUser === null ? 'loading' : 'authenticated');
