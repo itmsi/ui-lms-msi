@@ -45,6 +45,36 @@ const toGooglePreview = (url: URL): string | null => {
     return null;
 };
 
+const GOOGLE_DOC_TYPE: Record<string, string> = {
+    document: 'Google Docs',
+    spreadsheets: 'Google Sheets',
+    presentation: 'Google Slides',
+};
+
+export const resolveLinkType = (value: string): string | null => {
+    const url = parseUrl(value);
+
+    if (url === null) {
+        return null;
+    }
+
+    if (url.hostname === WEDRIVE_HOST) {
+        return 'WeDrive';
+    }
+
+    if (url.hostname === WECOM_DOC_HOST) {
+        return 'WeCom Doc';
+    }
+
+    if (url.hostname === GOOGLE_DOCS_HOST) {
+        const first = url.pathname.split('/').find((segment) => segment !== '');
+
+        return first === undefined ? null : (GOOGLE_DOC_TYPE[first] ?? null);
+    }
+
+    return url.hostname === GOOGLE_DRIVE_HOST ? 'Google Drive' : null;
+};
+
 export const resolveEmbed = (value: string): EmbedSource | null => {
     const url = parseUrl(value);
 

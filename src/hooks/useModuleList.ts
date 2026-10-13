@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { fetchModules } from '@/services/moduleService';
 import type { ApiFailureCode, ModuleListResult, ModuleSort } from '@/types/module';
+import { parsePageParam } from '@/utils/pageParam';
 
 type LoadedState =
     | { status: 'success'; result: ModuleListResult }
@@ -17,18 +18,12 @@ interface UseModuleListOptions {
     categoryOptions?: readonly string[];
 }
 
-const parsePage = (value: string | null): number => {
-    const page = Number.parseInt(value ?? '', 10);
-
-    return Number.isFinite(page) && page > 0 ? page : 1;
-};
-
 const parseSort = (value: string | null): ModuleSort => (value === 'title' ? 'title' : 'latest');
 
 export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOptions }: UseModuleListOptions) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const page = parsePage(searchParams.get('page'));
+    const page = parsePageParam(searchParams.get('page'));
     const search = searchParams.get('q') ?? '';
     const sort = parseSort(searchParams.get('sort'));
     const isCategoryFixed = fixedCategory !== undefined;

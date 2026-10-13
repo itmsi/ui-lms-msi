@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { API_BASE_URL, API_LOGIN_URL, API_TIMEOUT_MS, API_UPLOAD_TIMEOUT_MS } from '@/helpers/apiConfig';
 import { clearStoredSession } from '@/helpers/authSession';
@@ -15,7 +15,12 @@ const loginApi = axios.create({
     timeout: API_TIMEOUT_MS,
 });
 
-api.interceptors.request.use((config) => {
+const gatewayApi = axios.create({
+    baseURL: API_LOGIN_URL,
+    timeout: API_TIMEOUT_MS,
+});
+
+const attachToken = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     const token = getAuthToken();
 
     if (token !== null) {
@@ -23,7 +28,10 @@ api.interceptors.request.use((config) => {
     }
 
     return config;
-});
+};
+
+api.interceptors.request.use(attachToken);
+gatewayApi.interceptors.request.use(attachToken);
 
 export interface ApiResponse<T = unknown> {
     data: T;
@@ -62,12 +70,12 @@ const handleUnauthorized = () => {
     }
 };
 
-const toApiError = (error: unknown): ApiError & Error => {
+const toApiError = (error: unknown, redirectOnUnauthorized: boolean): ApiError & Error => {
     if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError<ApiErrorResponse>;
         const status = axiosError.response?.status;
 
-        if (status === 401 && isAuthRequest(axiosError.config?.url) === false) {
+        if (status === 401 && redirectOnUnauthorized && isAuthRequest(axiosError.config?.url) === false) {
             handleUnauthorized();
         }
 
@@ -87,7 +95,10 @@ const toApiError = (error: unknown): ApiError & Error => {
     return createApiError(error instanceof Error ? error.message : 'An unexpected error occurred');
 };
 
-const request = async <T>(run: () => Promise<AxiosResponse<T>>): Promise<ApiResponse<T>> => {
+const request = async <T>(
+    run: () => Promise<AxiosResponse<T>>,
+    redirectOnUnauthorized = true,
+): Promise<ApiResponse<T>> => {
     try {
         const response = await run();
 
@@ -96,7 +107,7 @@ const request = async <T>(run: () => Promise<AxiosResponse<T>>): Promise<ApiResp
             status: response.status,
         };
     } catch (error) {
-        throw toApiError(error);
+        throw toApiError(error, redirectOnUnauthorized);
     }
 };
 
@@ -110,6 +121,12 @@ export const apiLoginPost = async <T = unknown>(
     url: string,
     data?: Record<string, unknown>,
 ): Promise<ApiResponse<T>> => request<T>(() => loginApi.post<T>(url, data));
+
+export const apiGatewayPost = async <T = unknown>(
+    url: string,
+    data?: Record<string, unknown>,
+    config?: AxiosRequestConfig,
+): Promise<ApiResponse<T>> => request<T>(() => gatewayApi.post<T>(url, data, config), false);
 
 export const apiPost = async <T = unknown>(
     url: string,

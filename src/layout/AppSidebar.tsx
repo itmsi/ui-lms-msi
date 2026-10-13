@@ -4,6 +4,7 @@ import { BrandPanelDecor } from '@/components/ui/BrandPanelDecor';
 import type { NavItem } from '@/layout/navigation';
 import { strings } from '@/locales/id';
 import { cn } from '@/utils/cn';
+import { CircleUser } from 'lucide-react';
 
 interface AppSidebarProps {
     items: NavItem[];
@@ -42,6 +43,21 @@ export const AppSidebar = ({ items }: AppSidebarProps) => (
                     {label}
                 </NavLink>
             ))}
+            <NavLink
+                to={'/profile'}
+                className={({ isActive }) =>
+                    cn(
+                        'text-body font-serif flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+                        'focus-visible:outline-white',
+                        isActive
+                            ? 'bg-white/15 text-white'
+                            : 'text-sidebar-muted hover:bg-white/5 hover:text-white',
+                    )
+                }
+            >
+                <CircleUser className="size-4.5 shrink-0" />
+                Profile
+            </NavLink>
         </nav>
     </aside>
 );

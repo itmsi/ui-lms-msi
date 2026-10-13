@@ -11,13 +11,12 @@ const LOGIN_PATH = 'auth/sso/login';
 
 const PROGRAM_BY_GROUP: Record<string, CandidateProgram> = {
     mt: 'mt',
-    regular: 'regular',
+    reguler: 'reguler',
 };
 
 const toProgram = (groupName: string | null): CandidateProgram | null => {
     const key = groupName === null ? '' : groupName.trim().toLowerCase();
-
-    return key === '' ? 'regular' : (PROGRAM_BY_GROUP[key] ?? null);
+    return key === '' ? 'mt' : (PROGRAM_BY_GROUP[key] ?? null);
 };
 
 const toAuthUser = (user: ApiSsoUser, menu: ApiMenuItem[], systems: string[]): AuthUser => ({

@@ -5,6 +5,7 @@ import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { useActivityLog, useLogOnce } from '@/hooks/useActivityLog';
 import { useTrackModules } from '@/hooks/useTrackModules';
 import type { TrackModulesState } from '@/hooks/useTrackModules';
 import { strings } from '@/locales/id';
@@ -55,6 +56,11 @@ interface TrackDetailContentProps {
 
 export const TrackDetailContent = ({ track }: TrackDetailContentProps) => {
     const { state, retry } = useTrackModules(track.category, TRACK_LIST_LIMIT);
+    const activity = useActivityLog();
+
+    useLogOnce(track.category, () => {
+        activity.trackOpened(track.label);
+    });
 
     return (
         <section className="flex flex-col gap-5">
