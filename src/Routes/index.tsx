@@ -9,7 +9,6 @@ import { MenuRoute } from '@/Routes/MenuRoute';
 import { ProtectedRoute } from '@/Routes/ProtectedRoute';
 
 const Login = lazy(() => import('@/pages/Auth/Login/Login'));
-const AssessmentSession = lazy(() => import('@/pages/Interview/AssessmentSession'));
 const Dashboard = lazy(() => import('@/pages/Candidate/Dashboard/Dashboard'));
 const TrackDetail = lazy(() => import('@/pages/Candidate/TrackDetail/TrackDetail'));
 const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
@@ -29,7 +28,6 @@ export const AppRoutes = () => (
         <Routes>
             <Route element={<GuestRoute />}>
                 <Route path="/login" element={<Login />} />
-                <Route path="/assessment" element={<AssessmentSession />} />
             </Route>
 
             <Route element={<ProtectedRoute />}>
