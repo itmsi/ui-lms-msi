@@ -1,4 +1,5 @@
 import { strings } from '@/locales/id';
+import type { DateRange } from '@/types/dateRange';
 
 const LOCALE = 'id-ID';
 const MINUTE = 60_000;
@@ -74,6 +75,45 @@ export const formatClock = (iso: string): string => {
 
     return date === null ? '' : timeFormat.format(date);
 };
+
+const pad = (value: number): string => String(value).padStart(2, '0');
+
+export const toIsoDate = (date: Date): string =>
+    `${String(date.getFullYear())}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+export const lastDaysRange = (days: number, today: Date = new Date()): DateRange => {
+    const start = new Date(today);
+    start.setDate(start.getDate() - (days - 1));
+
+    return { start: toIsoDate(start), end: toIsoDate(today) };
+};
+
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+export const fromIsoDate = (isoDate: string): Date | undefined => {
+    const match = ISO_DATE.exec(isoDate);
+
+    return match === null ? undefined : new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+};
+
+const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
+const dayMonthFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
+
+export const formatShortDate = (date: Date): string => shortDateFormat.format(date);
+
+export const formatIsoDate = (isoDate: string): string => {
+    const date = fromIsoDate(isoDate);
+
+    return date === undefined ? isoDate : shortDateFormat.format(date);
+};
+
+export const formatDateSpan = (start: Date, end: Date): string =>
+    start.getFullYear() === end.getFullYear()
+        ? `${dayMonthFormat.format(start)} – ${shortDateFormat.format(end)}`
+        : `${shortDateFormat.format(start)} – ${shortDateFormat.format(end)}`;
+
+export const countDaysInclusive = (start: Date, end: Date): number =>
+    Math.round((startOfDay(end.getTime()) - startOfDay(start.getTime())) / DAY) + 1;
 
 export const formatFullDateTime = (iso: string): string => {
     const date = toDate(iso);

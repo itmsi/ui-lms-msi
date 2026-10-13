@@ -68,6 +68,7 @@ export const fetchActivities = async (
                 search: query.search,
                 modules_id: query.moduleId ?? '',
                 ...(query.employeeId === null ? {} : { employee_id: query.employeeId }),
+                ...(query.dateRange === undefined ? {} : { start_date: query.dateRange.start, end_date: query.dateRange.end }),
             },
             { signal },
         );

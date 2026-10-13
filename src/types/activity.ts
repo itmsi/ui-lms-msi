@@ -1,3 +1,4 @@
+import type { DateRange } from '@/types/dateRange';
 import type { ApiFailureCode, ModulePagination } from '@/types/module';
 
 export type ActivityKind = 'track' | 'module' | 'lesson' | 'link' | 'other';
@@ -25,6 +26,7 @@ export interface ActivityListQuery {
     search: string;
     moduleId: string | null;
     employeeId: string | null;
+    dateRange?: DateRange;
 }
 
 export type ActivityListOutcome =

@@ -1,6 +1,7 @@
 import { Footprints, RotateCcw, SearchX } from 'lucide-react';
 
 import { ApiErrorState } from '@/components/patterns/ApiErrorState';
+import { DateRangeFilter } from '@/components/patterns/DateRangeFilter';
 import { PageHeader } from '@/components/patterns/PageHeader';
 import { SearchBar } from '@/components/patterns/SearchBar';
 import { Button } from '@/components/ui/Button';
@@ -9,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FilterChip } from '@/components/ui/FilterChip';
 import { LinkButton } from '@/components/ui/LinkButton';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
+import type { SegmentedOption } from '@/components/ui/SegmentedControl';
 import { WoodPanel } from '@/components/ui/WoodPanel';
 import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
@@ -17,10 +19,18 @@ import { BoardLabel } from '@/pages/Activity/MyActivity/components/BoardLabel';
 import { RecentMaterials } from '@/pages/Activity/MyActivity/components/RecentMaterials';
 import { ResumeCard } from '@/pages/Activity/MyActivity/components/ResumeCard';
 import { useMyActivity } from '@/pages/Activity/MyActivity/hooks/useMyActivity';
+import type { RangePreset } from '@/pages/Activity/MyActivity/hooks/useMyActivity';
 import type { ActivityLog } from '@/types/activity';
 import { findModuleTitle } from '@/utils/activityText';
+import { toIsoDate } from '@/utils/dateTime';
 
 const NOW_TICK_MS = 60_000;
+
+const RANGE_OPTIONS: SegmentedOption<RangePreset>[] = [
+    { value: '7d', label: strings.activityLog.rangePreset['7d'] },
+    { value: '30d', label: strings.activityLog.rangePreset['30d'] },
+    { value: '90d', label: strings.activityLog.rangePreset['90d'] },
+];
 
 const TimelineSkeleton = ({ count }: { count: number }) => (
     <LoadingBlock label={strings.common.loading} className="flex flex-col gap-5">
@@ -51,10 +61,14 @@ export const MyActivity = () => {
         hasMore,
         search,
         moduleId,
+        rangePreset,
+        dateRange,
         hasFilters,
         pageSize,
         submitSearch,
         selectModule,
+        selectPreset,
+        selectCustomRange,
         clearFilters,
         reload,
         loadMore,
@@ -76,6 +90,15 @@ export const MyActivity = () => {
                 hasFilters={hasFilters}
                 onClear={clearFilters}
                 disabled={status === 'loading'}
+            />
+
+            <DateRangeFilter
+                presets={RANGE_OPTIONS}
+                preset={rangePreset}
+                range={dateRange}
+                max={toIsoDate(new Date(now))}
+                onSelectPreset={selectPreset}
+                onChangeRange={selectCustomRange}
             />
 
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -114,17 +137,22 @@ export const MyActivity = () => {
                     <Card>
                         <EmptyState
                             icon={hasFilters ? SearchX : Footprints}
-                            title={hasFilters ? strings.activityLog.filteredEmptyTitle : strings.activityLog.emptyTitle}
-                            description={hasFilters ? strings.activityLog.filteredEmptyBody : strings.activityLog.emptyBody}
+                            title={hasFilters ? strings.activityLog.filteredEmptyTitle : strings.activityLog.recentEmptyTitle}
+                            description={hasFilters ? strings.activityLog.filteredEmptyBody : strings.activityLog.recentEmptyBody}
                             action={
                                 hasFilters ? (
                                     <Button variant="secondary" size="sm" onClick={clearFilters}>
                                         {strings.library.clearFilters}
                                     </Button>
                                 ) : (
-                                    <LinkButton to="/" size="sm">
-                                        {strings.activityLog.emptyAction}
-                                    </LinkButton>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        <Button variant="secondary" size="sm" onClick={() => selectPreset('30d')}>
+                                            {strings.activityLog.widenRange}
+                                        </Button>
+                                        <LinkButton to="/" size="sm">
+                                            {strings.activityLog.emptyAction}
+                                        </LinkButton>
+                                    </div>
                                 )
                             }
                         />

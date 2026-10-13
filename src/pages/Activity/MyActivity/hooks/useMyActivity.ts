@@ -3,9 +3,24 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchActivities } from '@/services/activityService';
 import type { ActivityLog } from '@/types/activity';
+import type { DateRange } from '@/types/dateRange';
 import type { ApiFailureCode, ModulePagination } from '@/types/module';
+import { lastDaysRange } from '@/utils/dateTime';
 
 const PAGE_SIZE = 10;
+
+export type RangePreset = '7d' | '30d' | '90d';
+
+export const RANGE_PRESET_DAYS: Record<RangePreset, number> = { '7d': 7, '30d': 30, '90d': 90 };
+
+const DEFAULT_PRESET: RangePreset = '7d';
+
+interface RangeSelection {
+    preset: RangePreset | 'custom';
+    range: DateRange;
+}
+
+const presetSelection = (preset: RangePreset): RangeSelection => ({ preset, range: lastDaysRange(RANGE_PRESET_DAYS[preset]) });
 
 interface Accumulated {
     key: string;
@@ -34,13 +49,15 @@ export const useMyActivity = () => {
 
     const [search, setSearch] = useState('');
     const [moduleId, setModuleId] = useState<string | null>(null);
+    const [selection, setSelection] = useState<RangeSelection>(() => presetSelection(DEFAULT_PRESET));
     const [reloadToken, setReloadToken] = useState(0);
     const [requestedPage, setRequestedPage] = useState(1);
     const [attempt, setAttempt] = useState(0);
     const [accumulated, setAccumulated] = useState<Accumulated | null>(null);
     const [failure, setFailure] = useState<Failure | null>(null);
 
-    const filterKey = `${employeeId ?? ''}|${search}|${moduleId ?? ''}|${String(reloadToken)}`;
+    const dateRange = selection.range;
+    const filterKey = `${employeeId ?? ''}|${search}|${moduleId ?? ''}|${dateRange.start}|${dateRange.end}|${String(reloadToken)}`;
     const current = accumulated !== null && accumulated.key === filterKey ? accumulated : null;
     const loadedPage = current?.page ?? 0;
     const pendingPage = loadedPage < requestedPage ? loadedPage + 1 : null;
@@ -58,7 +75,7 @@ export const useMyActivity = () => {
 
         const run = async () => {
             const outcome = await fetchActivities(
-                { page: pendingPage, limit: PAGE_SIZE, search, moduleId, employeeId },
+                { page: pendingPage, limit: PAGE_SIZE, search, moduleId, employeeId, dateRange },
                 controller.signal,
             );
 
@@ -84,7 +101,7 @@ export const useMyActivity = () => {
         return () => {
             controller.abort();
         };
-    }, [filterKey, pendingPage, attempt, employeeId, search, moduleId]);
+    }, [filterKey, pendingPage, attempt, employeeId, search, moduleId, dateRange]);
 
     const submitSearch = useCallback((value: string) => {
         setSearch(value.trim());
@@ -96,9 +113,20 @@ export const useMyActivity = () => {
         setRequestedPage(1);
     }, []);
 
+    const selectPreset = useCallback((preset: RangePreset) => {
+        setSelection(presetSelection(preset));
+        setRequestedPage(1);
+    }, []);
+
+    const selectCustomRange = useCallback((range: DateRange) => {
+        setSelection({ preset: 'custom', range });
+        setRequestedPage(1);
+    }, []);
+
     const clearFilters = useCallback(() => {
         setSearch('');
         setModuleId(null);
+        setSelection(presetSelection(DEFAULT_PRESET));
         setRequestedPage(1);
     }, []);
 
@@ -127,10 +155,14 @@ export const useMyActivity = () => {
         hasMore,
         search,
         moduleId,
-        hasFilters: search !== '' || moduleId !== null,
+        rangePreset: selection.preset,
+        dateRange,
+        hasFilters: search !== '' || moduleId !== null || selection.preset !== DEFAULT_PRESET,
         pageSize: PAGE_SIZE,
         submitSearch,
         selectModule,
+        selectPreset,
+        selectCustomRange,
         clearFilters,
         reload,
         loadMore: hasMore ? loadMore : undefined,
