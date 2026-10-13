@@ -5,7 +5,7 @@ import { strings } from '@/locales/id';
 import type { LearningModule } from '@/types/module';
 import { staggerDelayMs } from '@/utils/motion';
 
-const GRID_CLASS = 'grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4';
+const GRID_CLASS = 'grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5';
 
 const REVEAL_STEP_MS = 30;
 const REVEAL_MAX_STAGGERED = 9;

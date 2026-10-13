@@ -8,14 +8,16 @@ import type { EmbedSource } from '@/utils/embedSource';
 
 interface MaterialLinkListProps {
     links: string[];
+    onOpenLink?: (link: string) => void;
 }
 
 interface EmbedCardProps {
     link: string;
     source: EmbedSource;
+    onOpenLink?: (link: string) => void;
 }
 
-const EmbedCard = ({ link, source }: EmbedCardProps) => {
+const EmbedCard = ({ link, source, onOpenLink }: EmbedCardProps) => {
     const [reloadKey, setReloadKey] = useState(0);
 
     return (
@@ -54,6 +56,12 @@ const EmbedCard = ({ link, source }: EmbedCardProps) => {
                         href={link}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => onOpenLink?.(link)}
+                        onAuxClick={(event) => {
+                            if (event.button === 1) {
+                                onOpenLink?.(link);
+                            }
+                        }}
                         className="text-primary hover:text-primary-dark text-caption flex shrink-0 items-center gap-1 font-medium"
                     >
                         <ExternalLink aria-hidden="true" className="size-3.5" />
@@ -65,7 +73,7 @@ const EmbedCard = ({ link, source }: EmbedCardProps) => {
     );
 };
 
-export const MaterialLinkList = ({ links }: MaterialLinkListProps) => {
+export const MaterialLinkList = ({ links, onOpenLink }: MaterialLinkListProps) => {
     // if (links.length === 0) {
     //     return <p className="text-body text-muted">{strings.materialDetail.noLinks}</p>;
     // }
@@ -90,7 +98,7 @@ export const MaterialLinkList = ({ links }: MaterialLinkListProps) => {
                         </a>
                     </li>
                 ) : (
-                    <EmbedCard key={key} link={link} source={source} />
+                    <EmbedCard key={key} link={link} source={source} onOpenLink={onOpenLink} />
                 );
             })}
         </ul>

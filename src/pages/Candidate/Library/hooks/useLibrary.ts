@@ -9,19 +9,18 @@ const PAGE_SIZE = 12;
 
 const CATEGORY_BY_PROGRAM: Record<CandidateProgram, string> = {
     mt: 'mt',
-    regular: 'reguler',
+    reguler: 'reguler',
     onboarding: 'onboarding',
 };
 
 export type LibraryCategoryFilter = 'all' | 'reguler' | 'mt' | 'onboarding';
 
-const FILTER_CATEGORIES = [CATEGORY_BY_PROGRAM.regular, CATEGORY_BY_PROGRAM.mt, CATEGORY_BY_PROGRAM.onboarding] as const;
+const FILTER_CATEGORIES = [CATEGORY_BY_PROGRAM.reguler, CATEGORY_BY_PROGRAM.mt, CATEGORY_BY_PROGRAM.onboarding] as const;
 
 export const useLibrary = () => {
     const { user } = useAuth();
     const program = user?.program ?? null;
-    const canFilterCategory = program === 'regular' || program === null;
-
+    const canFilterCategory = program === 'mt' || program === null;
     const list = useModuleList({
         createdBy: null,
         pageSize: PAGE_SIZE,

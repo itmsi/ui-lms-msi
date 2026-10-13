@@ -15,6 +15,13 @@ import { strings } from '@/locales/id';
 import { cn } from '@/utils/cn';
 import { staggerDelayMs } from '@/utils/motion';
 
+type Chapter = Extract<ModuleDetailState, { status: 'success' }>['detail']['chapters'][number];
+
+export interface LessonRef {
+    chapter: Chapter;
+    index: number;
+}
+
 interface ModuleDetailViewProps {
     state: ModuleDetailState;
     onRetry: () => void;
@@ -22,14 +29,19 @@ interface ModuleDetailViewProps {
     backLabel: string;
     titleAs?: 'h1' | 'h3';
     variant: 'library' | 'manage';
+    onLessonOpen?: (lesson: LessonRef) => void;
+    onLinkOpen?: (link: string, lesson: LessonRef | null) => void;
 }
 
-type Chapter = Extract<ModuleDetailState, { status: 'success' }>['detail']['chapters'][number];
+interface LessonBodyProps {
+    chapter: Chapter;
+    onOpenLink?: (link: string) => void;
+}
 
-const LessonBody = ({ chapter }: { chapter: Chapter }) => (
+const LessonBody = ({ chapter, onOpenLink }: LessonBodyProps) => (
     <>
         <div className="mt-3">
-            <MaterialLinkList links={chapter.linkMaterials} />
+            <MaterialLinkList links={chapter.linkMaterials} onOpenLink={onOpenLink} />
         </div>
 
         {chapter.description === '' ? null : <RichText html={chapter.description} className="mt-2" />}
@@ -52,19 +64,22 @@ interface LessonAccordionItemProps {
     chapter: Chapter;
     index: number;
     revealDelayMs: number;
+    onOpen?: () => void;
+    onOpenLink?: (link: string) => void;
 }
 
-const LessonAccordionItem = ({ chapter, index, revealDelayMs }: LessonAccordionItemProps) => (
+const LessonAccordionItem = ({ chapter, index, revealDelayMs, onOpen, onOpenLink }: LessonAccordionItemProps) => (
     <li className="motion-rise" style={{ animationDelay: `${String(revealDelayMs)}ms` }}>
         <Accordion
             title={chapter.title}
+            onOpen={onOpen}
             eyebrow={
                 chapter.linkMaterials.length === 0
                     ? `${strings.materialDetail.lessonPrefix} ${String(index + 1)}`
                     : `${strings.materialDetail.lessonPrefix} ${String(index + 1)} · ${String(chapter.linkMaterials.length)} ${strings.library.materialsSuffix}`
             }
         >
-            <LessonBody chapter={chapter} />
+            <LessonBody chapter={chapter} onOpenLink={onOpenLink} />
         </Accordion>
     </li>
 );
@@ -132,6 +147,8 @@ export const ModuleDetailView = ({
     backLabel,
     titleAs: TitleTag = 'h3',
     variant,
+    onLessonOpen,
+    onLinkOpen,
 }: ModuleDetailViewProps) => {
     if (state.status === 'loading') {
         return (
@@ -188,7 +205,10 @@ export const ModuleDetailView = ({
                     <RichText className="p-5" html={detail.description} />
                 )}
                 <div className='p-5'>
-                    <MaterialLinkList links={detail.linkMaterials} />
+                    <MaterialLinkList
+                        links={detail.linkMaterials}
+                        onOpenLink={onLinkOpen === undefined ? undefined : (link) => onLinkOpen(link, null)}
+                    />
                 </div>
             </Card>
 
@@ -210,6 +230,12 @@ export const ModuleDetailView = ({
                                         stepMs: REVEAL_ITEM_STEP_MS,
                                         maxStaggered: REVEAL_MAX_STAGGERED,
                                     })}
+                                    onOpen={onLessonOpen === undefined ? undefined : () => onLessonOpen({ chapter, index })}
+                                    onOpenLink={
+                                        onLinkOpen === undefined
+                                            ? undefined
+                                            : (link) => onLinkOpen(link, { chapter, index })
+                                    }
                                 />
                             ))}
                         </ol>

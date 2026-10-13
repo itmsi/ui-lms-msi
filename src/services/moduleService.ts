@@ -50,7 +50,7 @@ const toLearningModule = (value: unknown): LearningModule | null => {
     };
 };
 
-const toPagination = (value: unknown, fallback: ModuleListQuery): ModulePagination => {
+export const toPagination = (value: unknown, fallback: { page: number; limit: number }): ModulePagination => {
     const source = isRecord(value) ? value : {};
     const readNumber = (candidate: unknown, byDefault: number) =>
         typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : byDefault;
