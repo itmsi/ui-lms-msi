@@ -14,19 +14,24 @@ import { countDaysInclusive, formatDateSpan, formatShortDate, fromIsoDate, toIso
 
 const CUSTOM = 'custom';
 
+const safeFormatShortDate = formatShortDate as (date: Date) => string;
+const safeFormatDateSpan = formatDateSpan as (from: Date, to: Date) => string;
+const safeCountDaysInclusive = countDaysInclusive as (from: Date, to: Date) => number;
+const safeFromIsoDate = fromIsoDate as (value: string) => Date | undefined;
+
 const describeDraft = (draft: DayRange | undefined): string => {
     if (draft?.from === undefined) {
-        return strings.dateRange.pickStart;
+        return String(strings.dateRange.pickStart);
     }
 
     if (draft.to === undefined) {
-        return `${formatShortDate(draft.from)} – ${strings.dateRange.pickEnd}`;
+        return `${safeFormatShortDate(draft.from)} – ${strings.dateRange.pickEnd}`;
     }
 
-    return `${formatDateSpan(draft.from, draft.to)} · ${String(countDaysInclusive(draft.from, draft.to))} ${strings.dateRange.daysSuffix}`;
+    return `${safeFormatDateSpan(draft.from, draft.to)} · ${String(safeCountDaysInclusive(draft.from, draft.to))} ${strings.dateRange.daysSuffix}`;
 };
 
-const toDayRange = (range: DateRange): DayRange => ({ from: fromIsoDate(range.start), to: fromIsoDate(range.end) });
+const toDayRange = (range: DateRange): DayRange => ({ from: safeFromIsoDate(range.start), to: safeFromIsoDate(range.end) });
 
 interface DateRangeFilterProps<P extends string> {
     presets: SegmentedOption<P>[];
@@ -53,10 +58,10 @@ export const DateRangeFilter = <P extends string>({
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<DayRange | undefined>(undefined);
 
-    const latest = fromIsoDate(max) ?? new Date();
+    const latest = safeFromIsoDate(max) ?? new Date();
     const applied = toDayRange(range);
     const appliedLabel =
-        applied.from === undefined || applied.to === undefined ? '' : formatDateSpan(applied.from, applied.to);
+        applied.from === undefined || applied.to === undefined ? '' : safeFormatDateSpan(applied.from, applied.to);
     const isCustom = preset === CUSTOM;
 
     const openDialog = () => {

@@ -74,7 +74,6 @@ export const UserActivity = () => {
     return (
         <section className="flex flex-col gap-5">
             <PageHeader title={strings.nav.userActivity} description={strings.activityLog.userSubtitle} />
-
             <WoodPanel className="flex flex-col gap-3">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
                     <EmployeeSelect
@@ -98,7 +97,6 @@ export const UserActivity = () => {
                         />
                     </div>
                 </div>
-
                 {employeeId === null ? null : (
                     <EmployeeSummary
                         employeeId={employeeId}

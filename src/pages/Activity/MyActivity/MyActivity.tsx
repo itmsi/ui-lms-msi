@@ -146,7 +146,13 @@ export const MyActivity = () => {
                                     </Button>
                                 ) : (
                                     <div className="flex flex-wrap justify-center gap-2">
-                                        <Button variant="secondary" size="sm" onClick={() => selectPreset('30d')}>
+                                        <Button
+                                            variant="secondary"
+                                            size="sm"
+                                            onClick={() => {
+                                                (selectPreset as (preset: RangePreset) => void)('30d');
+                                            }}
+                                        >
                                             {strings.activityLog.widenRange}
                                         </Button>
                                         <LinkButton to="/" size="sm">
