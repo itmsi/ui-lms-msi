@@ -1,4 +1,4 @@
-import { UserRound } from 'lucide-react';
+import { ExternalLink, UserRound } from 'lucide-react';
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { TableColumn } from 'react-data-table-component';
@@ -65,7 +65,7 @@ const ActivityCell = ({ item }: { item: ActivityLog }) => {
     const kind = toActivityKind(item);
 
     return (
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 py-3">
             <ActivityKindIcon kind={kind} className="size-8" />
             <div className="flex min-w-0 flex-col gap-1">
                 {item.moduleTitle === null ? null : (
@@ -75,10 +75,26 @@ const ActivityCell = ({ item }: { item: ActivityLog }) => {
                     <span className="sr-only">{strings.activityLog.kind[kind]}: </span>
                     {toActivityDisplay(item.activity)}
                 </p>
-                {item.type === null ? null : (
-                    <span className="bg-neutral-soft text-neutral-ink text-caption w-fit rounded-full px-2 py-0.5">
-                        {item.type}
-                    </span>
+                {item.type === null && item.fileLink === null ? null : (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {item.type === null ? null : (
+                            <span className="bg-neutral-soft text-neutral-ink text-caption w-fit rounded-full px-2 py-0.5">
+                                {item.type}
+                            </span>
+                        )}
+                        {item.fileLink === null ? null : (
+                            <a
+                                href={item.fileLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={item.fileLink}
+                                className="text-caption text-primary hover:bg-primary-light focus-visible:outline-primary border-primary/40 inline-flex max-w-64 items-center gap-1 rounded-full border px-2 py-0.5 font-medium transition-colors focus-visible:outline-2"
+                            >
+                                <ExternalLink aria-hidden="true" className="size-3.5 shrink-0" />
+                                <span className="truncate">{item.fileName ?? strings.activityLog.openFile}</span>
+                            </a>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

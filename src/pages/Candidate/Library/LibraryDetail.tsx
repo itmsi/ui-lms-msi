@@ -6,6 +6,7 @@ import type { LessonRef } from '@/components/patterns/ModuleDetailView';
 import { useActivityLog, useLogOnce } from '@/hooks/useActivityLog';
 import { useModuleDetail } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
+import type { MaterialLink } from '@/types/module';
 
 export const LibraryDetail = () => {
     const { id } = useParams<{ id: string }>();
@@ -40,12 +41,12 @@ export const LibraryDetail = () => {
     );
 
     const handleLinkOpen = useCallback(
-        (link: string, lesson: LessonRef | null) => {
+        (material: MaterialLink, lesson: LessonRef | null) => {
             if (detail === null) {
                 return;
             }
 
-            activity.linkOpened(link, {
+            activity.linkOpened(material, {
                 moduleId: detail.id,
                 moduleTitle: detail.title,
                 lesson: lesson === null ? null : { index: lesson.index, title: lesson.chapter.title },

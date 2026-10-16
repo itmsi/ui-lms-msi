@@ -3,7 +3,7 @@ import { apiDelete, apiPostMultipart, apiPutMultipart } from '@/helpers/apiHelpe
 import { isRecord } from '@/helpers/authParsers';
 import type { LinkDraft, MaterialDraft } from '@/pages/Instructor/Materials/types';
 import { fetchModuleDetail, toApiFailureCode } from '@/services/moduleService';
-import type { ApiFailureCode, ModuleDetailOutcome } from '@/types/module';
+import type { ApiFailureCode, MaterialLink, ModuleDetailOutcome } from '@/types/module';
 import { toDescriptionExcerpt } from '@/utils/htmlText';
 
 const CREATE_PATH = 'modules/create-all';
@@ -21,11 +21,13 @@ interface ChapterPayload {
     line: number;
     title: string;
     description: string;
-    link_materials: string[];
+    link_materials: MaterialLink[];
 }
 
-const toLinkValues = (links: LinkDraft[]): string[] =>
-    links.map((link) => link.value.trim()).filter((value) => value !== '');
+const toLinkValues = (links: LinkDraft[]): MaterialLink[] =>
+    links
+        .map((link) => ({ title: link.title.trim(), link: link.link.trim() }))
+        .filter((item) => item.link !== '');
 
 const buildFormData = (draft: MaterialDraft): FormData => {
     const form = new FormData();
@@ -41,7 +43,7 @@ const buildFormData = (draft: MaterialDraft): FormData => {
     const links = toLinkValues(draft.links);
 
     if (links.length > 0) {
-        form.append('link_materials', links.join(','));
+        form.append('link_materials', JSON.stringify(links));
     }
 
     if (draft.banner !== null) {

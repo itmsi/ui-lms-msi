@@ -1,6 +1,5 @@
 import { ArrowRight, LibraryBig } from 'lucide-react';
 
-import { ModuleThumbnailGrid, ModuleThumbnailGridSkeleton } from '@/components/patterns/ModuleThumbnailGrid';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -8,6 +7,7 @@ import { LinkButton } from '@/components/ui/LinkButton';
 import { useTrackModules } from '@/hooks/useTrackModules';
 import type { TrackModulesState } from '@/hooks/useTrackModules';
 import { strings } from '@/locales/id';
+import { ModuleCarousel, ModuleCarouselSkeleton } from '@/pages/Candidate/Dashboard/components/ModuleCarousel';
 import type { TrackCategory } from '@/pages/Candidate/TrackDetail/track';
 
 const TRACK_SECTION_LIMIT = 5;
@@ -60,44 +60,57 @@ export const TrackSection = ({ title, category }: TrackSectionProps) => {
     const hasMore = state.status === 'success' && state.result.pagination.total > state.result.items.length;
 
     return (
-        <section className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-3">
-                <h2 className="text-section">{title}</h2>
+        <section className="flex flex-col gap-3 rounded-card bg-[url('/wood.png')] bg-repeat p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.5)] lg:p-6">
+            <div
+            // style={{
+            //     padding: "1rem",
+            //     background: "#ebebeb",
+            //     borderRadius: "4px",
+            //     boxShadow: `
+            //     inset 0 3px 6px rgba(0, 0, 0, 0.8),
+            //     0 1px 1px rgba(255, 255, 255, 0.1)
+            // `,
+            // }}
+            >
+                <div className="flex items-center justify-center gap-3">
+                    <h2 className="text-section text-2xl">{title}</h2>
 
-                {hasMore ? (
-                    <LinkButton
-                        to={`/tracks/${category}`}
-                        variant="ghost"
-                        size="sm"
-                        trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}
-                    >
-                        {strings.dashboard.viewAll}
-                    </LinkButton>
+                    {hasMore ? (
+                        <LinkButton
+                            to={`/tracks/${category}`}
+                            variant="ghost"
+                            size="sm"
+                            trailingIcon={<ArrowRight aria-hidden="true" className="size-4" />}
+                        >
+                            {strings.dashboard.viewAll}
+                        </LinkButton>
+                    ) : null}
+                </div>
+
+                {state.status === 'loading' ? <ModuleCarouselSkeleton count={TRACK_SECTION_LIMIT} /> : null}
+
+                {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
+
+                {state.status === 'success' && state.result.items.length === 0 ? (
+                    <Card>
+                        <EmptyState
+                            icon={LibraryBig}
+                            title={strings.dashboard.sectionEmptyTitle}
+                            description={strings.dashboard.sectionEmptyBody}
+                        />
+                    </Card>
+                ) : null}
+
+                {state.status === 'success' && state.result.items.length > 0 ? (
+                    <ModuleCarousel
+                        label={title}
+                        materials={state.result.items}
+                        showCategoryBadge={false}
+                        toBuilder={() => `/tracks/${category}`}
+                        ariaLabelBuilder={() => `${strings.dashboard.viewAll}: ${title}`}
+                    />
                 ) : null}
             </div>
-
-            {state.status === 'loading' ? <ModuleThumbnailGridSkeleton count={TRACK_SECTION_LIMIT} /> : null}
-
-            {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
-
-            {state.status === 'success' && state.result.items.length === 0 ? (
-                <Card>
-                    <EmptyState
-                        icon={LibraryBig}
-                        title={strings.dashboard.sectionEmptyTitle}
-                        description={strings.dashboard.sectionEmptyBody}
-                    />
-                </Card>
-            ) : null}
-
-            {state.status === 'success' && state.result.items.length > 0 ? (
-                <ModuleThumbnailGrid
-                    materials={state.result.items}
-                    showCategoryBadge={false}
-                    toBuilder={() => `/tracks/${category}`}
-                    ariaLabelBuilder={() => `${strings.dashboard.viewAll}: ${title}`}
-                />
-            ) : null}
         </section>
     );
 };

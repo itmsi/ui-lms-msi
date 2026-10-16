@@ -4,6 +4,7 @@ import { isRecord } from '@/helpers/authParsers';
 import type {
     ApiFailureCode,
     LearningModule,
+    MaterialLink,
     ModuleChapter,
     ModuleDetail,
     ModuleDetailOutcome,
@@ -24,8 +25,22 @@ const SORT_REQUEST: Record<ModuleSort, { sortBy: string; sortOrder: string }> = 
 
 const readString = (value: unknown): string | null => (typeof value === 'string' && value !== '' ? value : null);
 
-const toLinkMaterials = (value: unknown): string[] =>
-    Array.isArray(value) ? (value as unknown[]).filter((item): item is string => typeof item === 'string') : [];
+const toMaterialLink = (value: unknown): MaterialLink | null => {
+    if (typeof value === 'string') {
+        return value.trim() === '' ? null : { title: '', link: value.trim() };
+    }
+
+    if (isRecord(value) === false || typeof value.link !== 'string' || value.link.trim() === '') {
+        return null;
+    }
+
+    return { title: typeof value.title === 'string' ? value.title.trim() : '', link: value.link.trim() };
+};
+
+const toLinkMaterials = (value: unknown): MaterialLink[] =>
+    Array.isArray(value)
+        ? (value as unknown[]).map(toMaterialLink).filter((item): item is MaterialLink => item !== null)
+        : [];
 
 const toDescriptionClean = (description: string | null): string | null => {
     const excerpt = description === null ? '' : toDescriptionExcerpt(description);

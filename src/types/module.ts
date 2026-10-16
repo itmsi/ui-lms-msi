@@ -1,10 +1,15 @@
+export interface MaterialLink {
+    title: string;
+    link: string;
+}
+
 export interface LearningModule {
     id: string;
     title: string;
     description: string | null;
     descriptionClean: string | null;
     banner: string | null;
-    linkMaterials: string[];
+    linkMaterials: MaterialLink[];
     category: string | null;
 }
 
@@ -41,7 +46,7 @@ export interface ModuleChapter {
     id: string;
     title: string;
     description: string;
-    linkMaterials: string[];
+    linkMaterials: MaterialLink[];
     line: number;
 }
 
@@ -50,7 +55,7 @@ export interface ModuleDetail {
     title: string;
     description: string;
     banner: string | null;
-    linkMaterials: string[];
+    linkMaterials: MaterialLink[];
     category: string | null;
     chapters: ModuleChapter[];
 }

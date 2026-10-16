@@ -12,6 +12,7 @@ import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
 import { RichText } from '@/components/ui/RichText';
 import type { ModuleDetailState } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
+import type { MaterialLink } from '@/types/module';
 import { cn } from '@/utils/cn';
 import { staggerDelayMs } from '@/utils/motion';
 
@@ -30,12 +31,12 @@ interface ModuleDetailViewProps {
     titleAs?: 'h1' | 'h3';
     variant: 'library' | 'manage';
     onLessonOpen?: (lesson: LessonRef) => void;
-    onLinkOpen?: (link: string, lesson: LessonRef | null) => void;
+    onLinkOpen?: (material: MaterialLink, lesson: LessonRef | null) => void;
 }
 
 interface LessonBodyProps {
     chapter: Chapter;
-    onOpenLink?: (link: string) => void;
+    onOpenLink?: (material: MaterialLink) => void;
 }
 
 const LessonBody = ({ chapter, onOpenLink }: LessonBodyProps) => (
@@ -65,7 +66,7 @@ interface LessonAccordionItemProps {
     index: number;
     revealDelayMs: number;
     onOpen?: () => void;
-    onOpenLink?: (link: string) => void;
+    onOpenLink?: (material: MaterialLink) => void;
 }
 
 const LessonAccordionItem = ({ chapter, index, revealDelayMs, onOpen, onOpenLink }: LessonAccordionItemProps) => (
@@ -184,12 +185,12 @@ export const ModuleDetailView = ({
 
                 <div
                     className={cn(
-                        'bg-gradiend z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center',
+                        'bg-[url("/wood.png")] bg-repeat p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.5)] lg:p-6 z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center',
                         reveal.className,
                     )}
                     style={{ marginTop: '-68px', ...reveal.style(REVEAL_STEP_MS) }}
                 >
-                    <TitleTag className="text-card font-display line-clamp-2 text-xl font-medium text-white uppercase">
+                    <TitleTag className="text-shadow-lg/30 text-card font-display line-clamp-2 text-2xl font-medium text-white uppercase">
                         {detail.title}
                     </TitleTag>
                 </div>

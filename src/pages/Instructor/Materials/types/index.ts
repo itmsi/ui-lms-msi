@@ -1,11 +1,12 @@
-import type { ModuleChapter, ModuleDetail } from '@/types/module';
+import type { MaterialLink, ModuleChapter, ModuleDetail } from '@/types/module';
 
 export type MaterialChapter = ModuleChapter;
 export type MaterialDetail = ModuleDetail;
 
 export interface LinkDraft {
     key: string;
-    value: string;
+    title: string;
+    link: string;
 }
 
 export interface LessonDraft {
@@ -29,7 +30,7 @@ export type DraftErrors = Record<string, string>;
 
 export const createKey = (): string => crypto.randomUUID();
 
-export const createLinkDraft = (): LinkDraft => ({ key: createKey(), value: '' });
+export const createLinkDraft = (): LinkDraft => ({ key: createKey(), title: '', link: '' });
 
 export const createLessonDraft = (): LessonDraft => ({
     key: createKey(),
@@ -39,7 +40,8 @@ export const createLessonDraft = (): LessonDraft => ({
     links: [createLinkDraft()],
 });
 
-const toLinkDrafts = (values: string[]): LinkDraft[] => values.map((value) => ({ key: createKey(), value }));
+const toLinkDrafts = (values: MaterialLink[]): LinkDraft[] =>
+    values.map(({ title, link }) => ({ key: createKey(), title, link }));
 
 export const toMaterialDraft = (detail: MaterialDetail): MaterialDraft => ({
     title: detail.title,

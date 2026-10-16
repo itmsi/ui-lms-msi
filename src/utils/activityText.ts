@@ -5,7 +5,11 @@ const LESSON_PREFIX = /^lesson-(\d+)\s+/;
 const LESSON_TOKEN = /lesson-(\d+)/g;
 
 export const toActivityKind = ({ activity, type }: Pick<ActivityLog, 'activity' | 'type'>): ActivityKind => {
-    if (type !== null || activity.startsWith(strings.activity.linkOpened)) {
+    if (
+        type !== null ||
+        activity.startsWith(strings.activity.fileOpened) ||
+        activity.startsWith(strings.activity.linkOpened)
+    ) {
         return 'link';
     }
 

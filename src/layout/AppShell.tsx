@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
+import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed';
 import { AppBottomTabs } from '@/layout/AppBottomTabs';
 import { AppSidebar } from '@/layout/AppSidebar';
 import { AppTopbar } from '@/layout/AppTopbar';
@@ -12,6 +13,7 @@ export const AppShell = () => {
     const { user } = useAuth();
     const { pathname } = useLocation();
     const mainRef = useRef<HTMLElement>(null);
+    const sidebar = useSidebarCollapsed();
 
     const items = user === null ? [] : getNavItems(user.menu);
 
@@ -28,10 +30,10 @@ export const AppShell = () => {
                 {strings.nav.skipToContent}
             </a>
 
-            <AppSidebar items={items} />
+            <AppSidebar items={items} collapsed={sidebar.collapsed} />
 
             <div className="flex min-w-0 flex-1 flex-col">
-                <AppTopbar />
+                <AppTopbar sidebarCollapsed={sidebar.collapsed} onToggleSidebar={sidebar.toggle} />
                 <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 overflow-y-auto outline-none">
                     <div className="mx-auto w-full px-4 pt-6 pb-24 lg:px-8 lg:pb-12">
                         <Outlet />

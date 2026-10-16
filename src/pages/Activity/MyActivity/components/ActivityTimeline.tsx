@@ -107,10 +107,14 @@ const TimelineItem = ({ item, isToday, isLast, revealIndex, now, canFilterModule
                         </Link>
                     )}
 
-                    {item.fileName === null ? null : (
-                        <a href={item.fileName} target="_blank" rel="noopener noreferrer" className={actionClass}>
-                            <ExternalLink aria-hidden="true" className="size-3.5" />
-                            {item.type === null ? strings.activityLog.openLinkAgain : `${strings.activityLog.openLinkAgain} · ${item.type}`}
+                    {item.fileLink === null ? null : (
+                        <a href={item.fileLink} target="_blank" rel="noopener noreferrer" className={cn(actionClass, 'max-w-full')}>
+                            <ExternalLink aria-hidden="true" className="size-3.5 shrink-0" />
+                            <span className="truncate">
+                                {item.fileName === null && item.type === null
+                                    ? strings.activityLog.openLinkAgain
+                                    : `${strings.activityLog.openLinkAgain} · ${item.fileName ?? item.type ?? ''}`}
+                            </span>
                         </a>
                     )}
 

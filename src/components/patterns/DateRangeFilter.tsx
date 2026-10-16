@@ -14,24 +14,19 @@ import { countDaysInclusive, formatDateSpan, formatShortDate, fromIsoDate, toIso
 
 const CUSTOM = 'custom';
 
-const safeFormatShortDate = formatShortDate as (date: Date) => string;
-const safeFormatDateSpan = formatDateSpan as (from: Date, to: Date) => string;
-const safeCountDaysInclusive = countDaysInclusive as (from: Date, to: Date) => number;
-const safeFromIsoDate = fromIsoDate as (value: string) => Date | undefined;
-
 const describeDraft = (draft: DayRange | undefined): string => {
     if (draft?.from === undefined) {
-        return String(strings.dateRange.pickStart);
+        return strings.dateRange.pickStart;
     }
 
     if (draft.to === undefined) {
-        return `${safeFormatShortDate(draft.from)} – ${strings.dateRange.pickEnd}`;
+        return `${formatShortDate(draft.from)} – ${strings.dateRange.pickEnd}`;
     }
 
-    return `${safeFormatDateSpan(draft.from, draft.to)} · ${String(safeCountDaysInclusive(draft.from, draft.to))} ${strings.dateRange.daysSuffix}`;
+    return `${formatDateSpan(draft.from, draft.to)} · ${String(countDaysInclusive(draft.from, draft.to))} ${strings.dateRange.daysSuffix}`;
 };
 
-const toDayRange = (range: DateRange): DayRange => ({ from: safeFromIsoDate(range.start), to: safeFromIsoDate(range.end) });
+const toDayRange = (range: DateRange): DayRange => ({ from: fromIsoDate(range.start), to: fromIsoDate(range.end) });
 
 interface DateRangeFilterProps<P extends string> {
     presets: SegmentedOption<P>[];
@@ -58,10 +53,10 @@ export const DateRangeFilter = <P extends string>({
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<DayRange | undefined>(undefined);
 
-    const latest = safeFromIsoDate(max) ?? new Date();
+    const latest = fromIsoDate(max) ?? new Date();
     const applied = toDayRange(range);
     const appliedLabel =
-        applied.from === undefined || applied.to === undefined ? '' : safeFormatDateSpan(applied.from, applied.to);
+        applied.from === undefined || applied.to === undefined ? '' : formatDateSpan(applied.from, applied.to);
     const isCustom = preset === CUSTOM;
 
     const openDialog = () => {
@@ -142,7 +137,7 @@ export const DateRangeFilter = <P extends string>({
                 onClose={() => setOpen(false)}
                 className={cn(
                     'bg-surface shadow-raised motion-rise max-h-[92dvh] overflow-y-auto border-0 p-0 backdrop:bg-black/40',
-                    'mx-0 mt-auto mb-0 w-full max-w-2xl rounded-t-2xl',
+                    'mx-0 mt-auto mb-0 rounded-t-2xl',
                     'sm:m-auto sm:rounded-2xl',
                 )}
             >

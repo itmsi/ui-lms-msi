@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { strings } from '@/locales/id';
 import { logActivity } from '@/services/activityService';
+import type { MaterialLink } from '@/types/module';
 import { resolveLinkType } from '@/utils/embedSource';
 
 export const lessonLabel = (index: number, title: string): string => `lesson-${String(index + 1)} ${title}`;
@@ -18,12 +19,19 @@ export const useActivityLog = () => {
     const userId = user?.id ?? null;
 
     return useMemo(() => {
-        const send = (modulesId: string | null, activity: string, fileName: string | null, type: string | null) => {
+        const send = (modulesId: string | null, activity: string, file: MaterialLink | null, type: string | null) => {
             if (userId === null) {
                 return;
             }
 
-            logActivity({ createdBy: userId, modulesId, activity, fileName, type });
+            logActivity({
+                createdBy: userId,
+                modulesId,
+                activity,
+                fileName: file === null || file.title === '' ? null : file.title,
+                fileLink: file?.link ?? null,
+                type,
+            });
         };
 
         return {
@@ -36,15 +44,19 @@ export const useActivityLog = () => {
             lessonOpened: (moduleId: string, index: number, lessonTitle: string) => {
                 send(moduleId, lessonLabel(index, lessonTitle), null, null);
             },
-            linkOpened: (link: string, { moduleId, moduleTitle, lesson }: LinkContext) => {
-                const type = resolveLinkType(link);
-                const target = type === null ? strings.activity.linkOpened : `${strings.activity.linkOpened} ${type}`;
+            linkOpened: (material: MaterialLink, { moduleId, moduleTitle, lesson }: LinkContext) => {
+                const file = material.title === '' ? material.link : `"${material.title}" (${material.link})`;
                 const where =
                     lesson === null
                         ? `${strings.activity.materialContext} ${moduleTitle}`
                         : lessonLabel(lesson.index, lesson.title);
 
-                send(moduleId, `${target} ${strings.activity.linkIn} ${where}`, link, type);
+                send(
+                    moduleId,
+                    `${strings.activity.fileOpened} ${file} ${strings.activity.linkIn} ${where}`,
+                    material,
+                    resolveLinkType(material.link),
+                );
             },
         };
     }, [userId]);

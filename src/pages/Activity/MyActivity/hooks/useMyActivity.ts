@@ -5,22 +5,17 @@ import { fetchActivities } from '@/services/activityService';
 import type { ActivityLog } from '@/types/activity';
 import type { DateRange } from '@/types/dateRange';
 import type { ApiFailureCode, ModulePagination } from '@/types/module';
-import { lastDaysRange } from '@/utils/dateTime';
+import { DEFAULT_RANGE_PRESET, presetRange } from '@/utils/rangePreset';
+import type { RangePreset, RangeSelectionPreset } from '@/utils/rangePreset';
 
 const PAGE_SIZE = 10;
 
-export type RangePreset = '7d' | '30d' | '90d';
-
-export const RANGE_PRESET_DAYS: Record<RangePreset, number> = { '7d': 7, '30d': 30, '90d': 90 };
-
-const DEFAULT_PRESET: RangePreset = '7d';
-
 interface RangeSelection {
-    preset: RangePreset | 'custom';
+    preset: RangeSelectionPreset;
     range: DateRange;
 }
 
-const presetSelection = (preset: RangePreset): RangeSelection => ({ preset, range: lastDaysRange(RANGE_PRESET_DAYS[preset]) });
+const presetSelection = (preset: RangePreset): RangeSelection => ({ preset, range: presetRange(preset) });
 
 interface Accumulated {
     key: string;
@@ -49,7 +44,7 @@ export const useMyActivity = () => {
 
     const [search, setSearch] = useState('');
     const [moduleId, setModuleId] = useState<string | null>(null);
-    const [selection, setSelection] = useState<RangeSelection>(() => presetSelection(DEFAULT_PRESET));
+    const [selection, setSelection] = useState<RangeSelection>(() => presetSelection(DEFAULT_RANGE_PRESET));
     const [reloadToken, setReloadToken] = useState(0);
     const [requestedPage, setRequestedPage] = useState(1);
     const [attempt, setAttempt] = useState(0);
@@ -126,7 +121,7 @@ export const useMyActivity = () => {
     const clearFilters = useCallback(() => {
         setSearch('');
         setModuleId(null);
-        setSelection(presetSelection(DEFAULT_PRESET));
+        setSelection(presetSelection(DEFAULT_RANGE_PRESET));
         setRequestedPage(1);
     }, []);
 
@@ -157,7 +152,7 @@ export const useMyActivity = () => {
         moduleId,
         rangePreset: selection.preset,
         dateRange,
-        hasFilters: search !== '' || moduleId !== null || selection.preset !== DEFAULT_PRESET,
+        hasFilters: search !== '' || moduleId !== null || selection.preset !== DEFAULT_RANGE_PRESET,
         pageSize: PAGE_SIZE,
         submitSearch,
         selectModule,
