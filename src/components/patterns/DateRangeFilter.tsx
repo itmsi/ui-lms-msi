@@ -29,7 +29,8 @@ const describeDraft = (draft: DayRange | undefined): string => {
 const toDayRange = (range: DateRange): DayRange => ({ from: fromIsoDate(range.start), to: fromIsoDate(range.end) });
 
 interface DateRangeFilterProps<P extends string> {
-    presets: SegmentedOption<P>[];
+    presets?: SegmentedOption<P>[];
+    resolvePreset?: (preset: P) => DateRange;
     preset: P | typeof CUSTOM;
     range: DateRange;
     max: string;
@@ -40,6 +41,7 @@ interface DateRangeFilterProps<P extends string> {
 
 export const DateRangeFilter = <P extends string>({
     presets,
+    resolvePreset,
     preset,
     range,
     max,
@@ -52,15 +54,16 @@ export const DateRangeFilter = <P extends string>({
     const isWide = useMediaQuery('(min-width: 640px)');
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<DayRange | undefined>(undefined);
+    const [draftPreset, setDraftPreset] = useState<P | typeof CUSTOM>(preset);
 
     const latest = fromIsoDate(max) ?? new Date();
     const applied = toDayRange(range);
-    const appliedLabel =
-        applied.from === undefined || applied.to === undefined ? '' : formatDateSpan(applied.from, applied.to);
-    const isCustom = preset === CUSTOM;
+    const spanLabel = applied.from === undefined || applied.to === undefined ? '' : formatDateSpan(applied.from, applied.to);
+    const appliedLabel = spanLabel;
 
     const openDialog = () => {
         setDraft(toDayRange(range));
+        setDraftPreset(preset);
         setOpen(true);
         dialogRef.current?.showModal();
     };
@@ -69,7 +72,27 @@ export const DateRangeFilter = <P extends string>({
         dialogRef.current?.close();
     };
 
+    const choosePreset = (value: P | typeof CUSTOM) => {
+        if (value === CUSTOM || resolvePreset === undefined) {
+            return;
+        }
+
+        setDraftPreset(value);
+        setDraft(toDayRange(resolvePreset(value)));
+    };
+
+    const chooseDays = (next: DayRange | undefined) => {
+        setDraft(next);
+        setDraftPreset(CUSTOM);
+    };
+
     const apply = () => {
+        if (draftPreset !== CUSTOM) {
+            onSelectPreset(draftPreset);
+            closeDialog();
+            return;
+        }
+
         if (draft?.from === undefined) {
             return;
         }
@@ -99,37 +122,22 @@ export const DateRangeFilter = <P extends string>({
     }, [open]);
 
     return (
-        <div className="flex flex-wrap items-center gap-2">
-            <SegmentedControl<P | typeof CUSTOM>
-                label={strings.dateRange.label}
-                options={presets}
-                value={preset}
-                onChange={(value) => {
-                    if (value !== CUSTOM) {
-                        onSelectPreset(value);
-                    }
-                }}
-                disabled={disabled}
-            />
-
+        <div className={`flex items-center ${presets ? 'flex-wrap gap-2' : 'w-full'}`}>
             <button
                 type="button"
                 onClick={openDialog}
                 disabled={disabled}
                 aria-haspopup="dialog"
                 aria-label={`${strings.dateRange.trigger}: ${appliedLabel}`}
-                className={cn(
-                    'text-caption inline-flex min-h-9 items-center gap-2 rounded-full border px-3 font-medium transition-colors',
-                    'focus-visible:outline-primary focus-visible:outline-2 disabled:cursor-not-allowed disabled:opacity-60',
-                    isCustom
-                        ? 'bg-primary-light border-primary text-primary-dark'
-                        : 'bg-surface border-line text-ink hover:border-primary hover:text-primary-dark',
-                )}
+                className='w-full text-body text-ink placeholder:text-muted bg-transparent inline-flex items-center justify-between gap-2 py-2 px-3 outline-none'
             >
                 <CalendarRange aria-hidden="true" className="text-primary size-4" />
                 <span className="tabular-nums">{appliedLabel}</span>
                 <ChevronDown aria-hidden="true" className="text-muted size-4" />
             </button>
+            {/* } */}
+
+
 
             <dialog
                 ref={dialogRef}
@@ -153,9 +161,24 @@ export const DateRangeFilter = <P extends string>({
                                 {describeDraft(draft)}
                             </p>
                         </header>
+                        {presets === undefined || resolvePreset === undefined ? null : (
+                            <SegmentedControl<P | typeof CUSTOM>
+                                label={strings.dateRange.label}
+                                options={presets}
+                                value={draftPreset}
+                                onChange={choosePreset}
+                                disabled={disabled}
+                                showlabel={false}
+                            />
+                        )}
 
                         <div className="flex justify-center">
-                            <RangeCalendar selected={draft} onSelect={setDraft} latest={latest} numberOfMonths={isWide ? 2 : 1} />
+                            <RangeCalendar
+                                selected={draft}
+                                onSelect={chooseDays}
+                                latest={latest}
+                                numberOfMonths={isWide ? 2 : 1}
+                            />
                         </div>
 
                         <footer className="border-line flex justify-end gap-2 border-t pt-4">

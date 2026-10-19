@@ -10,6 +10,7 @@ import { SearchBar } from '@/components/patterns/SearchBar';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { WoodPanel } from '@/components/ui/WoodPanel';
+import { useEmployeeById } from '@/hooks/useEmployeeById';
 import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
 import { EmployeeSummary } from '@/pages/Activity/UserActivity/components/EmployeeSummary';
@@ -21,7 +22,8 @@ import type { Employee } from '@/types/employee';
 import type { LearningModule } from '@/types/module';
 import { findModuleTitle } from '@/utils/activityText';
 import { toIsoDate } from '@/utils/dateTime';
-import { RANGE_PRESET_OPTIONS } from '@/utils/rangePreset';
+// import { presetRange, RANGE_PRESET_OPTIONS } from '@/utils/rangePreset';
+import { presetRange } from '@/utils/rangePreset';
 
 const NOW_TICK_MS = 60_000;
 
@@ -113,7 +115,9 @@ export const UserActivity = () => {
     const total = state.status === 'success' ? state.result.pagination.total : null;
     const isFirstPage = state.status === 'success' && state.result.pagination.page === 1;
     const isNarrowed = search !== '' || moduleId !== null || rangeEndsToday === false;
-    const selected = employeeId === null ? null : (employees[employeeId] ?? null);
+    const selected = useEmployeeById(employeeId, employeeId === null ? null : (employees[employeeId] ?? null));
+    const employeeFallbackName =
+        employeeId === null ? null : (items.find((item) => item.createdBy === employeeId)?.createdByName ?? null);
     const selectedMaterial = moduleId === null ? null : (materials[moduleId] ?? null);
 
     return (
@@ -132,12 +136,25 @@ export const UserActivity = () => {
                 }
             />
             <WoodPanel className="flex flex-col gap-3">
-                <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-start">
+
+                <div className="basis-1/4 flex-1">
+                    <SearchBar
+                        label={strings.activityLog.searchLabel}
+                        placeholder={strings.activityLog.searchPlaceholder}
+                        value={search}
+                        onSubmit={submitSearch}
+                        hasFilters={hasFilters}
+                        onClear={clearFilters}
+                        disabled={isLoading}
+                    />
+                </div>
+                <div className="gap-3 lg:flex-row lg:flex-wrap lg:items-start grid grid-cols-3">
                     <EmployeeSelect
                         value={employeeId}
                         selected={selected}
                         onChange={handleSelectEmployee}
                         onEmployeesLoaded={rememberEmployees}
+                        fallbackLabel={employeeFallbackName}
                         label={strings.activityLog.employeeFilterLabel}
                         placeholder={strings.activityLog.employeeFilterPlaceholder}
                         className="basis-1/4"
@@ -152,34 +169,10 @@ export const UserActivity = () => {
                         placeholder={strings.activityLog.materialFilterPlaceholder}
                         className="basis-1/4"
                     />
-                    <div className="basis-1/4 flex-1">
-                        <SearchBar
-                            label={strings.activityLog.searchLabel}
-                            placeholder={strings.activityLog.searchPlaceholder}
-                            value={search}
-                            onSubmit={submitSearch}
-                            hasFilters={hasFilters}
-                            onClear={clearFilters}
-                            disabled={isLoading}
-                        />
-                    </div>
-                </div>
-                {employeeId === null ? null : (
-                    <EmployeeSummary
-                        employeeId={employeeId}
-                        employee={selected}
-                        fallbackName={items.find((item) => item.createdBy === employeeId)?.createdByName ?? null}
-                        total={total}
-                        totalIsFiltered
-                        lastActiveAt={isFirstPage && isNarrowed === false ? (items[0]?.createdAt ?? null) : null}
-                        now={now}
-                    />
-                )}
-
-                <div className="flex flex-wrap items-center justify-end gap-2">
-                    <div className="bg-surface rounded-card shadow-[0_2px_6px_rgb(0_0_0/0.3)] px-3 py-2">
+                    <div className="basis-1/4 bg-surface border-line rounded-card flex min-h-11 items-center border p-0 transition-colors hover:border-primary/50">
                         <DateRangeFilter
-                            presets={RANGE_PRESET_OPTIONS}
+                            // presets={RANGE_PRESET_OPTIONS}
+                            resolvePreset={presetRange}
                             preset={rangePreset}
                             range={dateRange}
                             max={toIsoDate(new Date(now))}
@@ -188,11 +181,20 @@ export const UserActivity = () => {
                             disabled={isLoading}
                         />
                     </div>
-
-                    {/* <p aria-live="polite" className="text-caption text-muted tabular-nums">
-                    {total === null ? ' ' : `${String(total)} ${strings.activityLog.totalSuffix}`}
-                </p> */}
                 </div>
+                {employeeId === null ? null : (
+                    <EmployeeSummary
+                        employeeId={employeeId}
+                        employee={selected}
+                        fallbackName={employeeFallbackName}
+                        total={total}
+                        totalIsFiltered
+                        lastActiveAt={isFirstPage && isNarrowed === false ? (items[0]?.createdAt ?? null) : null}
+                        now={now}
+                    />
+                )}
+
+
 
 
                 {state.status === 'error' ? (

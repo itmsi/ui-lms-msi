@@ -1,7 +1,9 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import type { ChevronProps, ClassNames, DateRange as DayRange } from 'react-day-picker';
 import { id } from 'react-day-picker/locale';
+
+import { cn } from '@/utils/cn';
 
 export type { DayRange };
 
@@ -9,14 +11,18 @@ const CLASS_NAMES: Partial<ClassNames> = {
     root: 'relative w-fit',
     months: 'relative flex flex-col gap-6 sm:flex-row',
     month: 'flex flex-col gap-2',
-    month_caption: 'flex h-10 items-center justify-center',
-    caption_label: 'font-display text-card text-ink capitalize',
-    nav: 'absolute inset-x-0 top-0 z-1 flex h-10 items-center justify-between',
+    month_caption: 'flex h-10 items-center justify-center px-10',
+    caption_label: 'font-display text-body text-ink inline-flex items-center gap-1 font-semibold capitalize',
+    dropdowns: 'flex items-center gap-1.5',
+    dropdown_root:
+        'border-line bg-surface hover:border-primary focus-within:outline-primary relative inline-flex h-9 items-center rounded-lg border px-2.5 transition-colors focus-within:outline-2',
+    dropdown: 'absolute inset-0 z-1 w-full cursor-pointer appearance-none opacity-0',
+    nav: 'pointer-events-none absolute inset-x-0 top-0 z-2 flex h-10 items-center justify-between',
     button_previous:
-        'text-primary hover:bg-primary-light focus-visible:outline-primary inline-flex size-9 items-center justify-center rounded-full transition-colors focus-visible:outline-2 disabled:cursor-not-allowed disabled:opacity-30 aria-disabled:cursor-not-allowed aria-disabled:opacity-30',
+        'text-primary hover:bg-primary-light focus-visible:outline-primary pointer-events-auto inline-flex size-9 items-center justify-center rounded-full transition-colors focus-visible:outline-2 disabled:cursor-not-allowed disabled:opacity-30 aria-disabled:cursor-not-allowed aria-disabled:opacity-30',
     button_next:
-        'text-primary hover:bg-primary-light focus-visible:outline-primary inline-flex size-9 items-center justify-center rounded-full transition-colors focus-visible:outline-2 disabled:cursor-not-allowed disabled:opacity-30 aria-disabled:cursor-not-allowed aria-disabled:opacity-30',
-    chevron: 'size-5',
+        'text-primary hover:bg-primary-light focus-visible:outline-primary pointer-events-auto inline-flex size-9 items-center justify-center rounded-full transition-colors focus-visible:outline-2 disabled:cursor-not-allowed disabled:opacity-30 aria-disabled:cursor-not-allowed aria-disabled:opacity-30',
+    chevron: 'size-4',
     month_grid: 'border-separate border-spacing-x-0 border-spacing-y-1',
     weekday: 'text-caption text-muted h-8 w-10 text-center font-medium capitalize',
     day: 'text-body size-10 p-0 text-center',
@@ -31,12 +37,17 @@ const CLASS_NAMES: Partial<ClassNames> = {
     range_middle: 'bg-primary-light [&>button]:text-primary-dark [&>button]:rounded-none',
 };
 
-const Chevron = ({ orientation, className }: ChevronProps) =>
-    orientation === 'left' ? (
-        <ChevronLeft aria-hidden="true" className={className} />
-    ) : (
-        <ChevronRight aria-hidden="true" className={className} />
-    );
+const Chevron = ({ orientation, className }: ChevronProps) => {
+    if (orientation === 'left') {
+        return <ChevronLeft aria-hidden="true" className={cn(className, 'size-5')} />;
+    }
+
+    if (orientation === 'down') {
+        return <ChevronDown aria-hidden="true" className={cn('text-muted', className)} />;
+    }
+
+    return <ChevronRight aria-hidden="true" className={cn(className, 'size-5')} />;
+};
 
 interface RangeCalendarProps {
     selected: DayRange | undefined;
@@ -52,11 +63,13 @@ export const RangeCalendar = ({ selected, onSelect, latest, numberOfMonths = 1 }
         onSelect={onSelect}
         locale={id}
         weekStartsOn={1}
+        startMonth={new Date(2014, 0)}
         numberOfMonths={numberOfMonths}
         defaultMonth={selected?.from ?? latest}
         endMonth={latest}
         disabled={{ after: latest }}
         classNames={CLASS_NAMES}
         components={{ Chevron }}
+        captionLayout="dropdown"
     />
 );

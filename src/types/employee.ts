@@ -24,3 +24,7 @@ export interface EmployeeListQuery {
 export type EmployeeListOutcome =
     | { ok: true; data: EmployeeListResult }
     | { ok: false; code: ApiFailureCode; message?: string };
+
+export type EmployeeLookupOutcome =
+    | { ok: true; data: Employee | null }
+    | { ok: false; code: ApiFailureCode; message?: string };

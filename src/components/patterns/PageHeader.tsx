@@ -11,7 +11,7 @@ interface PageHeaderProps {
 
 export const PageHeader = ({ title, description, actions, className }: PageHeaderProps) => (
     <div className={cn('flex flex-wrap items-start justify-between gap-4', className)}>
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex max-w-full w-120 flex-col gap-1">
             <h1 className="text-page">{title}</h1>
             {description === undefined ? null : <p className="text-body text-muted">{description}</p>}
         </div>

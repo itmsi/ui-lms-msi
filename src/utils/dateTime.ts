@@ -67,7 +67,7 @@ export const formatRelativeTime = (iso: string, now: number): string => {
         return relativeFormat.format(-Math.floor(elapsed / HOUR), 'hour');
     }
 
-    return elapsed < 7 * DAY ? relativeFormat.format(-Math.floor(elapsed / DAY), 'day') : fullFormat.format(date);
+    return elapsed < 2 * DAY ? relativeFormat.format(-1, 'day') : fullFormat.format(date);
 };
 
 export const formatClock = (iso: string): string => {

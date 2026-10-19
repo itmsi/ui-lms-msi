@@ -21,7 +21,7 @@ import { useMyActivity } from '@/pages/Activity/MyActivity/hooks/useMyActivity';
 import type { ActivityLog } from '@/types/activity';
 import { findModuleTitle } from '@/utils/activityText';
 import { toIsoDate } from '@/utils/dateTime';
-import { RANGE_PRESET_OPTIONS } from '@/utils/rangePreset';
+import { presetRange, RANGE_PRESET_OPTIONS } from '@/utils/rangePreset';
 
 const NOW_TICK_MS = 60_000;
 
@@ -87,6 +87,7 @@ export const MyActivity = () => {
 
             <DateRangeFilter
                 presets={RANGE_PRESET_OPTIONS}
+                resolvePreset={presetRange}
                 preset={rangePreset}
                 range={dateRange}
                 max={toIsoDate(new Date(now))}

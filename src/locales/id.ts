@@ -119,7 +119,7 @@ export const strings = {
     },
     activityLog: {
         mySubtitle: 'Jejak belajar Anda di MSI Learning. Ketuk aktivitas untuk kembali ke materinya.',
-        userSubtitle: 'Pantau aktivitas belajar karyawan baru. Klik karyawan atau materi untuk menyaring daftar.',
+        userSubtitle: 'Pantau aktivitas belajar karyawan baru.',
         searchLabel: 'Cari aktivitas',
         searchPlaceholder: 'Cari judul materi, lesson, atau tautan…',
         totalSuffix: 'aktivitas tercatat',

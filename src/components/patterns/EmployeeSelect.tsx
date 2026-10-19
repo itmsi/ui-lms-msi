@@ -37,6 +37,7 @@ interface EmployeeSelectProps {
     selected: Employee | null;
     onChange: (employee: Employee | null) => void;
     onEmployeesLoaded?: (items: Employee[]) => void;
+    fallbackLabel?: string | null;
     label?: string;
     placeholder?: string;
     className?: string;
@@ -47,6 +48,7 @@ export const EmployeeSelect = ({
     selected,
     onChange,
     onEmployeesLoaded,
+    fallbackLabel,
     label,
     placeholder,
     className,
@@ -63,7 +65,7 @@ export const EmployeeSelect = ({
             open={open}
             onOpenChange={setOpen}
             selectedKey={value}
-            selectedLabel={selected?.name ?? (value === null ? '' : shortId(value))}
+            selectedLabel={selected?.name ?? fallbackLabel ?? (value === null ? '' : shortId(value))}
             getKey={(employee) => employee.id}
             renderOption={(employee, currentQuery) => <EmployeeOption employee={employee} query={currentQuery} />}
             onSelect={onChange}
