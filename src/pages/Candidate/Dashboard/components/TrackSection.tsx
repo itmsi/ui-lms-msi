@@ -7,7 +7,8 @@ import { LinkButton } from '@/components/ui/LinkButton';
 import { useTrackModules } from '@/hooks/useTrackModules';
 import type { TrackModulesState } from '@/hooks/useTrackModules';
 import { strings } from '@/locales/id';
-import { ModuleCarousel, ModuleCarouselSkeleton } from '@/pages/Candidate/Dashboard/components/ModuleCarousel';
+import { BENTO_SLOTS, ModuleBentoGrid, ModuleBentoGridSkeleton } from '@/pages/Candidate/Dashboard/components/ModuleBentoGrid';
+import { ModuleFeatureGrid, ModuleFeatureGridSkeleton } from '@/pages/Candidate/Dashboard/components/ModuleFeatureGrid';
 import type { TrackCategory } from '@/pages/Candidate/TrackDetail/track';
 
 const TRACK_SECTION_LIMIT = 5;
@@ -52,15 +53,16 @@ const renderError = (state: Extract<TrackModulesState, { status: 'error' }>, onR
 interface TrackSectionProps {
     title: string;
     category: TrackCategory;
+    layout?: 'bento' | 'featured';
 }
 
-export const TrackSection = ({ title, category }: TrackSectionProps) => {
-    const { state, retry } = useTrackModules(category, TRACK_SECTION_LIMIT);
+export const TrackSection = ({ title, category, layout = 'bento' }: TrackSectionProps) => {
+    const { state, retry } = useTrackModules(category, layout === 'bento' ? BENTO_SLOTS : TRACK_SECTION_LIMIT);
 
     const hasMore = state.status === 'success' && state.result.pagination.total > state.result.items.length;
 
     return (
-        <section className="flex flex-col gap-3 rounded-card bg-[url('/wood.png')] bg-repeat p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.5)] lg:p-6">
+        <section className="flex flex-col gap-3 rounded-card">
             <div
             // style={{
             //     padding: "1rem",
@@ -72,7 +74,7 @@ export const TrackSection = ({ title, category }: TrackSectionProps) => {
             // `,
             // }}
             >
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-between gap-3 mb-4">
                     <h2 className="text-section text-2xl">{title}</h2>
 
                     {hasMore ? (
@@ -87,7 +89,13 @@ export const TrackSection = ({ title, category }: TrackSectionProps) => {
                     ) : null}
                 </div>
 
-                {state.status === 'loading' ? <ModuleCarouselSkeleton count={TRACK_SECTION_LIMIT} /> : null}
+                {state.status === 'loading' ? (
+                    layout === 'featured' ? (
+                        <ModuleFeatureGridSkeleton count={TRACK_SECTION_LIMIT} />
+                    ) : (
+                        <ModuleBentoGridSkeleton />
+                    )
+                ) : null}
 
                 {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
 
@@ -101,13 +109,19 @@ export const TrackSection = ({ title, category }: TrackSectionProps) => {
                     </Card>
                 ) : null}
 
-                {state.status === 'success' && state.result.items.length > 0 ? (
-                    <ModuleCarousel
-                        label={title}
+                {state.status === 'success' && state.result.items.length > 0 && layout === 'featured' ? (
+                    <ModuleFeatureGrid
                         materials={state.result.items}
-                        showCategoryBadge={false}
                         toBuilder={() => `/tracks/${category}`}
-                        ariaLabelBuilder={() => `${strings.dashboard.viewAll}: ${title}`}
+                        ariaLabelBuilder={(material) => `${strings.dashboard.viewAll}: ${title} · ${material.title}`}
+                    />
+                ) : null}
+
+                {state.status === 'success' && state.result.items.length > 0 && layout === 'bento' ? (
+                    <ModuleBentoGrid
+                        materials={state.result.items}
+                        toBuilder={() => `/tracks/${category}`}
+                        ariaLabelBuilder={(material) => `${strings.dashboard.viewAll}: ${title} · ${material.title}`}
                     />
                 ) : null}
             </div>

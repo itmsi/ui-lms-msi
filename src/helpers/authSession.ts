@@ -22,7 +22,7 @@ export const writeCachedSession = ({ user, menu, systems }: CachedSession): bool
         storage.setItem(SYSTEMS_KEY, JSON.stringify(systems));
     });
 
-export const clearCachedSession = (): boolean =>
+const clearCachedSession = (): boolean =>
     tryStorage((storage) => {
         for (const key of [USER_KEY, MENU_KEY, SYSTEMS_KEY, ...LEGACY_KEYS]) {
             storage.removeItem(key);

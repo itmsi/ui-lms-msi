@@ -6,7 +6,7 @@ import { logActivity } from '@/services/activityService';
 import type { MaterialLink } from '@/types/module';
 import { resolveLinkType } from '@/utils/embedSource';
 
-export const lessonLabel = (index: number, title: string): string => `lesson-${String(index + 1)} ${title}`;
+const lessonLabel = (index: number, title: string): string => `lesson-${String(index + 1)} ${title}`;
 
 export interface LinkContext {
     moduleId: string;

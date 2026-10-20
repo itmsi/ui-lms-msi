@@ -27,15 +27,3 @@ export interface ApiMenuItem {
     url: string;
     permission: MenuPermission[];
 }
-
-export interface ApiOauth {
-    sso_token: string;
-    expires_in: number;
-}
-
-export interface LoginData {
-    user: ApiSsoUser;
-    menu: ApiMenuItem[];
-    system: string[];
-    oauth: ApiOauth;
-}

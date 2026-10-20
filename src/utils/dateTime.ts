@@ -101,12 +101,6 @@ const dayMonthFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 
 
 export const formatShortDate = (date: Date): string => shortDateFormat.format(date);
 
-export const formatIsoDate = (isoDate: string): string => {
-    const date = fromIsoDate(isoDate);
-
-    return date === undefined ? isoDate : shortDateFormat.format(date);
-};
-
 export const formatDateSpan = (start: Date, end: Date): string =>
     start.getFullYear() === end.getFullYear()
         ? `${dayMonthFormat.format(start)} – ${shortDateFormat.format(end)}`

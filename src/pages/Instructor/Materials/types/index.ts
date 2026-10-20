@@ -28,7 +28,7 @@ export interface MaterialDraft {
 
 export type DraftErrors = Record<string, string>;
 
-export const createKey = (): string => crypto.randomUUID();
+const createKey = (): string => crypto.randomUUID();
 
 export const createLinkDraft = (): LinkDraft => ({ key: createKey(), title: '', link: '' });
 

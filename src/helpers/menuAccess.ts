@@ -3,7 +3,7 @@ import type { UserMenuItem } from '@/types/user';
 
 const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g, ' ');
 
-export const MATERIALS_MENU_NAME = 'materi lms';
+const MATERIALS_MENU_NAME = 'materi lms';
 
 export interface MaterialsAccess {
     canView: boolean;

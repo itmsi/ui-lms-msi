@@ -7,7 +7,7 @@ const decodeSegment = (segment: string): unknown => {
     return JSON.parse(new TextDecoder().decode(bytes)) as unknown;
 };
 
-export const readTokenExpiry = (token: string): number | null => {
+const readTokenExpiry = (token: string): number | null => {
     try {
         const segment = token.split('.')[1];
 

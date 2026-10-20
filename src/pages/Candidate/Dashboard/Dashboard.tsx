@@ -17,7 +17,7 @@ export const Dashboard = () => {
                 description={strings.dashboard.subtitle}
             />
 
-            <TrackSection title={strings.progress.onboarding} category="onboarding" />
+            <TrackSection title={strings.progress.onboarding} category="onboarding" layout="featured" />
 
             {user.program === 'mt' ? (
                 <TrackSection title={strings.progress.mt} category="mt" />

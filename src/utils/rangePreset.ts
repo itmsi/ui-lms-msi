@@ -7,7 +7,7 @@ export type RangePreset = '7d' | '30d' | '90d';
 
 export type RangeSelectionPreset = RangePreset | 'custom';
 
-export const RANGE_PRESET_DAYS: Record<RangePreset, number> = { '7d': 7, '30d': 30, '90d': 90 };
+const RANGE_PRESET_DAYS: Record<RangePreset, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
 export const DEFAULT_RANGE_PRESET: RangePreset = '7d';
 
