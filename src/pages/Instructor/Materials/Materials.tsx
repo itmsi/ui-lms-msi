@@ -52,8 +52,20 @@ const renderError = (state: Extract<MaterialsState, { status: 'error' }>, onRetr
 };
 
 export const Materials = () => {
-    const { state, search, sort, submitSearch, selectSort, clearFilters, goToPage, retry, hasFilters, pageSize } =
-        useMaterials();
+    const {
+        state,
+        search,
+        sort,
+        submitSearch,
+        selectSort,
+        clearFilters,
+        goToPage,
+        retry,
+        hasFilters,
+        pageSize,
+        pageSizeOptions,
+        selectPageSize,
+    } = useMaterials();
     const { canCreate } = useMaterialsAccess();
 
     const isLoading = state.status === 'loading';
@@ -116,7 +128,15 @@ export const Materials = () => {
             {state.status === 'success' && state.result.items.length > 0 ? (
                 <>
                     <ModuleRowList materials={state.result.items} toBuilder={(id) => `/materials/${id}`} />
-                    <Pagination pagination={state.result.pagination} onChangePage={goToPage} disabled={isLoading} />
+                    <Pagination
+                        pagination={state.result.pagination}
+                        onChangePage={goToPage}
+                        disabled={isLoading}
+                        itemLabel={strings.materials.itemsSuffix}
+                        pageSize={pageSize}
+                        pageSizeOptions={pageSizeOptions}
+                        onChangePageSize={selectPageSize}
+                    />
                 </>
             ) : null}
         </section>

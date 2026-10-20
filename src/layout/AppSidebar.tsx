@@ -28,7 +28,10 @@ export const AppSidebar = ({ items, collapsed }: AppSidebarProps) => (
             )}
         >
             <span className="flex size-9 shrink-0 items-center justify-center">
-                <img src="/msi_logo_white.svg" alt="Motorsights" />
+                {/* <img src="/msi_logo_white.svg" alt="Motorsights" /> */}
+                <img src="/msi-logo-transparent.png" alt="Motorsights" />
+                {/* <img src="/mi_logo.svg" alt="Motorsights" /> */}
+                {/* <img src="/mi_logo_white.svg" alt="Motorsights" /> */}
             </span>
             {collapsed ? null : (
                 <span className="login-serif text-card font-display whitespace-nowrap text-white">{strings.app.name}</span>

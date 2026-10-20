@@ -171,7 +171,7 @@ export const ModuleDetailView = ({
 
     return (
         <>
-            <Card className={cn('flex flex-col gap-5', reveal.className)} style={reveal.style(0)}>
+            <Card className={cn('flex flex-col gap-5 overflow-hidden', reveal.className)} style={reveal.style(0)}>
                 <div className="bg-neutral-soft relative aspect-video w-full overflow-hidden rounded-lg">
                     {detail.banner === null ? (
                         <div className="text-neutral-line flex size-full items-center justify-center">

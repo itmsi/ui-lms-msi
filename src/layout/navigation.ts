@@ -19,6 +19,16 @@ const NAV_BY_MENU_NAME: Record<string, NavItem> = {
 
 const ALWAYS_NAV_ITEMS: NavItem[] = [{ to: '/my-activity', label: strings.nav.myActivity, icon: Activity }];
 
+const NAV_ORDER = ['/dashboard', '/library', '/my-activity', '/user-activity', '/materials'];
+
+const orderOf = (item: NavItem): number => {
+    const index = NAV_ORDER.indexOf(item.to);
+
+    return index === -1 ? NAV_ORDER.length : index;
+};
+
+const sortNavItems = (items: NavItem[]): NavItem[] => [...items].sort((left, right) => orderOf(left) - orderOf(right));
+
 const ALWAYS_ALLOWED_ROUTES = ['/profile', '/history', '/403'];
 
 const NESTED_ROUTES: Record<string, string> = {
@@ -30,11 +40,13 @@ const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g
 const isUnder = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`);
 
 const getMenuNavItems = (menu: UserMenuItem[]): NavItem[] =>
-    menu
-        .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
-        .filter((item): item is NavItem => item !== undefined);
+    sortNavItems(
+        menu
+            .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
+            .filter((item): item is NavItem => item !== undefined),
+    );
 
-export const getNavItems = (menu: UserMenuItem[]): NavItem[] => [...getMenuNavItems(menu), ...ALWAYS_NAV_ITEMS];
+export const getNavItems = (menu: UserMenuItem[]): NavItem[] => sortNavItems([...getMenuNavItems(menu), ...ALWAYS_NAV_ITEMS]);
 
 export const canOpenRoute = (menu: UserMenuItem[], pathname: string): boolean => {
     if (ALWAYS_ALLOWED_ROUTES.some((route) => isUnder(pathname, route))) {

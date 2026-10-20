@@ -91,7 +91,7 @@ export const ModuleFeatureGrid = ({ materials, toBuilder, ariaLabelBuilder }: Mo
                                         {material.title}
                                     </span>
                                     {material.descriptionClean === null ? null : (
-                                        <span className="text-caption text-body text-white line-clamp-2">{material.descriptionClean}</span>
+                                        <span className="text-caption text-white line-clamp-2">{material.descriptionClean}</span>
                                     )}
                                 </span>
                             </Link>

@@ -14,16 +14,30 @@ export type ModuleListState = { status: 'loading' } | LoadedState;
 interface UseModuleListOptions {
     createdBy: string | null;
     pageSize: number;
+    pageSizeOptions?: readonly number[];
     fixedCategory?: string | null;
     categoryOptions?: readonly string[];
 }
 
 const parseSort = (value: string | null): ModuleSort => (value === 'title' ? 'title' : 'latest');
 
-export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOptions }: UseModuleListOptions) => {
+const parsePageSize = (value: string | null, fallback: number, options: readonly number[] | undefined): number => {
+    const size = Number.parseInt(value ?? '', 10);
+
+    return options !== undefined && options.includes(size) ? size : fallback;
+};
+
+export const useModuleList = ({
+    createdBy,
+    pageSize: defaultPageSize,
+    pageSizeOptions,
+    fixedCategory,
+    categoryOptions,
+}: UseModuleListOptions) => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     const page = parsePageParam(searchParams.get('page'));
+    const pageSize = parsePageSize(searchParams.get('limit'), defaultPageSize, pageSizeOptions);
     const search = searchParams.get('q') ?? '';
     const sort = parseSort(searchParams.get('sort'));
     const isCategoryFixed = fixedCategory !== undefined;
@@ -36,7 +50,7 @@ export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOpti
 
     const [reloadToken, setReloadToken] = useState(0);
 
-    const queryKey = `${String(page)}|${search}|${sort}|${category ?? ''}|${createdBy ?? ''}|${String(reloadToken)}`;
+    const queryKey = `${String(page)}|${String(pageSize)}|${search}|${sort}|${category ?? ''}|${createdBy ?? ''}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedState } | null>(null);
 
     const state: ModuleListState = loaded !== null && loaded.key === queryKey ? loaded.value : { status: 'loading' };
@@ -70,10 +84,18 @@ export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOpti
     }, [queryKey, page, pageSize, search, sort, category, createdBy]);
 
     const applyParams = useCallback(
-        (changes: { page?: number; q?: string; sort?: ModuleSort; category?: string | null }) => {
+        (changes: { page?: number; q?: string; sort?: ModuleSort; category?: string | null; limit?: number }) => {
             setSearchParams(
                 (current) => {
                     const next = new URLSearchParams(current);
+
+                    if (changes.limit !== undefined) {
+                        if (changes.limit === defaultPageSize) {
+                            next.delete('limit');
+                        } else {
+                            next.set('limit', String(changes.limit));
+                        }
+                    }
 
                     if (changes.q !== undefined) {
                         if (changes.q === '') {
@@ -112,7 +134,7 @@ export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOpti
                 { replace: true },
             );
         },
-        [setSearchParams],
+        [setSearchParams, defaultPageSize],
     );
 
     const submitSearch = useCallback(
@@ -147,6 +169,13 @@ export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOpti
         [applyParams],
     );
 
+    const selectPageSize = useCallback(
+        (next: number) => {
+            applyParams({ limit: next, q: search, sort, category: isCategoryFixed ? undefined : category });
+        },
+        [applyParams, search, sort, category, isCategoryFixed],
+    );
+
     const retry = useCallback(() => {
         setReloadToken((token) => token + 1);
     }, []);
@@ -165,5 +194,7 @@ export const useModuleList = ({ createdBy, pageSize, fixedCategory, categoryOpti
         retry,
         hasFilters: search !== '' || (isCategoryFixed === false && category !== null),
         pageSize,
+        pageSizeOptions,
+        selectPageSize,
     };
 };
