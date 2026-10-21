@@ -1,4 +1,4 @@
-import { BookOpen, LayoutDashboard, LibraryBig } from 'lucide-react';
+import { Activity, BookOpen, LayoutDashboard, LibraryBig, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { strings } from '@/locales/id';
@@ -14,7 +14,20 @@ const NAV_BY_MENU_NAME: Record<string, NavItem> = {
     'dashboard lms': { to: '/dashboard', label: strings.nav.dashboard, icon: LayoutDashboard },
     'materi lms': { to: '/materials', label: strings.nav.materials, icon: BookOpen },
     'perpustakaan lms': { to: '/library', label: strings.nav.library, icon: LibraryBig },
+    'user activity lms': { to: '/user-activity', label: strings.nav.userActivity, icon: Users },
 };
+
+const ALWAYS_NAV_ITEMS: NavItem[] = [{ to: '/my-activity', label: strings.nav.myActivity, icon: Activity }];
+
+const NAV_ORDER = ['/dashboard', '/library', '/my-activity', '/user-activity', '/materials'];
+
+const orderOf = (item: NavItem): number => {
+    const index = NAV_ORDER.indexOf(item.to);
+
+    return index === -1 ? NAV_ORDER.length : index;
+};
+
+const sortNavItems = (items: NavItem[]): NavItem[] => [...items].sort((left, right) => orderOf(left) - orderOf(right));
 
 const ALWAYS_ALLOWED_ROUTES = ['/profile', '/history', '/403'];
 
@@ -26,10 +39,14 @@ const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g
 
 const isUnder = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`);
 
-export const getNavItems = (menu: UserMenuItem[]): NavItem[] =>
-    menu
-        .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
-        .filter((item): item is NavItem => item !== undefined);
+const getMenuNavItems = (menu: UserMenuItem[]): NavItem[] =>
+    sortNavItems(
+        menu
+            .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
+            .filter((item): item is NavItem => item !== undefined),
+    );
+
+export const getNavItems = (menu: UserMenuItem[]): NavItem[] => sortNavItems([...getMenuNavItems(menu), ...ALWAYS_NAV_ITEMS]);
 
 export const canOpenRoute = (menu: UserMenuItem[], pathname: string): boolean => {
     if (ALWAYS_ALLOWED_ROUTES.some((route) => isUnder(pathname, route))) {
@@ -50,4 +67,4 @@ export const canOpenRoute = (menu: UserMenuItem[], pathname: string): boolean =>
 export const getPageLabel = (menu: UserMenuItem[], pathname: string): string =>
     getNavItems(menu).find((item) => isUnder(pathname, item.to))?.label ?? strings.app.name;
 
-export const getLandingRoute = (menu: UserMenuItem[]): string | null => getNavItems(menu)[0]?.to ?? null;
+export const getLandingRoute = (menu: UserMenuItem[]): string | null => getMenuNavItems(menu)[0]?.to ?? null;

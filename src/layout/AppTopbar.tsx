@@ -1,20 +1,41 @@
-import { Bell, GraduationCap, LogOut } from 'lucide-react';
+import { GraduationCap, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
-import { EmptyState } from '@/components/ui/EmptyState';
+// import { EmptyState } from '@/components/ui/EmptyState';
+import { IconButton } from '@/components/ui/IconButton';
 import { Popover } from '@/components/ui/Popover';
 import { useAuth } from '@/hooks/useAuth';
 import { getPageLabel } from '@/layout/navigation';
 import { strings } from '@/locales/id';
 import { getInitials } from '@/utils/getInitials';
 
-export const AppTopbar = () => {
+interface AppTopbarProps {
+    sidebarCollapsed: boolean;
+    onToggleSidebar: () => void;
+}
+
+export const AppTopbar = ({ sidebarCollapsed, onToggleSidebar }: AppTopbarProps) => {
     const { user, signOut } = useAuth();
     const { pathname } = useLocation();
+    const toggleLabel = sidebarCollapsed ? strings.nav.expandSidebar : strings.nav.collapseSidebar;
 
     return (
         <header className="border-line bg-surface z-10 flex h-16 shrink-0 items-center justify-between gap-3 border-b px-4 lg:px-8">
             <div className="flex min-w-0 items-center gap-2.5">
+                <IconButton
+                    label={toggleLabel}
+                    aria-expanded={sidebarCollapsed === false}
+                    aria-controls="app-sidebar"
+                    onClick={onToggleSidebar}
+                    icon={
+                        sidebarCollapsed ? (
+                            <PanelLeftOpen aria-hidden="true" className="size-5" />
+                        ) : (
+                            <PanelLeftClose aria-hidden="true" className="size-5" />
+                        )
+                    }
+                    className="-ml-2 hidden lg:inline-flex"
+                />
                 <span className="bg-primary flex size-8 items-center justify-center rounded-lg text-white lg:hidden">
                     <GraduationCap aria-hidden="true" className="size-4.5" />
                 </span>
@@ -25,7 +46,7 @@ export const AppTopbar = () => {
             </div>
 
             <div className="flex items-center gap-1">
-                <Popover
+                {/* <Popover
                     label={strings.nav.notifications}
                     triggerClassName="size-10"
                     panelClassName="w-80 max-w-[calc(100vw-2rem)]"
@@ -44,7 +65,7 @@ export const AppTopbar = () => {
                             />
                         </div>
                     )}
-                </Popover>
+                </Popover> */}
 
                 <Popover
                     label={strings.nav.accountMenu}

@@ -6,14 +6,16 @@ export interface SegmentedOption<T extends string> {
 }
 
 interface SegmentedControlProps<T extends string> {
-    label: string;
+    label?: string;
     options: SegmentedOption<T>[];
     value: T;
     onChange: (value: T) => void;
     disabled?: boolean;
+    showlabel?: boolean;
 }
 
 export const SegmentedControl = <T extends string>({
+    showlabel,
     label,
     options,
     value,
@@ -21,9 +23,11 @@ export const SegmentedControl = <T extends string>({
     disabled = false,
 }: SegmentedControlProps<T>) => (
     <div className="flex items-center gap-2">
-        <span aria-hidden="true" className="text-caption text-muted hidden sm:inline">
-            {label}
-        </span>
+        {showlabel &&
+            <span aria-hidden="true" className="text-caption text-muted hidden sm:inline">
+                {label}
+            </span>
+        }
 
         <div
             role="group"

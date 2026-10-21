@@ -12,8 +12,16 @@ import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
 import { RichText } from '@/components/ui/RichText';
 import type { ModuleDetailState } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
+import type { MaterialLink } from '@/types/module';
 import { cn } from '@/utils/cn';
 import { staggerDelayMs } from '@/utils/motion';
+
+type Chapter = Extract<ModuleDetailState, { status: 'success' }>['detail']['chapters'][number];
+
+export interface LessonRef {
+    chapter: Chapter;
+    index: number;
+}
 
 interface ModuleDetailViewProps {
     state: ModuleDetailState;
@@ -22,14 +30,19 @@ interface ModuleDetailViewProps {
     backLabel: string;
     titleAs?: 'h1' | 'h3';
     variant: 'library' | 'manage';
+    onLessonOpen?: (lesson: LessonRef) => void;
+    onLinkOpen?: (material: MaterialLink, lesson: LessonRef | null) => void;
 }
 
-type Chapter = Extract<ModuleDetailState, { status: 'success' }>['detail']['chapters'][number];
+interface LessonBodyProps {
+    chapter: Chapter;
+    onOpenLink?: (material: MaterialLink) => void;
+}
 
-const LessonBody = ({ chapter }: { chapter: Chapter }) => (
+const LessonBody = ({ chapter, onOpenLink }: LessonBodyProps) => (
     <>
         <div className="mt-3">
-            <MaterialLinkList links={chapter.linkMaterials} />
+            <MaterialLinkList links={chapter.linkMaterials} onOpenLink={onOpenLink} />
         </div>
 
         {chapter.description === '' ? null : <RichText html={chapter.description} className="mt-2" />}
@@ -52,19 +65,22 @@ interface LessonAccordionItemProps {
     chapter: Chapter;
     index: number;
     revealDelayMs: number;
+    onOpen?: () => void;
+    onOpenLink?: (material: MaterialLink) => void;
 }
 
-const LessonAccordionItem = ({ chapter, index, revealDelayMs }: LessonAccordionItemProps) => (
+const LessonAccordionItem = ({ chapter, index, revealDelayMs, onOpen, onOpenLink }: LessonAccordionItemProps) => (
     <li className="motion-rise" style={{ animationDelay: `${String(revealDelayMs)}ms` }}>
         <Accordion
             title={chapter.title}
+            onOpen={onOpen}
             eyebrow={
                 chapter.linkMaterials.length === 0
                     ? `${strings.materialDetail.lessonPrefix} ${String(index + 1)}`
                     : `${strings.materialDetail.lessonPrefix} ${String(index + 1)} · ${String(chapter.linkMaterials.length)} ${strings.library.materialsSuffix}`
             }
         >
-            <LessonBody chapter={chapter} />
+            <LessonBody chapter={chapter} onOpenLink={onOpenLink} />
         </Accordion>
     </li>
 );
@@ -132,6 +148,8 @@ export const ModuleDetailView = ({
     backLabel,
     titleAs: TitleTag = 'h3',
     variant,
+    onLessonOpen,
+    onLinkOpen,
 }: ModuleDetailViewProps) => {
     if (state.status === 'loading') {
         return (
@@ -153,7 +171,7 @@ export const ModuleDetailView = ({
 
     return (
         <>
-            <Card className={cn('flex flex-col gap-5', reveal.className)} style={reveal.style(0)}>
+            <Card className={cn('flex flex-col gap-5 overflow-hidden', reveal.className)} style={reveal.style(0)}>
                 <div className="bg-neutral-soft relative aspect-video w-full overflow-hidden rounded-lg">
                     {detail.banner === null ? (
                         <div className="text-neutral-line flex size-full items-center justify-center">
@@ -167,12 +185,12 @@ export const ModuleDetailView = ({
 
                 <div
                     className={cn(
-                        'bg-gradiend z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center',
+                        'bg-[url("/wood.png")] bg-repeat p-4 shadow-[0_10px_25px_rgba(0,0,0,0.4),inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-2px_4px_rgba(0,0,0,0.5)] lg:p-6 z-2 mx-auto flex min-h-22 w-[75%] items-center justify-center rounded-2xl px-7 py-4 text-center',
                         reveal.className,
                     )}
                     style={{ marginTop: '-68px', ...reveal.style(REVEAL_STEP_MS) }}
                 >
-                    <TitleTag className="text-card font-display line-clamp-2 text-xl font-medium text-white uppercase">
+                    <TitleTag className="text-shadow-lg/30 text-card font-display line-clamp-2 text-2xl font-medium text-white uppercase">
                         {detail.title}
                     </TitleTag>
                 </div>
@@ -188,7 +206,10 @@ export const ModuleDetailView = ({
                     <RichText className="p-5" html={detail.description} />
                 )}
                 <div className='p-5'>
-                    <MaterialLinkList links={detail.linkMaterials} />
+                    <MaterialLinkList
+                        links={detail.linkMaterials}
+                        onOpenLink={onLinkOpen === undefined ? undefined : (link) => onLinkOpen(link, null)}
+                    />
                 </div>
             </Card>
 
@@ -210,6 +231,12 @@ export const ModuleDetailView = ({
                                         stepMs: REVEAL_ITEM_STEP_MS,
                                         maxStaggered: REVEAL_MAX_STAGGERED,
                                     })}
+                                    onOpen={onLessonOpen === undefined ? undefined : () => onLessonOpen({ chapter, index })}
+                                    onOpenLink={
+                                        onLinkOpen === undefined
+                                            ? undefined
+                                            : (link) => onLinkOpen(link, { chapter, index })
+                                    }
                                 />
                             ))}
                         </ol>

@@ -33,5 +33,3 @@ export const NoMenuAccess = () => {
         </section>
     );
 };
-
-export default NoMenuAccess;

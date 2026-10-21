@@ -8,6 +8,7 @@ interface AccordionProps {
     eyebrow?: ReactNode;
     headingAs?: 'h2' | 'h3' | 'h4';
     defaultOpen?: boolean;
+    onOpen?: () => void;
     className?: string;
     children: ReactNode;
 }
@@ -17,11 +18,17 @@ export const Accordion = ({
     eyebrow,
     headingAs: Heading = 'h3',
     defaultOpen = false,
+    onOpen,
     className,
     children,
 }: AccordionProps) => (
     <details
         open={defaultOpen}
+        onToggle={(event) => {
+            if (event.currentTarget.open) {
+                onOpen?.();
+            }
+        }}
         className={cn(
             'group/accordion border-primary/30 rounded-card bg-surface overflow-hidden border open:border-primary',
             className,

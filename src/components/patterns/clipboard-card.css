@@ -1,0 +1,82 @@
+.clipboard-card {
+    position: relative;
+    display: block;
+    padding: 14px 8px 8px;
+    border-radius: 12px;
+    background: var(--color-primary-dark);
+    box-shadow: 0 8px 18px -12px rgb(1 30 60 / 0.7);
+    transition:
+        translate 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.clipboard-card::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    width: 64px;
+    height: 18px;
+    translate: -50% 0;
+    border-radius: 6px 6px 3px 3px;
+    background: linear-gradient(180deg, var(--color-neutral-soft), var(--color-neutral-line));
+    box-shadow: 0 2px 3px rgb(0 0 0 / 0.35);
+    pointer-events: none;
+}
+
+.clipboard-card:hover,
+.clipboard-card:focus-visible {
+    translate: 0 -3px;
+    box-shadow: 0 14px 24px -12px rgb(1 30 60 / 0.75);
+}
+
+.clipboard-card:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+.clipboard-card-sheet {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+}
+
+.clipboard-card-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+.clipboard-card-arrow {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: var(--color-surface);
+    transition: background-color 180ms ease;
+}
+
+.clipboard-card:hover .clipboard-card-arrow {
+    background: var(--color-primary-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clipboard-card,
+    .clipboard-card-arrow {
+        transition: none;
+    }
+}

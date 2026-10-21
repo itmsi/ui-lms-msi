@@ -1,4 +1,4 @@
-import { ImageOff, Paperclip } from 'lucide-react';
+import { ImageOff } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -49,12 +49,6 @@ export const ModuleRow = ({ material, to, showCategoryBadge = true }: ModuleRowP
                         <p className="text-body text-muted line-clamp-2">{material.descriptionClean}</p>
                     )}
 
-                    {material.linkMaterials.length === 0 ? null : (
-                        <p className="text-caption text-muted flex items-center gap-1.5 pt-1">
-                            <Paperclip aria-hidden="true" className="size-3.5 shrink-0" />
-                            {material.linkMaterials.length} {strings.library.materialsSuffix}
-                        </p>
-                    )}
                 </div>
             </Card>
         </Link>

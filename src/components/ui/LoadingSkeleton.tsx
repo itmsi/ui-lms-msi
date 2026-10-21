@@ -8,19 +8,6 @@ export const Skeleton = ({ className }: SkeletonProps) => (
     <div aria-hidden="true" className={cn('bg-neutral-soft animate-pulse rounded-md', className)} />
 );
 
-interface SkeletonTextProps {
-    lines?: number;
-    className?: string;
-}
-
-export const SkeletonText = ({ lines = 3, className }: SkeletonTextProps) => (
-    <div className={cn('flex flex-col gap-2', className)}>
-        {Array.from({ length: lines }, (_, index) => (
-            <Skeleton key={index} className={cn('h-3.5', index === lines - 1 ? 'w-2/3' : 'w-full')} />
-        ))}
-    </div>
-);
-
 interface LoadingBlockProps {
     label: string;
     className?: string;

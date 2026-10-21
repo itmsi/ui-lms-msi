@@ -48,8 +48,13 @@ const validate = (draft: MaterialDraft): DraftErrors => {
 
     const checkLinks = (links: MaterialDraft['links']) => {
         for (const link of links) {
-            if (link.value.trim() !== '' && isHttpUrl(link.value) === false) {
+            const hasTitle = link.title.trim() !== '';
+            const hasLink = link.link.trim() !== '';
+
+            if (hasLink && isHttpUrl(link.link) === false) {
                 errors[link.key] = strings.materialEditor.errorLinkInvalid;
+            } else if (hasTitle && hasLink === false) {
+                errors[link.key] = strings.materialEditor.errorLinkRequired;
             }
         }
     };

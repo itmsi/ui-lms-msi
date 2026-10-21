@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import type { SegmentedOption } from '@/components/ui/SegmentedControl';
+import { WoodPanel } from '@/components/ui/WoodPanel';
 import { strings } from '@/locales/id';
 import { useLibrary } from '@/pages/Candidate/Library/hooks/useLibrary';
 import type { LibraryCategoryFilter, LibraryState } from '@/pages/Candidate/Library/hooks/useLibrary';
@@ -111,37 +112,40 @@ export const Library = () => {
                 }
             />
 
-            {isLoading ? <ModuleThumbnailGridSkeleton count={pageSize} /> : null}
 
-            {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
+            <WoodPanel className="flex flex-col gap-3">
+                {isLoading ? <ModuleThumbnailGridSkeleton count={pageSize} /> : null}
 
-            {isEmpty ? (
-                <Card>
-                    <EmptyState
-                        icon={hasFilters ? SearchX : LibraryBig}
-                        title={hasFilters ? strings.library.filteredEmptyTitle : strings.library.emptyTitle}
-                        description={hasFilters ? strings.library.filteredEmptyBody : strings.library.emptyBody}
-                        action={
-                            hasFilters ? (
-                                <Button variant="secondary" size="sm" onClick={clearFilters}>
-                                    {strings.library.clearFilters}
-                                </Button>
-                            ) : undefined
-                        }
-                    />
-                </Card>
-            ) : null}
+                {state.status === 'error' ? <Card>{renderError(state, retry)}</Card> : null}
 
-            {state.status === 'success' && state.result.items.length > 0 ? (
-                <>
-                    <ModuleThumbnailGrid materials={state.result.items} toBuilder={(id) => `/library/${id}`} />
-                    <Pagination
-                        pagination={state.result.pagination}
-                        onChangePage={goToPage}
-                        disabled={isLoading}
-                    />
-                </>
-            ) : null}
+                {isEmpty ? (
+                    <Card>
+                        <EmptyState
+                            icon={hasFilters ? SearchX : LibraryBig}
+                            title={hasFilters ? strings.library.filteredEmptyTitle : strings.library.emptyTitle}
+                            description={hasFilters ? strings.library.filteredEmptyBody : strings.library.emptyBody}
+                            action={
+                                hasFilters ? (
+                                    <Button variant="secondary" size="sm" onClick={clearFilters}>
+                                        {strings.library.clearFilters}
+                                    </Button>
+                                ) : undefined
+                            }
+                        />
+                    </Card>
+                ) : null}
+
+                {state.status === 'success' && state.result.items.length > 0 ? (
+                    <>
+                        <ModuleThumbnailGrid materials={state.result.items} toBuilder={(id) => `/library/${id}`} />
+                        <Pagination
+                            pagination={state.result.pagination}
+                            onChangePage={goToPage}
+                            disabled={isLoading}
+                        />
+                    </>
+                ) : null}
+            </WoodPanel>
         </section>
     );
 };

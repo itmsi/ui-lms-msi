@@ -17,6 +17,8 @@ const MaterialDetail = lazy(() => import('@/pages/Instructor/Materials/MaterialD
 const Library = lazy(() => import('@/pages/Candidate/Library/Library'));
 const LibraryDetail = lazy(() => import('@/pages/Candidate/Library/LibraryDetail'));
 const History = lazy(() => import('@/pages/Candidate/History/History'));
+const MyActivity = lazy(() => import('@/pages/Activity/MyActivity/MyActivity'));
+const UserActivity = lazy(() => import('@/pages/Activity/UserActivity/UserActivity'));
 const Profile = lazy(() => import('@/pages/Candidate/Profile/Profile'));
 const Forbidden = lazy(() => import('@/pages/Errors/Forbidden'));
 const NotFound = lazy(() => import('@/pages/Errors/NotFound'));
@@ -43,6 +45,8 @@ export const AppRoutes = () => (
                         <Route path="/library" element={<Library />} />
                         <Route path="/library/:id" element={<LibraryDetail />} />
                         <Route path="/history" element={<History />} />
+                        <Route path="/my-activity" element={<MyActivity />} />
+                        <Route path="/user-activity" element={<UserActivity />} />
                         <Route path="/profile" element={<Profile />} />
                     </Route>
 
