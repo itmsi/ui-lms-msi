@@ -1,33 +1,29 @@
+import { differenceInCalendarDays, differenceInHours, differenceInMinutes, format, isValid, parseISO, startOfDay, subDays } from 'date-fns';
+
 import { strings } from '@/locales/id';
 import type { DateRange } from '@/types/dateRange';
 
 const LOCALE = 'id-ID';
-const MINUTE = 60_000;
-const HOUR = 60 * MINUTE;
-const DAY = 24 * HOUR;
+const ISO_DATE_PATTERN = 'yyyy-MM-dd';
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 const relativeFormat = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' });
 const timeFormat = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' });
 const dayFormat = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const fullFormat = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long', timeStyle: 'short' });
+const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
+const dayMonthFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 
 const toDate = (iso: string): Date | null => {
     const date = new Date(iso);
 
-    return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const startOfDay = (time: number): number => {
-    const date = new Date(time);
-    date.setHours(0, 0, 0, 0);
-
-    return date.getTime();
+    return isValid(date) ? date : null;
 };
 
 export const toDayKey = (iso: string): string => {
     const date = toDate(iso);
 
-    return date === null ? '' : String(startOfDay(date.getTime()));
+    return date === null ? '' : String(startOfDay(date).getTime());
 };
 
 export const formatDayLabel = (iso: string, now: number): string => {
@@ -37,7 +33,7 @@ export const formatDayLabel = (iso: string, now: number): string => {
         return '';
     }
 
-    const daysAgo = Math.round((startOfDay(now) - startOfDay(date.getTime())) / DAY);
+    const daysAgo = differenceInCalendarDays(now, date);
 
     if (daysAgo === 0) {
         return strings.activityLog.today;
@@ -53,21 +49,23 @@ export const formatRelativeTime = (iso: string, now: number): string => {
         return '';
     }
 
-    const elapsed = now - date.getTime();
+    const minutes = differenceInMinutes(now, date);
 
-    if (elapsed < MINUTE) {
+    if (minutes < 1) {
         return strings.activityLog.justNow;
     }
 
-    if (elapsed < HOUR) {
-        return relativeFormat.format(-Math.floor(elapsed / MINUTE), 'minute');
+    if (minutes < 60) {
+        return relativeFormat.format(-minutes, 'minute');
     }
 
-    if (elapsed < DAY) {
-        return relativeFormat.format(-Math.floor(elapsed / HOUR), 'hour');
+    const hours = differenceInHours(now, date);
+
+    if (hours < 24) {
+        return relativeFormat.format(-hours, 'hour');
     }
 
-    return elapsed < 2 * DAY ? relativeFormat.format(-1, 'day') : fullFormat.format(date);
+    return hours < 48 ? relativeFormat.format(-1, 'day') : fullFormat.format(date);
 };
 
 export const formatClock = (iso: string): string => {
@@ -76,28 +74,22 @@ export const formatClock = (iso: string): string => {
     return date === null ? '' : timeFormat.format(date);
 };
 
-const pad = (value: number): string => String(value).padStart(2, '0');
+export const toIsoDate = (date: Date): string => format(date, ISO_DATE_PATTERN);
 
-export const toIsoDate = (date: Date): string =>
-    `${String(date.getFullYear())}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-export const lastDaysRange = (days: number, today: Date = new Date()): DateRange => {
-    const start = new Date(today);
-    start.setDate(start.getDate() - (days - 1));
-
-    return { start: toIsoDate(start), end: toIsoDate(today) };
-};
-
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+export const lastDaysRange = (days: number, today: Date = new Date()): DateRange => ({
+    start: toIsoDate(subDays(today, days - 1)),
+    end: toIsoDate(today),
+});
 
 export const fromIsoDate = (isoDate: string): Date | undefined => {
-    const match = ISO_DATE.exec(isoDate);
+    if (!ISO_DATE.test(isoDate)) {
+        return undefined;
+    }
 
-    return match === null ? undefined : new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    const date = parseISO(isoDate);
+
+    return isValid(date) ? date : undefined;
 };
-
-const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
-const dayMonthFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 
 export const formatShortDate = (date: Date): string => shortDateFormat.format(date);
 
@@ -106,8 +98,7 @@ export const formatDateSpan = (start: Date, end: Date): string =>
         ? `${dayMonthFormat.format(start)} – ${shortDateFormat.format(end)}`
         : `${shortDateFormat.format(start)} – ${shortDateFormat.format(end)}`;
 
-export const countDaysInclusive = (start: Date, end: Date): number =>
-    Math.round((startOfDay(end.getTime()) - startOfDay(start.getTime())) / DAY) + 1;
+export const countDaysInclusive = (start: Date, end: Date): number => differenceInCalendarDays(end, start) + 1;
 
 export const formatFullDateTime = (iso: string): string => {
     const date = toDate(iso);

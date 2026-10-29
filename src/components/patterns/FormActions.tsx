@@ -9,6 +9,7 @@ interface FormActionsProps {
     cancelLabel: string;
     onCancel: () => void;
     isSubmitting?: boolean;
+    submitIcon?: ReactNode;
     children?: ReactNode;
 }
 
@@ -18,6 +19,7 @@ const FormActions = ({
     cancelLabel,
     onCancel,
     isSubmitting = false,
+    submitIcon = <Save aria-hidden="true" className="size-4" />,
     children,
 }: FormActionsProps) => (
     <div className="border-line bg-surface sticky bottom-0 flex flex-wrap justify-end gap-2 border-t p-4 rounded-2xl shadow-sm">
@@ -30,7 +32,7 @@ const FormActions = ({
             loading={isSubmitting}
             loadingLabel={submittingLabel}
             className='min-w-30'
-            leadingIcon={<Save aria-hidden="true" className="size-4" />}
+            leadingIcon={submitIcon}
         >
             {submitLabel}
         </Button>

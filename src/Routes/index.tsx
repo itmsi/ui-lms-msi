@@ -14,6 +14,11 @@ const TrackDetail = lazy(() => import('@/pages/Candidate/TrackDetail/TrackDetail
 const Materials = lazy(() => import('@/pages/Instructor/Materials/Materials'));
 const MaterialEditor = lazy(() => import('@/pages/Instructor/Materials/MaterialEditor'));
 const MaterialDetail = lazy(() => import('@/pages/Instructor/Materials/MaterialDetail'));
+const QuizMaterials = lazy(() => import('@/pages/QuizMaterials/QuizMaterials'));
+const QuizCreate = lazy(() => import('@/pages/QuizMaterials/QuizCreate'));
+const MyQuizzes = lazy(() => import('@/pages/Candidate/Quiz/MyQuizzes'));
+const QuizAttempt = lazy(() => import('@/pages/Candidate/Quiz/QuizAttempt'));
+const QuizResult = lazy(() => import('@/pages/Candidate/Quiz/QuizResult'));
 const Library = lazy(() => import('@/pages/Candidate/Library/Library'));
 const LibraryDetail = lazy(() => import('@/pages/Candidate/Library/LibraryDetail'));
 const History = lazy(() => import('@/pages/Candidate/History/History'));
@@ -42,6 +47,11 @@ export const AppRoutes = () => (
                         <Route path="/materials/new" element={<MaterialEditor />} />
                         <Route path="/materials/:id" element={<MaterialDetail />} />
                         <Route path="/materials/:id/edit" element={<MaterialEditor />} />
+                        <Route path="/quizzes" element={<QuizMaterials />} />
+                        <Route path="/quizzes/new" element={<QuizCreate />} />
+                        <Route path="/my-quizzes" element={<MyQuizzes />} />
+                        <Route path="/my-quizzes/:quizId" element={<QuizAttempt />} />
+                        <Route path="/my-quizzes/:quizId/result/:attemptId" element={<QuizResult />} />
                         <Route path="/library" element={<Library />} />
                         <Route path="/library/:id" element={<LibraryDetail />} />
                         <Route path="/history" element={<History />} />

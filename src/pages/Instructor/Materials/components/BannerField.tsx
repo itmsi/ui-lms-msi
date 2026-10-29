@@ -4,9 +4,7 @@ import type { ChangeEvent } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { strings } from '@/locales/id';
-
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+import { ACCEPTED_IMAGE_TYPES, validateImageFile } from '@/utils/imageUpload';
 
 interface BannerFieldProps {
     file: File | null;
@@ -40,17 +38,9 @@ export const BannerField = ({ file, error, currentUrl = null, onChange }: Banner
             return;
         }
 
-        if (ACCEPTED_TYPES.includes(picked.type) === false) {
-            onChange(null, strings.materialEditor.errorBannerType);
-            return;
-        }
+        const problem = validateImageFile(picked);
 
-        if (picked.size > MAX_SIZE_BYTES) {
-            onChange(null, strings.materialEditor.errorBannerSize);
-            return;
-        }
-
-        onChange(picked, null);
+        onChange(problem === null ? picked : null, problem);
     };
 
     return (
@@ -72,7 +62,7 @@ export const BannerField = ({ file, error, currentUrl = null, onChange }: Banner
                     <input
                         ref={inputRef}
                         type="file"
-                        accept={ACCEPTED_TYPES.join(',')}
+                        accept={ACCEPTED_IMAGE_TYPES.join(',')}
                         onChange={handlePick}
                         className="sr-only"
                         tabIndex={-1}

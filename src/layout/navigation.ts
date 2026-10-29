@@ -1,4 +1,4 @@
-import { Activity, BookOpen, LayoutDashboard, LibraryBig, Users } from 'lucide-react';
+import { Activity, BookOpen, ClipboardCheck, ClipboardList, LayoutDashboard, LibraryBig, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { strings } from '@/locales/id';
@@ -15,11 +15,16 @@ const NAV_BY_MENU_NAME: Record<string, NavItem> = {
     'materi lms': { to: '/materials', label: strings.nav.materials, icon: BookOpen },
     'perpustakaan lms': { to: '/library', label: strings.nav.library, icon: LibraryBig },
     'user activity lms': { to: '/user-activity', label: strings.nav.userActivity, icon: Users },
+    // 'materi quiz': { to: '/quizzes', label: strings.nav.quizMaterials, icon: ClipboardList },
 };
 
-const ALWAYS_NAV_ITEMS: NavItem[] = [{ to: '/my-activity', label: strings.nav.myActivity, icon: Activity }];
+const ALWAYS_NAV_ITEMS: NavItem[] = [
+    { to: '/my-quizzes', label: strings.nav.myQuiz, icon: ClipboardCheck },
+    { to: '/my-activity', label: strings.nav.myActivity, icon: Activity },
+    { to: '/quizzes', label: strings.nav.quizMaterials, icon: ClipboardList },
+];
 
-const NAV_ORDER = ['/dashboard', '/library', '/my-activity', '/user-activity', '/materials'];
+const NAV_ORDER = ['/dashboard', '/library', '/my-quizzes', '/my-activity', '/user-activity', '/materials', '/quizzes'];
 
 const orderOf = (item: NavItem): number => {
     const index = NAV_ORDER.indexOf(item.to);
@@ -40,11 +45,7 @@ const normalizeName = (name: string) => name.trim().toLowerCase().replace(/\s+/g
 const isUnder = (pathname: string, route: string) => pathname === route || pathname.startsWith(`${route}/`);
 
 const getMenuNavItems = (menu: UserMenuItem[]): NavItem[] =>
-    sortNavItems(
-        menu
-            .map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)])
-            .filter((item): item is NavItem => item !== undefined),
-    );
+    sortNavItems(menu.map((item) => NAV_BY_MENU_NAME[normalizeName(item.name)]).filter((item): item is NavItem => item !== undefined));
 
 export const getNavItems = (menu: UserMenuItem[]): NavItem[] => sortNavItems([...getMenuNavItems(menu), ...ALWAYS_NAV_ITEMS]);
 

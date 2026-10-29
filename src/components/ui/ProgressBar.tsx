@@ -37,7 +37,7 @@ export const ProgressBar = ({ value, label, tone = 'primary', showValue = true, 
                 className="bg-neutral-soft h-2 w-full overflow-hidden rounded-full"
             >
                 <div
-                    className={cn('h-full rounded-full transition-[width] duration-500 ease-out', TONE_CLASS[tone])}
+                    className={cn('h-full rounded-full transition-[width] duration-350 ease-out', TONE_CLASS[tone])}
                     style={{ width: `${percentage}%` }}
                 />
             </div>
