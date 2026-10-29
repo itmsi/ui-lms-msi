@@ -39,3 +39,52 @@
 .rich-text-editor .ProseMirror em {
     font-style: italic;
 }
+
+.rich-text {
+    overflow-x: auto;
+}
+
+.rich-text-editor .ProseMirror {
+    overflow-x: auto;
+}
+
+.rich-text table,
+.rich-text-editor .ProseMirror table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.rich-text th,
+.rich-text td,
+.rich-text-editor .ProseMirror th,
+.rich-text-editor .ProseMirror td {
+    position: relative;
+    min-width: 4rem;
+    padding: 0.375rem 0.625rem;
+    border: 1px solid var(--color-line);
+    text-align: left;
+    vertical-align: top;
+}
+
+.rich-text th,
+.rich-text-editor .ProseMirror th {
+    background: var(--color-neutral-soft);
+    font-weight: 600;
+}
+
+.rich-text th > p,
+.rich-text td > p,
+.rich-text-editor .ProseMirror th > p,
+.rich-text-editor .ProseMirror td > p {
+    margin: 0;
+}
+
+.rich-text-editor .ProseMirror .selectedCell::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-primary);
+    opacity: 0.12;
+    pointer-events: none;
+}

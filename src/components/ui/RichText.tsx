@@ -4,9 +4,9 @@ import { useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import '@/components/ui/rich-text.css';
 
-const ALLOWED_TAGS = ['p', 'br', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li'];
+const ALLOWED_TAGS = ['p', 'br', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];
 
-const ALLOWED_ATTR: string[] = [];
+const ALLOWED_ATTR = ['colspan', 'rowspan'];
 
 interface RichTextProps {
     html: string;

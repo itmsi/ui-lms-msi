@@ -1,10 +1,12 @@
 import { Check } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect, useId, useRef } from 'react';
+import { Suspense, useEffect, useId, useRef } from 'react';
 
 import { Card } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
+import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { strings } from '@/locales/id';
+import { AnswerEditor } from '@/pages/Candidate/Quiz/answerEditor';
+import { AnswerAttachments } from '@/pages/Candidate/Quiz/components/AnswerAttachments';
 import { formatEstimate } from '@/pages/Candidate/Quiz/quizModel';
 import { popIn } from '@/pages/Candidate/Quiz/quizMotion';
 import type { ParticipantOption, ParticipantQuestion, QuizAnswerValue } from '@/types/quiz';
@@ -94,10 +96,22 @@ interface QuestionPanelProps {
     options: ParticipantOption[];
     value: QuizAnswerValue | undefined;
     onChange: (value: QuizAnswerValue) => void;
+    attachments: readonly File[];
+    onChangeAttachments: (files: File[]) => void;
     focusOnMount: boolean;
 }
 
-export const QuestionPanel = ({ question, index, total, options, value, onChange, focusOnMount }: QuestionPanelProps) => {
+export const QuestionPanel = ({
+    question,
+    index,
+    total,
+    options,
+    value,
+    onChange,
+    attachments,
+    onChangeAttachments,
+    focusOnMount,
+}: QuestionPanelProps) => {
     const baseId = useId();
     const titleId = `${baseId}-title`;
     const hintId = `${baseId}-hint`;
@@ -111,11 +125,9 @@ export const QuestionPanel = ({ question, index, total, options, value, onChange
 
     const position = `${strings.myQuiz.questionLabel} ${String(index + 1)} ${strings.myQuiz.of} ${String(total)}`;
     const estimate = formatEstimate(question.estimatedSeconds);
-    const meta = [
-        question.required ? strings.myQuiz.requiredMark : strings.myQuiz.optionalMark,
-        question.points === null ? null : `${String(question.points)} ${strings.myQuiz.pointsSuffix}`,
-        estimate,
-    ].filter((part): part is string => part !== null);
+    const meta = [question.points === null ? null : `${String(question.points)} ${strings.myQuiz.pointsSuffix}`, estimate].filter(
+        (part): part is string => part !== null,
+    );
 
     return (
         <Card className="flex flex-col gap-5 p-5 sm:p-6">
@@ -132,12 +144,6 @@ export const QuestionPanel = ({ question, index, total, options, value, onChange
             <h2 ref={headingRef} id={titleId} tabIndex={-1} className="text-card text-ink font-sans whitespace-pre-line outline-none">
                 <span className="sr-only">{`${position}. `}</span>
                 {question.text}
-                {question.required ? (
-                    <span aria-hidden="true" className="text-danger-ink">
-                        {' '}
-                        *
-                    </span>
-                ) : null}
             </h2>
 
             {question.imageUrl === null ? null : (
@@ -154,15 +160,17 @@ export const QuestionPanel = ({ question, index, total, options, value, onChange
             </p>
 
             {question.type === 'short_answer' ? (
-                <Input
-                    label={strings.myQuiz.shortAnswerLabel}
-                    hideLabel
-                    aria-describedby={hintId}
-                    value={typeof value === 'string' ? value : ''}
-                    placeholder={strings.myQuiz.shortAnswerPlaceholder}
-                    onChange={(event) => onChange(event.target.value)}
-                    autoComplete="off"
-                />
+                <div className="flex flex-col gap-5">
+                    <Suspense fallback={<Skeleton className="h-40 rounded-lg" />}>
+                        <AnswerEditor
+                            label={strings.myQuiz.shortAnswerLabel}
+                            value={typeof value === 'string' ? value : ''}
+                            onChange={onChange}
+                            allowTables
+                        />
+                    </Suspense>
+                    <AnswerAttachments files={attachments} onChange={onChangeAttachments} />
+                </div>
             ) : (
                 <ChoiceList
                     name={`${baseId}-answer`}

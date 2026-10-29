@@ -2,6 +2,7 @@ import { addDays } from 'date-fns';
 
 import { isRecord } from '@/helpers/authParsers';
 import { toIsoDate } from '@/utils/dateTime';
+import { htmlToPlainText } from '@/utils/htmlText';
 
 type MockQuestionType = 'multiple_choice' | 'multiple_answers' | 'true_false' | 'short_answer';
 
@@ -15,8 +16,6 @@ interface MockQuestion {
     id: string;
     type: MockQuestionType;
     question: string;
-    required: boolean;
-    choice_order: 'keep' | 'shuffle';
     estimated_time: number | null;
     estimated_time_unit: 'minutes' | 'seconds';
     points: number;
@@ -32,7 +31,6 @@ interface MockQuiz {
     module_title: string;
     startOffsetDays: number;
     endOffsetDays: number;
-    result_screen: { title: string; message: string; show_score: boolean; show_correct_answers: boolean };
     questions: MockQuestion[];
 }
 
@@ -43,13 +41,11 @@ const choice = (
     type: 'multiple_choice' | 'multiple_answers',
     question: string,
     options: MockOption[],
-    extra: Partial<Pick<MockQuestion, 'required' | 'choice_order' | 'estimated_time' | 'estimated_time_unit' | 'points'>> = {},
+    extra: Partial<Pick<MockQuestion, 'estimated_time' | 'estimated_time_unit' | 'points'>> = {},
 ): MockQuestion => ({
     id,
     type,
     question,
-    required: true,
-    choice_order: 'keep',
     estimated_time: 1,
     estimated_time_unit: 'minutes',
     points: 1,
@@ -63,8 +59,6 @@ const trueFalse = (id: string, question: string, answer: 'true' | 'false', point
     id,
     type: 'true_false',
     question,
-    required: true,
-    choice_order: 'keep',
     estimated_time: 30,
     estimated_time_unit: 'seconds',
     points,
@@ -73,17 +67,10 @@ const trueFalse = (id: string, question: string, answer: 'true' | 'false', point
     expected_answer: null,
 });
 
-const shortAnswer = (
-    id: string,
-    question: string,
-    expected: string,
-    extra: Partial<Pick<MockQuestion, 'required' | 'points'>> = {},
-): MockQuestion => ({
+const shortAnswer = (id: string, question: string, expected: string, extra: Partial<Pick<MockQuestion, 'points'>> = {}): MockQuestion => ({
     id,
     type: 'short_answer',
     question,
-    required: true,
-    choice_order: 'keep',
     estimated_time: 1,
     estimated_time_unit: 'minutes',
     points: 1,
@@ -101,12 +88,6 @@ const MOCK_QUIZZES: MockQuiz[] = [
         module_title: 'Keamanan Informasi Dasar',
         startOffsetDays: -3,
         endOffsetDays: 14,
-        result_screen: {
-            title: 'Terima kasih sudah mengerjakan!',
-            message: 'Pelajari pembahasan di bawah untuk memperkuat pemahaman Anda tentang keamanan informasi.',
-            show_score: true,
-            show_correct_answers: true,
-        },
         questions: [
             choice(
                 'ki-1',
@@ -118,7 +99,7 @@ const MOCK_QUIZZES: MockQuiz[] = [
                     option('ki-1-c', 'Balas email dan minta penjelasan'),
                     option('ki-1-d', 'Teruskan ke rekan kerja untuk dicek'),
                 ],
-                { choice_order: 'shuffle', points: 2 },
+                { points: 2 },
             ),
             choice(
                 'ki-2',
@@ -136,9 +117,8 @@ const MOCK_QUIZZES: MockQuiz[] = [
             shortAnswer(
                 'ki-4',
                 'Apa nama serangan penipuan yang menyamar sebagai pihak tepercaya, biasanya lewat email atau pesan?',
-                'phishing',
+                '<p>phishing</p>',
                 {
-                    required: false,
                     points: 2,
                 },
             ),
@@ -162,12 +142,6 @@ const MOCK_QUIZZES: MockQuiz[] = [
         module_title: 'Pengenalan K3',
         startOffsetDays: -7,
         endOffsetDays: 2,
-        result_screen: {
-            title: 'Jawaban Anda sudah diterima',
-            message: 'Terapkan prinsip K3 setiap hari agar Anda dan rekan kerja tetap aman.',
-            show_score: true,
-            show_correct_answers: false,
-        },
         questions: [
             choice('k3-1', 'multiple_choice', 'Apa kepanjangan dari K3?', [
                 option('k3-1-a', 'Keselamatan dan Kesehatan Kerja', true),
@@ -185,7 +159,7 @@ const MOCK_QUIZZES: MockQuiz[] = [
                     option('k3-3-c', 'Berkumpul di titik kumpul yang ditentukan', true),
                     option('k3-3-d', 'Kembali ke meja untuk mengambil barang pribadi'),
                 ],
-                { points: 2, choice_order: 'shuffle' },
+                { points: 2 },
             ),
             choice(
                 'k3-4',
@@ -207,12 +181,6 @@ const MOCK_QUIZZES: MockQuiz[] = [
         module_title: 'Etika Komunikasi Kerja',
         startOffsetDays: 0,
         endOffsetDays: 30,
-        result_screen: {
-            title: 'Terima kasih!',
-            message: 'Jawaban Anda sudah tercatat. Tim HR akan meninjau hasilnya.',
-            show_score: false,
-            show_correct_answers: false,
-        },
         questions: [
             choice(
                 'kom-1',
@@ -234,7 +202,7 @@ const MOCK_QUIZZES: MockQuiz[] = [
                     option('kom-3-b', 'Menulis seluruhnya dengan huruf kapital agar tegas'),
                     option('kom-3-c', 'Memastikan lampiran yang disebut benar-benar terlampir', true),
                 ],
-                { points: 2, required: false },
+                { points: 2 },
             ),
         ],
     },
@@ -310,16 +278,10 @@ const writeAttempts = (attempts: Record<string, unknown>[]) => {
 
 const lastAttemptOf = (quiz: MockQuiz) => {
     const attempt = readAttempts().find((item) => item.quizzes_id === quiz.id);
-    const showScore = quiz.result_screen.show_score;
 
     return attempt === undefined
         ? null
-        : {
-              id: attempt.id,
-              score: showScore ? attempt.score : null,
-              max_score: showScore ? attempt.max_score : null,
-              submitted_at: attempt.submitted_at,
-          };
+        : { id: attempt.id, score: attempt.score, max_score: attempt.max_score, submitted_at: attempt.submitted_at };
 };
 
 const toQuestionPayload = (question: MockQuestion, line: number) => ({
@@ -327,9 +289,7 @@ const toQuestionPayload = (question: MockQuestion, line: number) => ({
     line,
     type: question.type,
     question: question.question,
-    required: question.required,
     image: null,
-    choice_order: question.choice_order,
     estimated_time: question.estimated_time,
     estimated_time_unit: question.estimated_time_unit,
     points: question.points,
@@ -339,6 +299,36 @@ const toQuestionPayload = (question: MockQuestion, line: number) => ({
 const TRUE_FALSE_LABEL: Record<'true' | 'false', string> = { true: 'Benar', false: 'Salah' };
 
 const normalizeText = (value: string) => value.trim().toLowerCase().replace(/\s+/g, ' ');
+
+interface MockSubmission {
+    quizId: string | null;
+    answers: unknown[];
+    filesOf: (questionId: string) => File[];
+}
+
+const parseAnswers = (value: FormDataEntryValue | null): unknown[] => {
+    try {
+        const parsed: unknown = typeof value === 'string' ? JSON.parse(value) : [];
+
+        return Array.isArray(parsed) ? (parsed as unknown[]) : [];
+    } catch {
+        return [];
+    }
+};
+
+const readSubmission = (payload: unknown): MockSubmission => {
+    if (payload instanceof FormData) {
+        const quizId = payload.get('quizzes_id');
+
+        return {
+            quizId: typeof quizId === 'string' ? quizId : null,
+            answers: parseAnswers(payload.get('answers')),
+            filesOf: (questionId) => payload.getAll(`attachments[${questionId}]`).filter((entry): entry is File => entry instanceof File),
+        };
+    }
+
+    return { quizId: null, answers: [], filesOf: () => [] };
+};
 
 const readSubmittedAnswer = (answers: unknown[], questionId: string) => {
     const answer = answers.filter(isRecord).find((item) => item.quiz_questions_id === questionId);
@@ -363,9 +353,11 @@ const gradeQuestion = (question: MockQuestion, answers: unknown[]) => {
     }
 
     if (question.type === 'short_answer') {
+        const plain = htmlToPlainText(text);
+
         return {
-            isCorrect: text.trim() !== '' && normalizeText(text) === normalizeText(question.expected_answer ?? ''),
-            yourAnswer: text.trim() === '' ? [] : [text.trim()],
+            isCorrect: plain !== '' && normalizeText(plain) === normalizeText(htmlToPlainText(question.expected_answer ?? '')),
+            yourAnswer: plain === '' ? [] : [text.trim()],
             correctAnswer: question.expected_answer === null ? [] : [question.expected_answer],
         };
     }
@@ -382,17 +374,16 @@ const gradeQuestion = (question: MockQuestion, answers: unknown[]) => {
 const createAttemptId = () =>
     typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `contoh-${String(Date.now())}`;
 
-const submitAttempt = (payload: unknown) => {
-    const body = isRecord(payload) ? payload : {};
-    const quiz = MOCK_QUIZZES.find((item) => item.id === body.quizzes_id);
+const submitAttempt = (submission: MockSubmission) => {
+    const quiz = MOCK_QUIZZES.find((item) => item.id === submission.quizId);
 
     if (quiz === undefined) {
         return null;
     }
 
-    const answers = Array.isArray(body.answers) ? (body.answers as unknown[]) : [];
     const review = quiz.questions.map((question, index) => {
-        const graded = gradeQuestion(question, answers);
+        const graded = gradeQuestion(question, submission.answers);
+        const files = question.type === 'short_answer' ? submission.filesOf(question.id) : [];
 
         return {
             quiz_questions_id: question.id,
@@ -400,6 +391,7 @@ const submitAttempt = (payload: unknown) => {
             type: question.type,
             question: question.question,
             your_answer: graded.yourAnswer,
+            your_attachments: files.map((file) => ({ name: file.name, size: file.size, url: null })),
             correct_answer: graded.correctAnswer,
             is_correct: graded.isCorrect,
             points_earned: graded.isCorrect ? question.points : 0,
@@ -417,8 +409,7 @@ const submitAttempt = (payload: unknown) => {
         max_score: review.reduce((total, item) => total + item.points, 0),
         correct_count: review.filter((item) => item.is_correct).length,
         question_count: review.length,
-        result_screen: quiz.result_screen,
-        review: quiz.result_screen.show_correct_answers ? review : null,
+        review,
     };
 
     writeAttempts([attempt, ...readAttempts()]);
@@ -456,13 +447,13 @@ export const mockQuizRequest = async (path: string, payload?: unknown, signal?: 
     }
 
     if (path === SUBMIT_PATH) {
-        const quizId = isRecord(payload) ? payload.quizzes_id : undefined;
+        const submission = readSubmission(payload);
 
-        if (readAttempts().some((item) => item.quizzes_id === quizId)) {
+        if (readAttempts().some((item) => item.quizzes_id === submission.quizId)) {
             return { data: { success: false, message: ALREADY_COMPLETED_MESSAGE } };
         }
 
-        const attempt = submitAttempt(payload);
+        const attempt = submitAttempt(submission);
 
         if (attempt === null) {
             throw notFound();

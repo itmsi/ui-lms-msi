@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, ClipboardCheck, ClipboardX, FileClock, LayoutGrid, Send } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ApiErrorState } from '@/components/patterns/ApiErrorState';
@@ -14,6 +14,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useAuth } from '@/hooks/useAuth';
 import { strings } from '@/locales/id';
+import { preloadAnswerEditor } from '@/pages/Candidate/Quiz/answerEditor';
 import { QuestionNavigator } from '@/pages/Candidate/Quiz/components/QuestionNavigator';
 import { QuestionPanel } from '@/pages/Candidate/Quiz/components/QuestionPanel';
 import { QuestionStepper } from '@/pages/Candidate/Quiz/components/QuestionStepper';
@@ -22,12 +23,14 @@ import { QuizMotionProvider } from '@/pages/Candidate/Quiz/components/QuizMotion
 import { SubmitDialog } from '@/pages/Candidate/Quiz/components/SubmitDialog';
 import { useQuizResource } from '@/pages/Candidate/Quiz/hooks/useQuizResource';
 import { resultPath, useQuizSession } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
-import { countDraftAnswers, formatAnsweredCount, orderOptions, resultActionLabel } from '@/pages/Candidate/Quiz/quizModel';
+import { formatAnsweredCount } from '@/pages/Candidate/Quiz/quizModel';
 import { PRESSABLE_CLASS, questionSlideVariants } from '@/pages/Candidate/Quiz/quizMotion';
 import { fetchParticipantQuiz } from '@/services/quizService';
 import type { ParticipantQuiz } from '@/types/quiz';
 
 const LIST_PATH = '/my-quizzes';
+
+const NO_FILES: readonly File[] = [];
 
 const AttemptSkeleton = () => (
     <LoadingBlock label={strings.common.loading}>
@@ -53,12 +56,19 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
     const [hasNavigated, setHasNavigated] = useState(false);
     const [direction, setDirection] = useState(1);
     const navigatorTitleId = useId();
+    const needsEditor = quiz.questions.some((item) => item.type === 'short_answer');
+
+    useEffect(() => {
+        if (needsEditor) {
+            preloadAnswerEditor();
+        }
+    }, [needsEditor]);
 
     if (session.phase === 'intro' || session.draft === null) {
         return (
             <QuizIntro
                 quiz={quiz}
-                draftAnswered={session.draft === null ? null : countDraftAnswers(session.draft)}
+                draftAnswered={session.draft === null ? null : session.answeredCount}
                 onStart={session.start}
                 onResume={session.resume}
             />
@@ -119,7 +129,12 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                 <Card className="hidden flex-col gap-2 p-3 lg:sticky lg:top-4 lg:flex">
                     <p className="text-caption text-muted px-2 pt-1 font-semibold">{strings.myQuiz.openNavigator}</p>
                     <div className="max-h-[calc(100dvh-16rem)] overflow-y-auto">
-                        <QuestionStepper questions={quiz.questions} answers={draft.answers} currentIndex={index} onSelect={goTo} />
+                        <QuestionStepper
+                            questions={quiz.questions}
+                            answeredIds={session.answeredIds}
+                            currentIndex={index}
+                            onSelect={goTo}
+                        />
                     </div>
                     {/* <div className="border-line border-t pt-3">
                         <Button
@@ -149,9 +164,11 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                                     question={question}
                                     index={index}
                                     total={total}
-                                    options={orderOptions(question, draft.optionOrder)}
+                                    options={question.options}
                                     value={draft.answers[question.id]}
                                     onChange={(value) => session.setAnswer(question.id, value)}
+                                    attachments={session.attachments[question.id] ?? NO_FILES}
+                                    onChangeAttachments={(files) => session.setQuestionAttachments(question.id, files)}
                                     focusOnMount={hasNavigated}
                                 />
                             </m.div>
@@ -195,7 +212,7 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                 </h2>
                 <QuestionNavigator
                     questions={quiz.questions}
-                    answers={draft.answers}
+                    answeredIds={session.answeredIds}
                     currentIndex={index}
                     onSelect={(target) => {
                         setNavigatorOpen(false);
@@ -208,7 +225,7 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                 open={reviewOpen}
                 answered={session.answeredCount}
                 total={total}
-                missingRequired={session.missingRequired}
+                unanswered={session.unanswered}
                 submitState={session.submitState}
                 onClose={() => setReviewOpen(false)}
                 onJump={(target) => {
@@ -238,7 +255,7 @@ const CompletedQuiz = ({ quiz }: { quiz: ParticipantQuiz }) => (
                             size="sm"
                             leadingIcon={<FileClock aria-hidden="true" className="size-4" />}
                         >
-                            {resultActionLabel(quiz.lastAttempt)}
+                            {strings.myQuiz.viewScore}
                         </LinkButton>
                     )}
                 </div>

@@ -18,18 +18,17 @@ interface SubmitDialogProps {
     open: boolean;
     answered: number;
     total: number;
-    missingRequired: number[];
+    unanswered: number[];
     submitState: SubmitState;
     onClose: () => void;
     onJump: (index: number) => void;
     onSubmit: () => void;
 }
 
-export const SubmitDialog = ({ open, answered, total, missingRequired, submitState, onClose, onJump, onSubmit }: SubmitDialogProps) => {
+export const SubmitDialog = ({ open, answered, total, unanswered, submitState, onClose, onJump, onSubmit }: SubmitDialogProps) => {
     const titleId = useId();
     const isSubmitting = submitState.status === 'submitting';
-    const hasMissing = missingRequired.length > 0;
-    const hasOptionalEmpty = answered + missingRequired.length < total;
+    const hasMissing = unanswered.length > 0;
 
     return (
         <SheetDialog open={open} onClose={onClose} labelledBy={titleId} className="sm:max-w-md">
@@ -45,10 +44,10 @@ export const SubmitDialog = ({ open, answered, total, missingRequired, submitSta
                     <m.div variants={reviewItemVariants} className="bg-warning-soft text-warning-ink flex flex-col gap-3 rounded-lg p-3.5">
                         <p className="text-body flex items-start gap-2 font-medium">
                             <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                            {`${String(missingRequired.length)} ${strings.myQuiz.missingRequiredSuffix}. ${strings.myQuiz.missingRequiredHint}`}
+                            {`${String(unanswered.length)} ${strings.myQuiz.unansweredSuffix}. ${strings.myQuiz.unansweredHint}`}
                         </p>
                         <ul className="flex flex-wrap gap-2">
-                            {missingRequired.map((index) => (
+                            {unanswered.map((index) => (
                                 <li key={index}>
                                     <Button variant="secondary" size="sm" onClick={() => onJump(index)}>
                                         {`${strings.myQuiz.questionLabel} ${String(index + 1)}`}
@@ -57,12 +56,6 @@ export const SubmitDialog = ({ open, answered, total, missingRequired, submitSta
                             ))}
                         </ul>
                     </m.div>
-                ) : null}
-
-                {hasMissing === false && hasOptionalEmpty ? (
-                    <m.p variants={reviewItemVariants} className="text-body text-muted">
-                        {strings.myQuiz.optionalEmpty}
-                    </m.p>
                 ) : null}
 
                 {hasMissing ? null : (

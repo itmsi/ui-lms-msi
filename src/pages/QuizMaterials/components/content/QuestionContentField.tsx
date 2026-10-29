@@ -9,14 +9,13 @@ import { ACCEPTED_IMAGE_TYPES, validateImageFile } from '@/utils/imageUpload';
 
 interface QuestionContentFieldProps {
     number: number;
-    required: boolean;
     text: string;
     image: File | null;
     onChangeText: (text: string) => void;
     onChangeImage: (image: File | null) => void;
 }
 
-export const QuestionContentField = ({ number, required, text, image, onChangeText, onChangeImage }: QuestionContentFieldProps) => {
+export const QuestionContentField = ({ number, text, image, onChangeText, onChangeImage }: QuestionContentFieldProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [imageError, setImageError] = useState<string | null>(null);
     const previewUrl = useMemo(() => (image === null ? null : URL.createObjectURL(image)), [image]);
@@ -50,14 +49,7 @@ export const QuestionContentField = ({ number, required, text, image, onChangeTe
 
     return (
         <div className="flex flex-col gap-3">
-            <h3 className="text-card text-ink flex items-center gap-2">
-                {`${strings.quizContent.questionPrefix} ${String(number)}`}
-                {required ? (
-                    <span className="text-caption text-danger-ink bg-danger-soft rounded-full px-2 py-0.5 font-medium">
-                        {strings.quizContent.requiredMark}
-                    </span>
-                ) : null}
-            </h3>
+            <h3 className="text-card text-ink">{`${strings.quizContent.questionPrefix} ${String(number)}`}</h3>
 
             <Textarea
                 label={strings.quizContent.textLabel}

@@ -11,9 +11,11 @@ import type {
     ParticipantQuizSummary,
     QuestionReview,
     QuizAnswers,
+    QuizAttachments,
     QuizAttemptResult,
     QuizLastAttempt,
     QuizOutcome,
+    SubmittedAttachment,
 } from '@/types/quiz';
 
 const LIST_PATH = 'quizzes/participant/get';
@@ -50,8 +52,8 @@ const toLastAttempt = (value: unknown): QuizLastAttempt | null => {
 
     return {
         id: value.id,
-        score: readNumber(value.score),
-        maxScore: readNumber(value.max_score),
+        score: readNumber(value.score) ?? 0,
+        maxScore: readNumber(value.max_score) ?? 0,
         submittedAt: readString(value.submitted_at),
     };
 };
@@ -90,9 +92,7 @@ const toQuestion = (value: unknown): ParticipantQuestion | null => {
         line: readNumber(value.line) ?? 0,
         type: value.type,
         text: readString(value.question),
-        required: value.required !== false,
         imageUrl: typeof value.image === 'string' && value.image !== '' ? value.image : null,
-        shuffle: value.choice_order === 'shuffle',
         estimatedSeconds: toEstimatedSeconds(value.estimated_time, value.estimated_time_unit),
         points: readNumber(value.points),
         options: value.type === 'true_false' ? TRUE_FALSE_OPTIONS : options,
@@ -114,6 +114,25 @@ const toQuiz = (value: unknown): ParticipantQuiz | null => {
     return { ...toSummaryBase({ ...value, id: value.id }), questions };
 };
 
+const toHttpsUrl = (value: unknown): string | null => {
+    if (typeof value !== 'string' || value === '') {
+        return null;
+    }
+
+    try {
+        const url = new URL(value);
+
+        return url.protocol === 'https:' ? url.href : null;
+    } catch {
+        return null;
+    }
+};
+
+const toSubmittedAttachment = (value: unknown): SubmittedAttachment | null =>
+    isRecord(value) && typeof value.name === 'string'
+        ? { name: value.name, size: readNumber(value.size), url: toHttpsUrl(value.url) }
+        : null;
+
 const toReview = (value: unknown): QuestionReview | null => {
     if (isRecord(value) === false || typeof value.quiz_questions_id !== 'string' || isQuestionType(value.type) === false) {
         return null;
@@ -125,6 +144,9 @@ const toReview = (value: unknown): QuestionReview | null => {
         type: value.type,
         text: readString(value.question),
         yourAnswer: readStringList(value.your_answer),
+        yourAttachments: Array.isArray(value.your_attachments)
+            ? (value.your_attachments as unknown[]).map(toSubmittedAttachment).filter((item): item is SubmittedAttachment => item !== null)
+            : [],
         correctAnswer: readStringList(value.correct_answer),
         isCorrect: value.is_correct === true,
         pointsEarned: readNumber(value.points_earned) ?? 0,
@@ -137,8 +159,6 @@ const toAttempt = (value: unknown): QuizAttemptResult | null => {
         return null;
     }
 
-    const screen = isRecord(value.result_screen) ? value.result_screen : {};
-
     return {
         id: value.id,
         quizId: readString(value.quizzes_id),
@@ -149,15 +169,9 @@ const toAttempt = (value: unknown): QuizAttemptResult | null => {
         maxScore: readNumber(value.max_score) ?? 0,
         correctCount: readNumber(value.correct_count) ?? 0,
         questionCount: readNumber(value.question_count) ?? 0,
-        resultScreen: {
-            title: readString(screen.title),
-            message: readString(screen.message),
-            showScore: screen.show_score !== false,
-            showCorrectAnswers: screen.show_correct_answers === true,
-        },
         review: Array.isArray(value.review)
             ? (value.review as unknown[]).map(toReview).filter((item): item is QuestionReview => item !== null)
-            : null,
+            : [],
     };
 };
 
@@ -212,8 +226,19 @@ const toAnswerPayload = (question: ParticipantQuestion, answers: QuizAnswers) =>
     };
 };
 
-export const submitQuizAttempt = (quiz: ParticipantQuiz, answers: QuizAnswers) =>
-    request(SUBMIT_PATH, toAttempt, {
-        quizzes_id: quiz.id,
-        answers: quiz.questions.map((question) => toAnswerPayload(question, answers)),
-    });
+const attachmentField = (questionId: string) => `attachments[${questionId}]`;
+
+export const submitQuizAttempt = (quiz: ParticipantQuiz, answers: QuizAnswers, attachments: QuizAttachments) => {
+    const body = new FormData();
+
+    body.append('quizzes_id', quiz.id);
+    body.append('answers', JSON.stringify(quiz.questions.map((question) => toAnswerPayload(question, answers))));
+
+    quiz.questions
+        .filter((question) => question.type === 'short_answer')
+        .forEach((question) => {
+            (attachments[question.id] ?? []).forEach((file) => body.append(attachmentField(question.id), file, file.name));
+        });
+
+    return request(SUBMIT_PATH, toAttempt, body);
+};

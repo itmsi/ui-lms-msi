@@ -1,4 +1,4 @@
-import { ArrowRight, Asterisk, Clock, HardDriveDownload, PencilLine, Send } from 'lucide-react';
+import { ArrowRight, Clock, HardDriveDownload, ListChecks, PencilLine, Send } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 
@@ -12,7 +12,7 @@ import { formatShortDate, fromIsoDate } from '@/utils/dateTime';
 
 const RULES: { icon: LucideIcon; text: string }[] = [
     { icon: Clock, text: strings.myQuiz.ruleNoTimer },
-    { icon: Asterisk, text: strings.myQuiz.ruleRequired },
+    { icon: ListChecks, text: strings.myQuiz.ruleAllRequired },
     { icon: HardDriveDownload, text: strings.myQuiz.ruleSaved },
     { icon: Send, text: strings.myQuiz.ruleOnce },
 ];
@@ -35,7 +35,6 @@ export const QuizIntro = ({ quiz, draftAnswered, onStart, onResume }: QuizIntroP
     const [confirmingRestart, setConfirmingRestart] = useState(false);
 
     const total = quiz.questions.length;
-    const requiredCount = quiz.questions.filter((question) => question.required).length;
     const hasAllPoints = quiz.questions.every((question) => question.points !== null);
     const totalPoints = quiz.questions.reduce((sum, question) => sum + (question.points ?? 0), 0);
     const estimate = formatEstimate(quiz.questions.reduce((sum, question) => sum + (question.estimatedSeconds ?? 0), 0));
@@ -44,10 +43,7 @@ export const QuizIntro = ({ quiz, draftAnswered, onStart, onResume }: QuizIntroP
     return (
         <Card className="motion-rise flex flex-col gap-6 p-5 sm:p-6">
             <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <Fact
-                    label={strings.myQuiz.factQuestions}
-                    value={`${String(total)} ${strings.myQuiz.questionsSuffix} · ${String(requiredCount)} ${strings.myQuiz.requiredSuffix}`}
-                />
+                <Fact label={strings.myQuiz.factQuestions} value={`${String(total)} ${strings.myQuiz.questionsSuffix}`} />
                 <Fact label={strings.myQuiz.factEstimate} value={estimate ?? strings.myQuiz.noEstimate} />
                 {hasAllPoints ? (
                     <Fact label={strings.myQuiz.factPoints} value={`${String(totalPoints)} ${strings.myQuiz.pointsSuffix}`} />

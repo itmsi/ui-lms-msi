@@ -74,26 +74,28 @@ export const MyActivity = () => {
     return (
         <section className="mx-auto flex w-full flex-col gap-5">
             <PageHeader title={strings.nav.myActivity} description={strings.activityLog.mySubtitle} />
-
-            <SearchBar
-                label={strings.activityLog.searchLabel}
-                placeholder={strings.activityLog.searchPlaceholder}
-                value={search}
-                onSubmit={submitSearch}
-                hasFilters={hasFilters}
-                onClear={clearFilters}
-                disabled={status === 'loading'}
-            />
-
-            <DateRangeFilter
-                presets={RANGE_PRESET_OPTIONS}
-                resolvePreset={presetRange}
-                preset={rangePreset}
-                range={dateRange}
-                max={toIsoDate(new Date(now))}
-                onSelectPreset={selectPreset}
-                onChangeRange={selectCustomRange}
-            />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+                <SearchBar
+                    label={strings.activityLog.searchLabel}
+                    placeholder={strings.activityLog.searchPlaceholder}
+                    value={search}
+                    onSubmit={submitSearch}
+                    hasFilters={hasFilters}
+                    onClear={clearFilters}
+                    disabled={status === 'loading'}
+                />
+                <div className="w-1xl">
+                    <DateRangeFilter
+                        presets={RANGE_PRESET_OPTIONS}
+                        resolvePreset={presetRange}
+                        preset={rangePreset}
+                        range={dateRange}
+                        max={toIsoDate(new Date(now))}
+                        onSelectPreset={selectPreset}
+                        onChangeRange={selectCustomRange}
+                    />
+                </div>
+            </div>
 
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <p aria-live="polite" className="text-caption text-muted tabular-nums">

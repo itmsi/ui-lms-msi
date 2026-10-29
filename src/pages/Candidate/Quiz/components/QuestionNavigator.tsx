@@ -2,23 +2,23 @@ import { Check } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
 
 import { strings } from '@/locales/id';
-import { describeQuestionState, isAnsweredValue } from '@/pages/Candidate/Quiz/quizModel';
+import { describeQuestionState } from '@/pages/Candidate/Quiz/quizModel';
 import { popIn } from '@/pages/Candidate/Quiz/quizMotion';
-import type { ParticipantQuestion, QuizAnswers } from '@/types/quiz';
+import type { ParticipantQuestion } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
 interface QuestionNavigatorProps {
     questions: readonly ParticipantQuestion[];
-    answers: QuizAnswers;
+    answeredIds: ReadonlySet<string>;
     currentIndex: number;
     onSelect: (index: number) => void;
 }
 
-export const QuestionNavigator = ({ questions, answers, currentIndex, onSelect }: QuestionNavigatorProps) => (
+export const QuestionNavigator = ({ questions, answeredIds, currentIndex, onSelect }: QuestionNavigatorProps) => (
     <nav aria-label={strings.myQuiz.navigatorLabel} className="flex flex-col gap-4">
         <ol className="grid grid-cols-5 gap-2">
             {questions.map((question, index) => {
-                const answered = isAnsweredValue(answers[question.id]);
+                const answered = answeredIds.has(question.id);
                 const current = index === currentIndex;
 
                 return (
@@ -26,7 +26,7 @@ export const QuestionNavigator = ({ questions, answers, currentIndex, onSelect }
                         <button
                             type="button"
                             onClick={() => onSelect(index)}
-                            aria-label={describeQuestionState(question, index, answered)}
+                            aria-label={describeQuestionState(index, answered)}
                             aria-current={current ? 'step' : undefined}
                             className={cn(
                                 'text-body relative flex aspect-square w-full min-w-10 items-center justify-center rounded-lg border font-semibold tabular-nums',
@@ -51,9 +51,6 @@ export const QuestionNavigator = ({ questions, answers, currentIndex, onSelect }
                                     </m.span>
                                 ) : null}
                             </AnimatePresence>
-                            {question.required && answered === false ? (
-                                <span aria-hidden="true" className="bg-warning absolute top-1 right-1 size-1.5 rounded-full" />
-                            ) : null}
                         </button>
                     </li>
                 );
@@ -70,10 +67,6 @@ export const QuestionNavigator = ({ questions, answers, currentIndex, onSelect }
             <li className="flex items-center gap-1.5">
                 <span className="border-line size-3 rounded-sm border" />
                 {strings.myQuiz.legendUnanswered}
-            </li>
-            <li className="flex items-center gap-1.5">
-                <span className="bg-warning size-1.5 rounded-full" />
-                {strings.myQuiz.legendRequired}
             </li>
         </ul>
     </nav>

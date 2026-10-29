@@ -4,36 +4,25 @@ import {
     changeQuestionType,
     createOption,
     createQuestion,
-    createResultScreen,
     duplicateQuestion as cloneQuestion,
     hasQuestionContent,
 } from '@/pages/QuizMaterials/questionModel';
-import type {
-    ContentSelection,
-    QuestionType,
-    QuizQuestion,
-    ResultScreen,
-    TrueFalseAnswer,
-} from '@/pages/QuizMaterials/types';
+import type { QuestionType, QuizQuestion, TrueFalseAnswer } from '@/pages/QuizMaterials/types';
 import { moveItem } from '@/utils/array';
 
 interface ContentState {
     questions: QuizQuestion[];
-    selection: ContentSelection;
-    result: ResultScreen;
+    selectedKey: string | null;
 }
 
 const createInitialState = (): ContentState => {
     const first = createQuestion();
 
-    return { questions: [first], selection: { kind: 'question', key: first.key }, result: createResultScreen() };
+    return { questions: [first], selectedKey: first.key };
 };
 
-const mapQuestion = (
-    questions: QuizQuestion[],
-    key: string,
-    change: (question: QuizQuestion) => QuizQuestion,
-): QuizQuestion[] => questions.map((question) => (question.key === key ? change(question) : question));
+const mapQuestion = (questions: QuizQuestion[], key: string, change: (question: QuizQuestion) => QuizQuestion): QuizQuestion[] =>
+    questions.map((question) => (question.key === key ? change(question) : question));
 
 export const useQuizContent = () => {
     const [state, setState] = useState<ContentState>(createInitialState);
@@ -43,11 +32,7 @@ export const useQuizContent = () => {
     }, []);
 
     const select = useCallback((key: string) => {
-        setState((current) => ({ ...current, selection: { kind: 'question', key } }));
-    }, []);
-
-    const selectResult = useCallback(() => {
-        setState((current) => ({ ...current, selection: { kind: 'result' } }));
+        setState((current) => ({ ...current, selectedKey: key }));
     }, []);
 
     const addQuestion = useCallback(() => {
@@ -56,7 +41,7 @@ export const useQuizContent = () => {
         setState((current) => ({
             ...current,
             questions: [...current.questions, question],
-            selection: { kind: 'question', key: question.key },
+            selectedKey: question.key,
         }));
     }, []);
 
@@ -73,7 +58,7 @@ export const useQuizContent = () => {
             const questions = [...current.questions];
             questions.splice(index + 1, 0, copy);
 
-            return { ...current, questions, selection: { kind: 'question', key: copy.key } };
+            return { ...current, questions, selectedKey: copy.key };
         });
     }, []);
 
@@ -87,16 +72,11 @@ export const useQuizContent = () => {
 
             const questions = current.questions.filter((question) => question.key !== key);
             const neighbour = questions[index] ?? questions[index - 1];
-            const wasSelected = current.selection.kind === 'question' && current.selection.key === key;
 
             return {
                 ...current,
                 questions,
-                selection: wasSelected
-                    ? neighbour === undefined
-                        ? { kind: 'result' }
-                        : { kind: 'question', key: neighbour.key }
-                    : current.selection,
+                selectedKey: current.selectedKey === key ? (neighbour?.key ?? null) : current.selectedKey,
             };
         });
     }, []);
@@ -176,25 +156,13 @@ export const useQuizContent = () => {
         [editQuestion],
     );
 
-    const updateResult = useCallback((patch: Partial<ResultScreen>) => {
-        setState((current) => ({ ...current, result: { ...current.result, ...patch } }));
-    }, []);
-
-    const hasContent = useMemo(
-        () =>
-            state.questions.some(hasQuestionContent) ||
-            state.result.title.trim() !== '' ||
-            state.result.message.trim() !== '',
-        [state],
-    );
+    const hasContent = useMemo(() => state.questions.some(hasQuestionContent), [state.questions]);
 
     return {
         questions: state.questions,
-        selection: state.selection,
-        result: state.result,
+        selectedKey: state.selectedKey,
         hasContent,
         select,
-        selectResult,
         addQuestion,
         duplicateQuestion,
         deleteQuestion,
@@ -207,7 +175,6 @@ export const useQuizContent = () => {
         moveOption,
         toggleCorrect,
         setTrueFalseAnswer,
-        updateResult,
     };
 };
 

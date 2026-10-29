@@ -45,40 +45,30 @@ const ScoreSummary = ({ result }: { result: QuizAttemptResult }) => {
     );
 };
 
-const ResultView = ({ result }: { result: QuizAttemptResult }) => {
-    const { resultScreen } = result;
+const ResultView = ({ result }: { result: QuizAttemptResult }) => (
+    <>
+        <Card className="motion-rise flex flex-col items-center gap-5 p-6 text-center sm:p-8">
+            <span aria-hidden="true" className="bg-primary-light text-primary flex size-14 items-center justify-center rounded-full">
+                <ClipboardCheck className="size-7" />
+            </span>
 
-    return (
-        <>
-            <Card className="motion-rise flex flex-col items-center gap-5 p-6 text-center sm:p-8">
-                <span aria-hidden="true" className="bg-primary-light text-primary flex size-14 items-center justify-center rounded-full">
-                    <ClipboardCheck className="size-7" />
-                </span>
+            <div role="status" className="flex flex-col gap-1.5">
+                <h2 className="text-section font-sans">{strings.myQuiz.resultTitle}</h2>
+                <p className="text-body text-muted mx-auto max-w-md">{strings.myQuiz.resultMessage}</p>
+            </div>
 
-                <div role="status" className="flex flex-col gap-1.5">
-                    <h2 className="text-section font-sans">
-                        {resultScreen.title === '' ? strings.myQuiz.resultFallbackTitle : resultScreen.title}
-                    </h2>
-                    <p className="text-body text-muted mx-auto max-w-md whitespace-pre-line">
-                        {resultScreen.message === '' ? strings.myQuiz.resultFallbackMessage : resultScreen.message}
-                    </p>
-                </div>
+            <ScoreSummary result={result} />
 
-                {resultScreen.showScore ? <ScoreSummary result={result} /> : null}
+            {result.submittedAt === '' ? null : (
+                <p className="text-caption text-muted">{`${strings.myQuiz.submittedAt} ${formatFullDateTime(result.submittedAt)}`}</p>
+            )}
 
-                {result.submittedAt === '' ? null : (
-                    <p className="text-caption text-muted">{`${strings.myQuiz.submittedAt} ${formatFullDateTime(result.submittedAt)}`}</p>
-                )}
+            <LinkButton to={LIST_PATH}>{strings.myQuiz.backToList}</LinkButton>
+        </Card>
 
-                <LinkButton to={LIST_PATH}>{strings.myQuiz.backToList}</LinkButton>
-            </Card>
-
-            {resultScreen.showCorrectAnswers && result.review !== null && result.review.length > 0 ? (
-                <AnswerReviewList items={result.review} />
-            ) : null}
-        </>
-    );
-};
+        {result.review.length > 0 ? <AnswerReviewList items={result.review} /> : null}
+    </>
+);
 
 export const QuizResult = () => {
     const { attemptId } = useParams<{ attemptId: string }>();

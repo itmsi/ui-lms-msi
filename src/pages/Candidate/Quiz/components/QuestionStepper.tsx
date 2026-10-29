@@ -3,19 +3,19 @@ import { AnimatePresence, m } from 'motion/react';
 import { useEffect, useRef } from 'react';
 
 import { strings } from '@/locales/id';
-import { describeQuestionState, isAnsweredValue } from '@/pages/Candidate/Quiz/quizModel';
+import { describeQuestionState } from '@/pages/Candidate/Quiz/quizModel';
 import { popIn } from '@/pages/Candidate/Quiz/quizMotion';
-import type { ParticipantQuestion, QuizAnswers } from '@/types/quiz';
+import type { ParticipantQuestion } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
 interface QuestionStepperProps {
     questions: readonly ParticipantQuestion[];
-    answers: QuizAnswers;
+    answeredIds: ReadonlySet<string>;
     currentIndex: number;
     onSelect: (index: number) => void;
 }
 
-export const QuestionStepper = ({ questions, answers, currentIndex, onSelect }: QuestionStepperProps) => {
+export const QuestionStepper = ({ questions, answeredIds, currentIndex, onSelect }: QuestionStepperProps) => {
     const listRef = useRef<HTMLOListElement>(null);
 
     useEffect(() => {
@@ -26,7 +26,7 @@ export const QuestionStepper = ({ questions, answers, currentIndex, onSelect }: 
         <nav aria-label={strings.myQuiz.navigatorLabel}>
             <ol ref={listRef} className="flex flex-col">
                 {questions.map((question, index) => {
-                    const answered = isAnsweredValue(answers[question.id]);
+                    const answered = answeredIds.has(question.id);
                     const current = index === currentIndex;
                     const isLast = index === questions.length - 1;
 
@@ -44,7 +44,7 @@ export const QuestionStepper = ({ questions, answers, currentIndex, onSelect }: 
                             <button
                                 type="button"
                                 onClick={() => onSelect(index)}
-                                aria-label={describeQuestionState(question, index, answered)}
+                                aria-label={describeQuestionState(index, answered)}
                                 aria-current={current ? 'step' : undefined}
                                 className={cn(
                                     'flex w-full items-start gap-3 rounded-lg p-2 text-left',
@@ -86,9 +86,6 @@ export const QuestionStepper = ({ questions, answers, currentIndex, onSelect }: 
                                         )}
                                     >
                                         {`${strings.myQuiz.questionLabel} ${String(index + 1)}`}
-                                        {question.required && answered === false ? (
-                                            <span className="bg-warning size-1.5 rounded-full" />
-                                        ) : null}
                                     </span>
                                     <span
                                         className={cn(

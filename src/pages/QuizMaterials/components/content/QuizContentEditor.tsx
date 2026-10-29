@@ -8,7 +8,6 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { strings } from '@/locales/id';
 import { QuestionEditor } from '@/pages/QuizMaterials/components/content/QuestionEditor';
 import { QuestionNavigation } from '@/pages/QuizMaterials/components/content/QuestionNavigation';
-import { ResultScreenSettings } from '@/pages/QuizMaterials/components/content/ResultScreenSettings';
 import type { QuizContentController } from '@/pages/QuizMaterials/hooks/useQuizContent';
 import { cn } from '@/utils/cn';
 
@@ -21,24 +20,17 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
     const [navOpen, setNavOpen] = useState(false);
     const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
-    const { questions, selection } = content;
-    const activeIndex = selection.kind === 'question' ? questions.findIndex((question) => question.key === selection.key) : -1;
-    const activeQuestion = questions[activeIndex];
+    const { questions, selectedKey } = content;
+    const activeIndex = questions.findIndex((question) => question.key === selectedKey);
+    const activeQuestion = activeIndex === -1 ? undefined : questions[activeIndex];
 
     const currentLabel =
-        selection.kind === 'result'
-            ? strings.quizContent.result.title
-            : activeQuestion === undefined
-              ? strings.quizContent.emptyTitle
-              : `${strings.quizContent.questionPrefix} ${String(activeIndex + 1)} · ${strings.quizContent.type[activeQuestion.type]}`;
+        activeQuestion === undefined
+            ? strings.quizContent.emptyTitle
+            : `${strings.quizContent.questionPrefix} ${String(activeIndex + 1)} · ${strings.quizContent.type[activeQuestion.type]}`;
 
     const selectQuestion = (key: string) => {
         content.select(key);
-        setNavOpen(false);
-    };
-
-    const selectResult = () => {
-        content.selectResult();
         setNavOpen(false);
     };
 
@@ -79,9 +71,8 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
                 <div id={navId} className={cn(navOpen ? 'mt-3 block' : 'hidden', 'lg:mt-0 lg:block')}>
                     <QuestionNavigation
                         questions={questions}
-                        selection={selection}
+                        selectedKey={selectedKey}
                         onSelect={selectQuestion}
-                        onSelectResult={selectResult}
                         onAdd={addQuestion}
                         onDuplicate={content.duplicateQuestion}
                         onMove={content.moveQuestion}
@@ -91,9 +82,7 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
             </Card>
 
             <div className="min-w-0">
-                {selection.kind === 'result' ? (
-                    <ResultScreenSettings result={content.result} onChange={content.updateResult} />
-                ) : activeQuestion === undefined ? (
+                {activeQuestion === undefined ? (
                     <Card>
                         <EmptyState
                             icon={ListOrdered}

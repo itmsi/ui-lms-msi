@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { strings } from '@/locales/id';
 import { resultPath } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
-import { countDraftAnswers, formatValidUntil, readDraft, resultActionLabel } from '@/pages/Candidate/Quiz/quizModel';
+import { countDraftAnswers, formatValidUntil, readDraft } from '@/pages/Candidate/Quiz/quizModel';
 import type { ParticipantQuizSummary } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
@@ -82,7 +82,7 @@ export const QuizSummaryCard = ({ quiz, userId }: QuizSummaryCardProps) => {
     const footerText = formatValidUntil(quiz.endDate);
 
     const scorePercent =
-        lastAttempt === null || lastAttempt.score === null || lastAttempt.maxScore === null || lastAttempt.maxScore === 0
+        lastAttempt === null || lastAttempt.maxScore === 0
             ? null
             : (lastAttempt.score / lastAttempt.maxScore) * 100;
     const progressPercent = isCompleted
@@ -91,7 +91,7 @@ export const QuizSummaryCard = ({ quiz, userId }: QuizSummaryCardProps) => {
             ? (activeDraft / quiz.questionCount) * 100
             : 0;
 
-    const actionLabel = isCompleted ? resultActionLabel(lastAttempt) : activeDraft === null ? strings.myQuiz.start : strings.myQuiz.resume;
+    const actionLabel = isCompleted ? strings.myQuiz.viewScore : activeDraft === null ? strings.myQuiz.start : strings.myQuiz.resume;
     const target = isCompleted && lastAttempt !== null ? resultPath(quiz.id, lastAttempt.id) : `/my-quizzes/${quiz.id}`;
     const statusChip = isCompleted
         ? { icon: ClipboardCheck, label: strings.myQuiz.lastSubmitted }

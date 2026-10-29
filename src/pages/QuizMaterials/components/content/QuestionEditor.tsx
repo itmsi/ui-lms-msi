@@ -25,9 +25,7 @@ export const QuestionEditor = ({ question, number, content, onRequestDelete }: Q
         <Card className="flex flex-col">
             <QuestionEditorToolbar
                 type={question.type}
-                required={question.required}
                 onChangeType={(type) => content.changeType(key, type)}
-                onChangeRequired={(required) => content.updateQuestion(key, { required })}
                 onDuplicate={() => content.duplicateQuestion(key)}
                 onDelete={onRequestDelete}
             />
@@ -35,7 +33,6 @@ export const QuestionEditor = ({ question, number, content, onRequestDelete }: Q
             <div className="flex flex-col gap-5 p-4 sm:p-5">
                 <QuestionContentField
                     number={number}
-                    required={question.required}
                     text={question.text}
                     image={question.image}
                     onChangeText={(text) => content.updateQuestion(key, { text })}

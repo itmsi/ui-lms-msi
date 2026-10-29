@@ -4,6 +4,7 @@ import { useId } from 'react';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
+import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useDragReorder } from '@/hooks/useDragReorder';
 import { strings } from '@/locales/id';
 import { MIN_CHOICE_OPTIONS } from '@/pages/QuizMaterials/questionModel';
@@ -116,13 +117,12 @@ export const AnswerOptionsEditor = ({
 
     if (question.type === 'short_answer') {
         return (
-            <Input
+            <RichTextEditor
                 label={strings.quizContent.expectedLabel}
                 value={question.expectedAnswer}
-                placeholder={strings.quizContent.expectedPlaceholder}
                 hint={strings.quizContent.expectedHint}
-                onChange={(event) => onChangeExpected(event.target.value)}
-                inputClassName="h-10"
+                onChange={onChangeExpected}
+                allowTables
             />
         );
     }

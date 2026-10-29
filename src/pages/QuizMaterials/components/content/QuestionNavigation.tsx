@@ -1,11 +1,11 @@
-import { AlertCircle, ArrowDown, ArrowUp, ClipboardCheck, Copy, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react';
 
 import { ActionMenu } from '@/components/ui/ActionMenu';
 import { IconButton } from '@/components/ui/IconButton';
 import { useDragReorder } from '@/hooks/useDragReorder';
 import { strings } from '@/locales/id';
 import { findIssues } from '@/pages/QuizMaterials/questionModel';
-import type { ContentSelection, QuizQuestion } from '@/pages/QuizMaterials/types';
+import type { QuizQuestion } from '@/pages/QuizMaterials/types';
 import { cn } from '@/utils/cn';
 
 const ITEM_CLASS =
@@ -41,10 +41,7 @@ const QuestionNavigationItem = ({
                 type="button"
                 onClick={onSelect}
                 aria-current={active ? 'true' : undefined}
-                className={cn(
-                    ITEM_CLASS,
-                    active ? 'border-primary bg-primary-light' : 'hover:bg-neutral-soft border-transparent',
-                )}
+                className={cn(ITEM_CLASS, active ? 'border-primary bg-primary-light' : 'hover:bg-neutral-soft border-transparent')}
             >
                 <span
                     className={cn(
@@ -55,12 +52,7 @@ const QuestionNavigationItem = ({
                     {index + 1}
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
-                    <span
-                        className={cn(
-                            'text-body truncate',
-                            question.text.trim() === '' ? 'text-muted italic' : 'text-ink font-medium',
-                        )}
-                    >
+                    <span className={cn('text-body truncate', question.text.trim() === '' ? 'text-muted italic' : 'text-ink font-medium')}>
                         {title}
                     </span>
                     <span className="text-caption text-muted truncate">{strings.quizContent.type[question.type]}</span>
@@ -91,25 +83,15 @@ const QuestionNavigationItem = ({
 
 interface QuestionNavigationProps {
     questions: QuizQuestion[];
-    selection: ContentSelection;
+    selectedKey: string | null;
     onSelect: (key: string) => void;
-    onSelectResult: () => void;
     onAdd: () => void;
     onDuplicate: (key: string) => void;
     onMove: (from: number, to: number) => void;
     onDelete: (key: string) => void;
 }
 
-export const QuestionNavigation = ({
-    questions,
-    selection,
-    onSelect,
-    onSelectResult,
-    onAdd,
-    onDuplicate,
-    onMove,
-    onDelete,
-}: QuestionNavigationProps) => {
+export const QuestionNavigation = ({ questions, selectedKey, onSelect, onAdd, onDuplicate, onMove, onDelete }: QuestionNavigationProps) => {
     const { itemProps, overIndex, dragIndex } = useDragReorder(questions.length, onMove);
 
     return (
@@ -144,7 +126,7 @@ export const QuestionNavigation = ({
                                 question={question}
                                 index={index}
                                 total={questions.length}
-                                active={selection.kind === 'question' && selection.key === question.key}
+                                active={selectedKey === question.key}
                                 onSelect={() => onSelect(question.key)}
                                 onDuplicate={() => onDuplicate(question.key)}
                                 onMove={(to) => onMove(index, to)}
@@ -154,24 +136,6 @@ export const QuestionNavigation = ({
                     ))}
                 </ol>
             )}
-
-            <div className="border-line border-t pt-3">
-                <button
-                    type="button"
-                    onClick={onSelectResult}
-                    aria-current={selection.kind === 'result' ? 'true' : undefined}
-                    className={cn(
-                        ITEM_CLASS,
-                        selection.kind === 'result' ? 'border-primary bg-primary-light' : 'hover:bg-neutral-soft border-transparent',
-                    )}
-                >
-                    <ClipboardCheck aria-hidden="true" className="text-primary mt-0.5 size-4.5 shrink-0" />
-                    <span className="flex min-w-0 flex-col">
-                        <span className="text-body text-ink font-medium">{strings.quizContent.result.title}</span>
-                        <span className="text-caption text-muted">{strings.quizContent.result.navHint}</span>
-                    </span>
-                </button>
-            </div>
         </nav>
     );
 };

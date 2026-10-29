@@ -4,8 +4,8 @@ export type ParticipantQuestionType = 'multiple_choice' | 'multiple_answers' | '
 
 export interface QuizLastAttempt {
     id: string;
-    score: number | null;
-    maxScore: number | null;
+    score: number;
+    maxScore: number;
     submittedAt: string;
 }
 
@@ -33,9 +33,7 @@ export interface ParticipantQuestion {
     line: number;
     type: ParticipantQuestionType;
     text: string;
-    required: boolean;
     imageUrl: string | null;
-    shuffle: boolean;
     estimatedSeconds: number | null;
     points: number | null;
     options: ParticipantOption[];
@@ -49,11 +47,12 @@ export type QuizAnswerValue = string | string[];
 
 export type QuizAnswers = Record<string, QuizAnswerValue>;
 
-export interface QuizResultScreen {
-    title: string;
-    message: string;
-    showScore: boolean;
-    showCorrectAnswers: boolean;
+export type QuizAttachments = Record<string, File[]>;
+
+export interface SubmittedAttachment {
+    name: string;
+    size: number | null;
+    url: string | null;
 }
 
 export interface QuestionReview {
@@ -62,6 +61,7 @@ export interface QuestionReview {
     type: ParticipantQuestionType;
     text: string;
     yourAnswer: string[];
+    yourAttachments: SubmittedAttachment[];
     correctAnswer: string[];
     isCorrect: boolean;
     pointsEarned: number;
@@ -78,8 +78,7 @@ export interface QuizAttemptResult {
     maxScore: number;
     correctCount: number;
     questionCount: number;
-    resultScreen: QuizResultScreen;
-    review: QuestionReview[] | null;
+    review: QuestionReview[];
 }
 
 export type QuizFailureCode = ApiFailureCode | 'not_found';

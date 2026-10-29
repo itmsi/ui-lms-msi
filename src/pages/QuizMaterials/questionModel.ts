@@ -1,4 +1,4 @@
-import type { AnswerOption, QuestionIssue, QuestionType, QuizQuestion, ResultScreen } from '@/pages/QuizMaterials/types';
+import type { AnswerOption, QuestionIssue, QuestionType, QuizQuestion } from '@/pages/QuizMaterials/types';
 
 export const MIN_CHOICE_OPTIONS = 2;
 
@@ -10,22 +10,13 @@ export const createQuestion = (): QuizQuestion => ({
     key: createKey(),
     type: 'multiple_choice',
     text: '',
-    required: true,
     image: null,
     options: [createOption(), createOption()],
     trueFalseAnswer: null,
     expectedAnswer: '',
-    choiceOrder: 'keep',
     estimatedTime: '',
     timeUnit: 'minutes',
     points: '',
-});
-
-export const createResultScreen = (): ResultScreen => ({
-    title: '',
-    message: '',
-    showScore: true,
-    showCorrectAnswers: false,
 });
 
 export const duplicateQuestion = (question: QuizQuestion): QuizQuestion => ({
@@ -48,7 +39,7 @@ export const changeQuestionType = (question: QuizQuestion, type: QuestionType): 
     };
 };
 
-export const isChoiceType = (type: QuestionType): boolean => type === 'multiple_choice' || type === 'multiple_answers';
+const isChoiceType = (type: QuestionType): boolean => type === 'multiple_choice' || type === 'multiple_answers';
 
 export const findIssues = (question: QuizQuestion): QuestionIssue[] => {
     const issues: QuestionIssue[] = [];
