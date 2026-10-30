@@ -12,7 +12,7 @@ interface MockOption {
     correct: boolean;
 }
 
-interface MockQuestion {
+export interface MockQuestion {
     id: string;
     type: MockQuestionType;
     question: string;
@@ -24,7 +24,7 @@ interface MockQuestion {
     expected_answer: string | null;
 }
 
-interface MockQuiz {
+export interface MockQuiz {
     id: string;
     title: string;
     modules_id: string;
@@ -80,7 +80,7 @@ const shortAnswer = (id: string, question: string, expected: string, extra: Part
     ...extra,
 });
 
-const MOCK_QUIZZES: MockQuiz[] = [
+export const MOCK_QUIZZES: readonly MockQuiz[] = [
     {
         id: 'contoh-quiz-keamanan-informasi',
         title: 'Contoh: Keamanan Informasi di Tempat Kerja',
@@ -218,9 +218,9 @@ const DETAIL_PREFIX = 'quizzes/participant/get/';
 const SUBMIT_PATH = 'quiz-attempts/submit';
 const ATTEMPT_PREFIX = 'quiz-attempts/get/';
 
-const wait = (ms: number, signal?: AbortSignal) =>
+export const mockLatency = (signal?: AbortSignal) =>
     new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, ms);
+        const timer = setTimeout(resolve, LATENCY_MS);
 
         signal?.addEventListener(
             'abort',
@@ -258,7 +258,7 @@ const summaryOf = (quiz: MockQuiz) => {
     };
 };
 
-const readAttempts = (): Record<string, unknown>[] => {
+export const readAttempts = (): Record<string, unknown>[] => {
     try {
         const parsed: unknown = JSON.parse(localStorage.getItem(ATTEMPTS_KEY) ?? '[]');
 
@@ -268,7 +268,7 @@ const readAttempts = (): Record<string, unknown>[] => {
     }
 };
 
-const writeAttempts = (attempts: Record<string, unknown>[]) => {
+export const writeAttempts = (attempts: Record<string, unknown>[]) => {
     try {
         localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(attempts.slice(0, MAX_STORED_ATTEMPTS)));
     } catch {
@@ -374,16 +374,21 @@ const gradeQuestion = (question: MockQuestion, answers: unknown[]) => {
 const createAttemptId = () =>
     typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `contoh-${String(Date.now())}`;
 
-const submitAttempt = (submission: MockSubmission) => {
-    const quiz = MOCK_QUIZZES.find((item) => item.id === submission.quizId);
+export interface MockAttachmentMeta {
+    name: string;
+    size: number | null;
+    url: string | null;
+}
 
-    if (quiz === undefined) {
-        return null;
-    }
-
+export const buildAttempt = (
+    quiz: MockQuiz,
+    answers: unknown[],
+    attachmentsOf: (questionId: string) => MockAttachmentMeta[],
+    submittedAt: string,
+) => {
     const review = quiz.questions.map((question, index) => {
-        const graded = gradeQuestion(question, submission.answers);
-        const files = question.type === 'short_answer' ? submission.filesOf(question.id) : [];
+        const graded = gradeQuestion(question, answers);
+        const pointsEarned = graded.isCorrect ? question.points : 0;
 
         return {
             quiz_questions_id: question.id,
@@ -391,36 +396,52 @@ const submitAttempt = (submission: MockSubmission) => {
             type: question.type,
             question: question.question,
             your_answer: graded.yourAnswer,
-            your_attachments: files.map((file) => ({ name: file.name, size: file.size, url: null })),
+            your_attachments: question.type === 'short_answer' ? attachmentsOf(question.id) : [],
             correct_answer: graded.correctAnswer,
             is_correct: graded.isCorrect,
-            points_earned: graded.isCorrect ? question.points : 0,
+            points_earned: pointsEarned,
+            auto_points_earned: pointsEarned,
             points: question.points,
         };
     });
 
-    const attempt = {
+    return {
         id: createAttemptId(),
         quizzes_id: quiz.id,
         quiz_title: quiz.title,
         module_title: quiz.module_title,
-        submitted_at: new Date().toISOString(),
+        submitted_at: submittedAt,
         score: review.reduce((total, item) => total + item.points_earned, 0),
         max_score: review.reduce((total, item) => total + item.points, 0),
         correct_count: review.filter((item) => item.is_correct).length,
         question_count: review.length,
         review,
     };
+};
+
+const submitAttempt = (submission: MockSubmission) => {
+    const quiz = MOCK_QUIZZES.find((item) => item.id === submission.quizId);
+
+    if (quiz === undefined) {
+        return null;
+    }
+
+    const attempt = buildAttempt(
+        quiz,
+        submission.answers,
+        (questionId) => submission.filesOf(questionId).map((file) => ({ name: file.name, size: file.size, url: null })),
+        new Date().toISOString(),
+    );
 
     writeAttempts([attempt, ...readAttempts()]);
 
     return attempt;
 };
 
-const notFound = () => Object.assign(new Error('Not found'), { status: 404 });
+export const mockNotFound = () => Object.assign(new Error('Not found'), { status: 404 });
 
 export const mockQuizRequest = async (path: string, payload?: unknown, signal?: AbortSignal): Promise<{ data: unknown }> => {
-    await wait(LATENCY_MS, signal);
+    await mockLatency(signal);
 
     if (path === LIST_PATH) {
         return { data: { success: true, data: MOCK_QUIZZES.map(summaryOf) } };
@@ -430,7 +451,7 @@ export const mockQuizRequest = async (path: string, payload?: unknown, signal?: 
         const quiz = MOCK_QUIZZES.find((item) => item.id === path.slice(DETAIL_PREFIX.length));
 
         if (quiz === undefined) {
-            throw notFound();
+            throw mockNotFound();
         }
 
         const summary = summaryOf(quiz);
@@ -456,7 +477,7 @@ export const mockQuizRequest = async (path: string, payload?: unknown, signal?: 
         const attempt = submitAttempt(submission);
 
         if (attempt === null) {
-            throw notFound();
+            throw mockNotFound();
         }
 
         return { data: { success: true, data: attempt } };
@@ -466,11 +487,11 @@ export const mockQuizRequest = async (path: string, payload?: unknown, signal?: 
         const attempt = readAttempts().find((item) => item.id === path.slice(ATTEMPT_PREFIX.length));
 
         if (attempt === undefined) {
-            throw notFound();
+            throw mockNotFound();
         }
 
         return { data: { success: true, data: attempt } };
     }
 
-    throw notFound();
+    throw mockNotFound();
 };

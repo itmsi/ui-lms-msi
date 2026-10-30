@@ -68,10 +68,20 @@ interface RichTextEditorProps {
     hint?: string;
     error?: string;
     allowTables?: boolean;
+    readOnly?: boolean;
     className?: string;
 }
 
-export const RichTextEditor = ({ label, value, onChange, hint, error, allowTables = false, className }: RichTextEditorProps) => {
+export const RichTextEditor = ({
+    label,
+    value,
+    onChange,
+    hint,
+    error,
+    allowTables = false,
+    readOnly = false,
+    className,
+}: RichTextEditorProps) => {
     const fieldId = useId();
     const labelId = `${fieldId}-label`;
     const hintId = `${fieldId}-hint`;
@@ -95,6 +105,7 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, allowTable
             ...(allowTables ? [TableKit.configure({ table: { resizable: false } })] : []),
         ],
         content: value,
+        editable: readOnly === false,
         onUpdate: ({ editor: instance }) => {
             onChange(instance.isEmpty ? '' : instance.getHTML());
         },
@@ -102,6 +113,7 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, allowTable
             attributes: {
                 role: 'textbox',
                 'aria-multiline': 'true',
+                'aria-readonly': readOnly ? 'true' : 'false',
                 'aria-labelledby': labelId,
                 ...(describedBy === '' ? {} : { 'aria-describedby': describedBy }),
                 class: 'text-body text-ink px-3.5 py-3',
@@ -111,17 +123,21 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, allowTable
 
     const toolbarState = useEditorState({
         editor,
-        selector: ({ editor: instance }) => ({
-            isBold: instance?.isActive('bold') ?? false,
-            isItalic: instance?.isActive('italic') ?? false,
-            isBulletList: instance?.isActive('bulletList') ?? false,
-            isOrderedList: instance?.isActive('orderedList') ?? false,
-            isInTable: instance?.isActive('table') ?? false,
-            canDeleteRow: instance?.can().deleteRow() ?? false,
-            canDeleteColumn: instance?.can().deleteColumn() ?? false,
-            canUndo: instance?.can().undo() ?? false,
-            canRedo: instance?.can().redo() ?? false,
-        }),
+        selector: ({ editor: instance }) => {
+            const isInTable = allowTables && instance !== null && instance.isActive('table');
+
+            return {
+                isBold: instance?.isActive('bold') ?? false,
+                isItalic: instance?.isActive('italic') ?? false,
+                isBulletList: instance?.isActive('bulletList') ?? false,
+                isOrderedList: instance?.isActive('orderedList') ?? false,
+                isInTable,
+                canDeleteRow: isInTable && instance.can().deleteRow(),
+                canDeleteColumn: isInTable && instance.can().deleteColumn(),
+                canUndo: instance?.can().undo() ?? false,
+                canRedo: instance?.can().redo() ?? false,
+            };
+        },
     });
 
     return (
@@ -141,7 +157,10 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, allowTable
                     role="toolbar"
                     aria-label={strings.richText.toolbarLabel}
                     aria-controls={fieldId}
-                    className="border-line bg-neutral-soft/50 flex flex-wrap items-center gap-0.5 border-b px-1.5 py-1"
+                    className={cn(
+                        'border-line bg-neutral-soft/50 flex flex-wrap items-center gap-0.5 border-b px-1.5 py-1',
+                        readOnly && 'hidden',
+                    )}
                 >
                     <IconButton
                         label={strings.richText.bold}
@@ -200,7 +219,7 @@ export const RichTextEditor = ({ label, value, onChange, hint, error, allowTable
                     />
                 </div>
 
-                {allowTables && toolbarState?.isInTable === true ? (
+                {allowTables && readOnly === false && toolbarState?.isInTable === true ? (
                     <div
                         role="toolbar"
                         aria-label={strings.richText.table.toolbarLabel}

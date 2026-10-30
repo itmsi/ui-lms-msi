@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { WoodPanel } from '@/components/ui/WoodPanel';
 import { useEmployeeById } from '@/hooks/useEmployeeById';
+import { useMaterialSelection } from '@/hooks/useMaterialSelection';
 import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
 import { EmployeeSummary } from '@/pages/Activity/UserActivity/components/EmployeeSummary';
@@ -19,7 +20,6 @@ import { UserActivityTable } from '@/pages/Activity/UserActivity/components/User
 import { useActivityExport } from '@/pages/Activity/UserActivity/hooks/useActivityExport';
 import { useUserActivity } from '@/pages/Activity/UserActivity/hooks/useUserActivity';
 import type { Employee } from '@/types/employee';
-import type { LearningModule } from '@/types/module';
 import { findModuleTitle } from '@/utils/activityText';
 import { toIsoDate } from '@/utils/dateTime';
 // import { presetRange, RANGE_PRESET_OPTIONS } from '@/utils/rangePreset';
@@ -77,30 +77,7 @@ export const UserActivity = () => {
         [rememberEmployees, selectEmployee],
     );
 
-    const [materials, setMaterials] = useState<Record<string, LearningModule>>({});
-
-    const rememberMaterials = useCallback((items: LearningModule[]) => {
-        setMaterials((previous) => {
-            const next = { ...previous };
-
-            for (const item of items) {
-                next[item.id] = item;
-            }
-
-            return next;
-        });
-    }, []);
-
-    const handleSelectMaterial = useCallback(
-        (material: LearningModule | null) => {
-            if (material !== null) {
-                rememberMaterials([material]);
-            }
-
-            selectModule(material?.id ?? null);
-        },
-        [rememberMaterials, selectModule],
-    );
+    const { selectedMaterial, rememberMaterials, selectMaterial: handleSelectMaterial } = useMaterialSelection(moduleId, selectModule);
 
     const rangeStart = dateRange.start;
     const rangeEnd = dateRange.end;
@@ -118,7 +95,6 @@ export const UserActivity = () => {
     const selected = useEmployeeById(employeeId, employeeId === null ? null : (employees[employeeId] ?? null));
     const employeeFallbackName =
         employeeId === null ? null : (items.find((item) => item.createdBy === employeeId)?.createdByName ?? null);
-    const selectedMaterial = moduleId === null ? null : (materials[moduleId] ?? null);
 
     return (
         <section className="flex flex-col gap-5">
@@ -193,9 +169,6 @@ export const UserActivity = () => {
                         now={now}
                     />
                 )}
-
-
-
 
                 {state.status === 'error' ? (
                     <Card>

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { strings } from '@/locales/id';
 import type { SubmitState } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
-import { formatAnsweredCount } from '@/pages/Candidate/Quiz/quizModel';
-import { PRESSABLE_CLASS, reviewItemVariants, reviewListVariants } from '@/pages/Candidate/Quiz/quizMotion';
+import { PRESSABLE_CLASS, reviewItemVariants, reviewListVariants } from '@/pages/Candidate/Quiz/utils/quizMotion';
+import { formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
 
 const FAILURE_TEXT: Record<string, string> = {
     offline: strings.apiErrors.offlineHappened,

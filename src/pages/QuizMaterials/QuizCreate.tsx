@@ -2,29 +2,38 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
+import { PermissionDenied } from '@/components/patterns/PermissionDenied';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useBeforeUnloadWarning } from '@/hooks/useBeforeUnloadWarning';
+import { useMenuAccess } from '@/hooks/useMenuAccess';
 import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
-import { QuizContentEditor } from '@/pages/QuizMaterials/components/content/QuizContentEditor';
 import { QuizInfoForm } from '@/pages/QuizMaterials/components/QuizInfoForm';
-import { QuizInfoSummary } from '@/pages/QuizMaterials/components/QuizInfoSummary';
-import { useQuizContent } from '@/pages/QuizMaterials/hooks/useQuizContent';
-import { useQuizDraft } from '@/pages/QuizMaterials/hooks/useQuizDraft';
+import { EMPTY_QUIZ_INFO, useQuizDraft } from '@/pages/QuizMaterials/hooks/useQuizDraft';
+import { QUIZ_LIST_PATH, quizDetailPath } from '@/pages/QuizMaterials/utils/paths';
+import { createQuiz } from '@/pages/QuizMaterials/services/quizMaterialService';
 import { toIsoDate } from '@/utils/dateTime';
 
 const NOW_TICK_MS = 60_000;
-const LIST_PATH = '/quizzes';
 
 export const QuizCreate = () => {
     const navigate = useNavigate();
+    const { canCreate } = useMenuAccess('quizMaterials');
     const today = toIsoDate(new Date(useNow(NOW_TICK_MS)));
-    const { info, errors, step, update, continueToContent, editInfo, isDirty: isInfoDirty } = useQuizDraft(today);
-    const content = useQuizContent();
+    const openDetail = useCallback((quizId: string) => void navigate(quizDetailPath(quizId), { replace: true }), [navigate]);
+    const { info, errors, isSubmitting, update, setBanner, submit, isDirty } = useQuizDraft({
+        today,
+        initial: EMPTY_QUIZ_INFO,
+        save: createQuiz,
+        successMessage: strings.quizForm.saved,
+        onSaved: openDetail,
+    });
     const [confirmingLeave, setConfirmingLeave] = useState(false);
-    const isDirty = isInfoDirty || content.hasContent;
+
+    useBeforeUnloadWarning(isDirty && isSubmitting === false);
 
     const leave = useCallback(() => {
-        void navigate(LIST_PATH);
+        void navigate(QUIZ_LIST_PATH);
     }, [navigate]);
 
     const requestLeave = useCallback(() => {
@@ -40,24 +49,20 @@ export const QuizCreate = () => {
         <section className="flex flex-col gap-5">
             <PageHeaderDetail title={strings.quizForm.createTitle} subtitle={strings.quizForm.createSubtitle} backPath={requestLeave} />
 
-            {step === 'info' ? (
+            {canCreate ? (
                 <QuizInfoForm
+                    mode="create"
                     info={info}
                     errors={errors}
-                    today={today}
+                    minDate={today}
+                    isSubmitting={isSubmitting}
                     onChange={update}
-                    onSubmit={continueToContent}
+                    onChangeBanner={setBanner}
+                    onSubmit={() => void submit()}
                     onCancel={requestLeave}
                 />
             ) : (
-                <>
-                    <QuizInfoSummary info={info} today={today} onEdit={editInfo} />
-                    {/* <p role="note" className="bg-warning-soft text-warning-ink text-caption flex items-start gap-2 rounded-lg px-3 py-2.5">
-                        <CloudOff aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                        {strings.quizContent.unsavedNotice}
-                    </p> */}
-                    <QuizContentEditor content={content} />
-                </>
+                <PermissionDenied description={strings.permission.createQuiz} />
             )}
 
             <ConfirmDialog

@@ -1,21 +1,44 @@
-import { AlertCircle, ArrowDown, ArrowUp, Copy, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, ArrowDown, ArrowUp, CircleCheck, Copy, Plus, Trash2 } from 'lucide-react';
 
 import { ActionMenu } from '@/components/ui/ActionMenu';
 import { IconButton } from '@/components/ui/IconButton';
 import { useDragReorder } from '@/hooks/useDragReorder';
 import { strings } from '@/locales/id';
-import { findIssues } from '@/pages/QuizMaterials/questionModel';
-import type { QuizQuestion } from '@/pages/QuizMaterials/types';
+import { findIssues } from '@/pages/QuizMaterials/utils/questionModel';
+import type { QuestionSaveStatus, QuizQuestion } from '@/pages/QuizMaterials/types';
 import { cn } from '@/utils/cn';
 
 const ITEM_CLASS =
     'focus-visible:outline-primary flex w-full min-w-0 items-start gap-2.5 rounded-lg border px-2.5 py-2 text-left transition-colors focus-visible:outline-2';
+
+const StatusMark = ({ incomplete, status }: { incomplete: boolean; status: QuestionSaveStatus }) => {
+    if (incomplete) {
+        return <AlertCircle aria-label={strings.quizContent.incomplete} className="text-warning-ink mt-0.5 size-4 shrink-0" />;
+    }
+
+    if (status === 'saved') {
+        return <CircleCheck aria-label={strings.quizContent.saveStatus.saved} className="text-success-ink mt-0.5 size-4 shrink-0" />;
+    }
+
+    return (
+        <span
+            role="img"
+            aria-label={strings.quizContent.saveStatus[status]}
+            className="flex size-4 shrink-0 items-center justify-center mt-0.5"
+        >
+            <span className="bg-primary size-2 rounded-full" />
+        </span>
+    );
+};
 
 interface QuestionNavigationItemProps {
     question: QuizQuestion;
     index: number;
     total: number;
     active: boolean;
+    status: QuestionSaveStatus;
+    readOnly: boolean;
+    deleteLocked: boolean;
     onSelect: () => void;
     onDuplicate: () => void;
     onMove: (to: number) => void;
@@ -27,6 +50,9 @@ const QuestionNavigationItem = ({
     index,
     total,
     active,
+    status,
+    readOnly,
+    deleteLocked,
     onSelect,
     onDuplicate,
     onMove,
@@ -57,26 +83,32 @@ const QuestionNavigationItem = ({
                     </span>
                     <span className="text-caption text-muted truncate">{strings.quizContent.type[question.type]}</span>
                 </span>
-                {incomplete ? (
-                    <AlertCircle aria-label={strings.quizContent.incomplete} className="text-warning-ink mt-0.5 size-4 shrink-0" />
-                ) : null}
+                {readOnly ? null : <StatusMark incomplete={incomplete} status={status} />}
             </button>
 
-            <ActionMenu
-                label={`${strings.quizContent.questionMenu} ${String(index + 1)}`}
-                items={[
-                    { label: strings.quizContent.duplicate, icon: Copy, onSelect: onDuplicate },
-                    { label: strings.quizContent.moveUp, icon: ArrowUp, onSelect: () => onMove(index - 1), disabled: index === 0 },
-                    {
-                        label: strings.quizContent.moveDown,
-                        icon: ArrowDown,
-                        onSelect: () => onMove(index + 1),
-                        disabled: index === total - 1,
-                    },
-                    { label: strings.quizContent.delete, icon: Trash2, onSelect: onDelete, tone: 'danger' },
-                ]}
-                className="mt-1"
-            />
+            {readOnly ? null : (
+                <ActionMenu
+                    label={`${strings.quizContent.questionMenu} ${String(index + 1)}`}
+                    items={[
+                        { label: strings.quizContent.duplicate, icon: Copy, onSelect: onDuplicate },
+                        { label: strings.quizContent.moveUp, icon: ArrowUp, onSelect: () => onMove(index - 1), disabled: index === 0 },
+                        {
+                            label: strings.quizContent.moveDown,
+                            icon: ArrowDown,
+                            onSelect: () => onMove(index + 1),
+                            disabled: index === total - 1,
+                        },
+                        {
+                            label: strings.quizContent.delete,
+                            icon: Trash2,
+                            onSelect: onDelete,
+                            tone: 'danger',
+                            disabled: deleteLocked,
+                        },
+                    ]}
+                    className="mt-1"
+                />
+            )}
         </div>
     );
 };
@@ -84,6 +116,9 @@ const QuestionNavigationItem = ({
 interface QuestionNavigationProps {
     questions: QuizQuestion[];
     selectedKey: string | null;
+    statuses: Record<string, QuestionSaveStatus>;
+    busyKeys: ReadonlySet<string>;
+    readOnly: boolean;
     onSelect: (key: string) => void;
     onAdd: () => void;
     onDuplicate: (key: string) => void;
@@ -91,7 +126,18 @@ interface QuestionNavigationProps {
     onDelete: (key: string) => void;
 }
 
-export const QuestionNavigation = ({ questions, selectedKey, onSelect, onAdd, onDuplicate, onMove, onDelete }: QuestionNavigationProps) => {
+export const QuestionNavigation = ({
+    questions,
+    selectedKey,
+    statuses,
+    busyKeys,
+    readOnly,
+    onSelect,
+    onAdd,
+    onDuplicate,
+    onMove,
+    onDelete,
+}: QuestionNavigationProps) => {
     const { itemProps, overIndex, dragIndex } = useDragReorder(questions.length, onMove);
 
     return (
@@ -100,22 +146,26 @@ export const QuestionNavigation = ({ questions, selectedKey, onSelect, onAdd, on
                 <h2 className="text-caption text-muted font-semibold tracking-wide uppercase">
                     {`${strings.quizContent.questionsHeading} (${String(questions.length)})`}
                 </h2>
-                <IconButton
-                    label={strings.quizContent.addQuestion}
-                    icon={<Plus aria-hidden="true" className="size-4" />}
-                    onClick={onAdd}
-                    className="text-primary hover:bg-primary-light hover:text-primary-dark size-8"
-                />
+                {readOnly ? null : (
+                    <IconButton
+                        label={strings.quizContent.addQuestion}
+                        icon={<Plus aria-hidden="true" className="size-4" />}
+                        onClick={onAdd}
+                        className="text-primary hover:bg-primary-light hover:text-primary-dark size-8"
+                    />
+                )}
             </div>
 
             {questions.length === 0 ? (
-                <p className="text-caption text-muted">{strings.quizContent.emptyBody}</p>
+                <p className="text-caption text-muted">
+                    {readOnly ? strings.quizContent.emptyReadOnlyBody : strings.quizContent.emptyBody}
+                </p>
             ) : (
                 <ol className="flex flex-col gap-1">
                     {questions.map((question, index) => (
                         <li
                             key={question.key}
-                            {...itemProps(index)}
+                            {...(readOnly ? {} : itemProps(index))}
                             className={cn(
                                 'rounded-lg',
                                 dragIndex === index && 'opacity-50',
@@ -127,6 +177,9 @@ export const QuestionNavigation = ({ questions, selectedKey, onSelect, onAdd, on
                                 index={index}
                                 total={questions.length}
                                 active={selectedKey === question.key}
+                                status={statuses[question.key] ?? 'new'}
+                                readOnly={readOnly}
+                                deleteLocked={busyKeys.has(question.key)}
                                 onSelect={() => onSelect(question.key)}
                                 onDuplicate={() => onDuplicate(question.key)}
                                 onMove={(to) => onMove(index, to)}

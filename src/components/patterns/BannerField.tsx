@@ -10,10 +10,11 @@ interface BannerFieldProps {
     file: File | null;
     error?: string;
     currentUrl?: string | null;
+    required?: boolean;
     onChange: (file: File | null, error: string | null) => void;
 }
 
-export const BannerField = ({ file, error, currentUrl = null, onChange }: BannerFieldProps) => {
+export const BannerField = ({ file, error, currentUrl = null, required = false, onChange }: BannerFieldProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const previewUrl = useMemo(() => (file === null ? null : URL.createObjectURL(file)), [file]);
@@ -45,7 +46,10 @@ export const BannerField = ({ file, error, currentUrl = null, onChange }: Banner
 
     return (
         <div className="flex flex-col gap-1.5">
-            <span className="text-body text-ink font-medium">{strings.materialEditor.bannerLabel}</span>
+            <span className="text-body text-ink font-medium">
+                {strings.materialEditor.bannerLabel}
+                {required ? <span className="text-danger-ink"> *</span> : null}
+            </span>
 
             <div className="flex flex-wrap items-start gap-3">
                 <div className="bg-neutral-soft border-line aspect-video w-48 shrink-0 overflow-hidden rounded-lg border">

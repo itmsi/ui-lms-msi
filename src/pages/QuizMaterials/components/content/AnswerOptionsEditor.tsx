@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { useDragReorder } from '@/hooks/useDragReorder';
 import { strings } from '@/locales/id';
-import { MIN_CHOICE_OPTIONS } from '@/pages/QuizMaterials/questionModel';
+import { MIN_CHOICE_OPTIONS } from '@/pages/QuizMaterials/utils/questionModel';
 import type { AnswerOption, QuizQuestion, TrueFalseAnswer } from '@/pages/QuizMaterials/types';
 import { cn } from '@/utils/cn';
 
@@ -93,6 +93,7 @@ const TRUE_FALSE_VALUES: readonly TrueFalseAnswer[] = ['true', 'false'];
 
 interface AnswerOptionsEditorProps {
     question: QuizQuestion;
+    readOnly: boolean;
     onToggleCorrect: (optionKey: string) => void;
     onChangeOptionText: (optionKey: string, text: string) => void;
     onRemoveOption: (optionKey: string) => void;
@@ -104,6 +105,7 @@ interface AnswerOptionsEditorProps {
 
 export const AnswerOptionsEditor = ({
     question,
+    readOnly,
     onToggleCorrect,
     onChangeOptionText,
     onRemoveOption,
@@ -123,6 +125,7 @@ export const AnswerOptionsEditor = ({
                 hint={strings.quizContent.expectedHint}
                 onChange={onChangeExpected}
                 allowTables
+                readOnly={readOnly}
             />
         );
     }
@@ -185,16 +188,18 @@ export const AnswerOptionsEditor = ({
                 ))}
             </ol>
 
-            <div>
-                <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onAddOption}
-                    leadingIcon={<Plus aria-hidden="true" className="text-primary size-4" />}
-                >
-                    {strings.quizContent.addOption}
-                </Button>
-            </div>
+            {readOnly ? null : (
+                <div>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={onAddOption}
+                        leadingIcon={<Plus aria-hidden="true" className="text-primary size-4" />}
+                    >
+                        {strings.quizContent.addOption}
+                    </Button>
+                </div>
+            )}
         </fieldset>
     );
 };

@@ -10,7 +10,7 @@ import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { strings } from '@/locales/id';
 import { AnswerReviewList } from '@/pages/Candidate/Quiz/components/AnswerReviewList';
-import { useQuizResource } from '@/pages/Candidate/Quiz/hooks/useQuizResource';
+import { useQuizResource } from '@/hooks/useQuizResource';
 import { fetchQuizAttempt } from '@/services/quizService';
 import type { QuizAttemptResult } from '@/types/quiz';
 import { formatFullDateTime } from '@/utils/dateTime';

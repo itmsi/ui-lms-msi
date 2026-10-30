@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import type { SubmitEvent } from 'react';
 
+import { BannerField } from '@/components/patterns/BannerField';
 import { DateRangePickerField } from '@/components/patterns/DateRangePickerField';
 import FormActions from '@/components/patterns/FormActions';
 import { MateriSelect } from '@/components/patterns/MateriSelect';
@@ -12,15 +13,30 @@ import type { QuizInfo, QuizInfoErrors, QuizInfoField } from '@/pages/QuizMateri
 import { cn } from '@/utils/cn';
 
 interface QuizInfoFormProps {
+    mode: 'create' | 'edit';
     info: QuizInfo;
     errors: QuizInfoErrors;
-    today: string;
+    minDate: string;
+    currentBannerUrl?: string | null;
+    isSubmitting: boolean;
     onChange: <K extends QuizInfoField>(field: K, value: QuizInfo[K]) => void;
+    onChangeBanner: (file: File | null, error: string | null) => void;
     onSubmit: () => void;
     onCancel: () => void;
 }
 
-export const QuizInfoForm = ({ info, errors, today, onChange, onSubmit, onCancel }: QuizInfoFormProps) => {
+export const QuizInfoForm = ({
+    mode,
+    info,
+    errors,
+    minDate,
+    currentBannerUrl = null,
+    isSubmitting,
+    onChange,
+    onChangeBanner,
+    onSubmit,
+    onCancel,
+}: QuizInfoFormProps) => {
     const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         onSubmit();
@@ -78,19 +94,22 @@ export const QuizInfoForm = ({ info, errors, today, onChange, onSubmit, onCancel
                     required
                     value={info.period}
                     onChange={(period) => onChange('period', period)}
-                    min={today}
+                    min={minDate}
                     placeholder={strings.quizForm.periodPlaceholder}
                     error={errors.period}
                     className="sm:max-w-sm"
                 />
+
+                <BannerField file={info.banner} error={errors.banner} currentUrl={currentBannerUrl} required onChange={onChangeBanner} />
             </Card>
 
             <FormActions
-                submitLabel={strings.quizForm.continue}
-                submittingLabel={strings.quizForm.continue}
+                submitLabel={mode === 'create' ? strings.quizForm.saveAndContinue : strings.quizForm.saveChanges}
+                submittingLabel={strings.quizForm.savingInfo}
                 cancelLabel={strings.quizForm.cancel}
                 onCancel={onCancel}
-                submitIcon={<ArrowRight aria-hidden="true" className="size-4" />}
+                isSubmitting={isSubmitting}
+                submitIcon={mode === 'create' ? <ArrowRight aria-hidden="true" className="size-4" /> : undefined}
             />
         </form>
     );

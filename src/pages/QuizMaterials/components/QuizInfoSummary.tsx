@@ -1,28 +1,16 @@
-import { BookOpen, CalendarRange, CircleCheck, CircleSlash, FilePen, Pencil, Users } from 'lucide-react';
+import { BookOpen, CalendarRange, CloudCheck, Pencil, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { strings } from '@/locales/id';
+import { QuizScheduleBadge } from '@/pages/QuizMaterials/components/QuizScheduleBadge';
+import { resolveSchedule } from '@/pages/QuizMaterials/utils/quizSchedule';
 import type { QuizInfo, QuizSchedule } from '@/pages/QuizMaterials/types';
 import type { DateRange } from '@/types/dateRange';
-import { cn } from '@/utils/cn';
 import { formatIsoRange } from '@/utils/dateRangeText';
 import { formatShortDate, fromIsoDate } from '@/utils/dateTime';
-
-const SCHEDULE_STYLE: Record<QuizSchedule, { icon: LucideIcon; className: string }> = {
-    draft: { icon: FilePen, className: 'bg-neutral-soft text-neutral-ink' },
-    active: { icon: CircleCheck, className: 'bg-success-soft text-success-ink' },
-    ended: { icon: CircleSlash, className: 'bg-neutral-soft text-neutral-ink' },
-};
-
-const resolveSchedule = (period: DateRange, today: string): QuizSchedule => {
-    if (period.start > today) {
-        return 'draft';
-    }
-
-    return period.end < today ? 'ended' : 'active';
-};
 
 const formatIso = (isoDate: string): string => {
     const date = fromIsoDate(isoDate);
@@ -44,14 +32,10 @@ const describeSchedule = (schedule: QuizSchedule, period: DateRange): string => 
 
 const ScheduleNote = ({ period, today }: { period: DateRange; today: string }) => {
     const schedule = resolveSchedule(period, today);
-    const { icon: Icon, className } = SCHEDULE_STYLE[schedule];
 
     return (
         <p className="border-line text-caption text-muted flex flex-wrap items-center gap-2 border-t pt-4">
-            <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium', className)}>
-                <Icon aria-hidden="true" className="size-3.5 shrink-0" />
-                {strings.quizForm.schedule[schedule]}
-            </span>
+            <QuizScheduleBadge schedule={schedule} />
             {describeSchedule(schedule, period)}
         </p>
     );
@@ -72,7 +56,7 @@ const SummaryItem = ({ icon: Icon, label, value }: { icon: LucideIcon; label: st
 interface QuizInfoSummaryProps {
     info: QuizInfo;
     today: string;
-    onEdit: () => void;
+    onEdit?: () => void;
 }
 
 export const QuizInfoSummary = ({ info, today, onEdit }: QuizInfoSummaryProps) => (
@@ -82,9 +66,16 @@ export const QuizInfoSummary = ({ info, today, onEdit }: QuizInfoSummaryProps) =
                 <span className="text-caption text-muted">{strings.quizForm.titleLabel}</span>
                 <h2 className="text-section line-clamp-2">{info.title}</h2>
             </div>
-            <Button variant="secondary" size="sm" onClick={onEdit} leadingIcon={<Pencil aria-hidden="true" className="size-4" />}>
-                {strings.quizForm.editInfo}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+                <Badge tone="success" icon={CloudCheck}>
+                    {strings.quizForm.savedChip}
+                </Badge>
+                {onEdit === undefined ? null : (
+                    <Button variant="secondary" size="sm" onClick={onEdit} leadingIcon={<Pencil aria-hidden="true" className="size-4" />}>
+                        {strings.quizForm.editInfo}
+                    </Button>
+                )}
+            </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
@@ -96,8 +87,8 @@ export const QuizInfoSummary = ({ info, today, onEdit }: QuizInfoSummaryProps) =
                     (info.audiences as (keyof typeof strings.quizForm.audience)[]).length === 0
                         ? '—'
                         : (info.audiences as (keyof typeof strings.quizForm.audience)[])
-                            .map((audience) => strings.quizForm.audience[audience])
-                            .join(', ')
+                              .map((audience) => strings.quizForm.audience[audience])
+                              .join(', ')
                 }
             />
             <SummaryItem

@@ -10,7 +10,7 @@ const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const relativeFormat = new Intl.RelativeTimeFormat(LOCALE, { numeric: 'auto' });
 const timeFormat = new Intl.DateTimeFormat(LOCALE, { hour: '2-digit', minute: '2-digit' });
 const dayFormat = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-const fullFormat = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long', timeStyle: 'short' });
+const longDateFormat = new Intl.DateTimeFormat(LOCALE, { dateStyle: 'long' });
 const shortDateFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short', year: 'numeric' });
 const dayMonthFormat = new Intl.DateTimeFormat(LOCALE, { day: 'numeric', month: 'short' });
 
@@ -19,6 +19,8 @@ const toDate = (iso: string): Date | null => {
 
     return isValid(date) ? date : null;
 };
+
+const formatDateWithClock = (date: Date): string => `${longDateFormat.format(date)} ${timeFormat.format(date)}`;
 
 export const toDayKey = (iso: string): string => {
     const date = toDate(iso);
@@ -65,7 +67,7 @@ export const formatRelativeTime = (iso: string, now: number): string => {
         return relativeFormat.format(-hours, 'hour');
     }
 
-    return hours < 48 ? relativeFormat.format(-1, 'day') : fullFormat.format(date);
+    return hours < 48 ? relativeFormat.format(-1, 'day') : formatDateWithClock(date);
 };
 
 export const formatClock = (iso: string): string => {
@@ -102,6 +104,5 @@ export const countDaysInclusive = (start: Date, end: Date): number => difference
 
 export const formatFullDateTime = (iso: string): string => {
     const date = toDate(iso);
-
-    return date === null ? '' : fullFormat.format(date);
+    return date === null ? '' : formatDateWithClock(date);
 };

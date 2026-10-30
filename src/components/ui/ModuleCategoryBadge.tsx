@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn';
 
 interface ModuleCategoryBadgeProps {
     category: string;
+    srLabel?: string;
     className?: string;
 }
 
@@ -28,7 +29,7 @@ const TONE_CLASS: Record<CategoryTone, string> = {
 
 const UNKNOWN_CLASS = 'bg-neutral-soft border-neutral-line text-neutral-ink';
 
-export const ModuleCategoryBadge = ({ category, className }: ModuleCategoryBadgeProps) => {
+export const ModuleCategoryBadge = ({ category, srLabel = strings.library.categoryLabel, className }: ModuleCategoryBadgeProps) => {
     const tone = TONE_BY_CATEGORY[category.trim().toLowerCase()];
 
     return (
@@ -40,7 +41,7 @@ export const ModuleCategoryBadge = ({ category, className }: ModuleCategoryBadge
                 className,
             )}
         >
-            <span className="sr-only">{strings.library.categoryLabel} </span>
+            <span className="sr-only">{srLabel} </span>
             {tone === undefined ? category.toUpperCase() : LABEL_BY_TONE[tone]}
         </span>
     );

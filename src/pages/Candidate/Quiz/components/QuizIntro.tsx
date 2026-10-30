@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { strings } from '@/locales/id';
-import { formatAnsweredCount, formatEstimate } from '@/pages/Candidate/Quiz/quizModel';
+import { formatAnsweredCount, formatEstimate } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantQuiz } from '@/types/quiz';
 import { formatShortDate, fromIsoDate } from '@/utils/dateTime';
 

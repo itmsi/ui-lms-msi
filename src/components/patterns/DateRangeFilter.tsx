@@ -85,7 +85,7 @@ export const DateRangeFilter = <P extends string>({
     };
 
     return (
-        <div className={`flex items-center ${presets ? 'flex-wrap gap-2' : 'w-full'}`}>
+        <div className={`flex items-center ${presets ? 'flex-wrap gap-2 w-full' : 'w-full'}`}>
             <button
                 type="button"
                 onClick={openDialog}

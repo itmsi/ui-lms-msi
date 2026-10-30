@@ -13,7 +13,7 @@ const BASE_STYLES: TableStyles = {
     headRow: {
         style: {
             minHeight: '44px',
-            backgroundColor: 'var(--color-background)',
+            backgroundColor: 'var(--color-primary-dark)',
             borderBottom: '1px solid var(--color-line)',
         },
     },
@@ -21,9 +21,9 @@ const BASE_STYLES: TableStyles = {
         style: {
             paddingLeft: '16px',
             paddingRight: '16px',
-            fontSize: '12px',
+            fontSize: '14px',
             fontWeight: 600,
-            color: 'var(--color-muted)',
+            color: 'var(--color-white)',
         },
     },
     rows: {

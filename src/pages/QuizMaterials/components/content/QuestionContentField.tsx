@@ -11,22 +11,24 @@ interface QuestionContentFieldProps {
     number: number;
     text: string;
     image: File | null;
+    imageUrl: string | null;
     onChangeText: (text: string) => void;
     onChangeImage: (image: File | null) => void;
 }
 
-export const QuestionContentField = ({ number, text, image, onChangeText, onChangeImage }: QuestionContentFieldProps) => {
+export const QuestionContentField = ({ number, text, image, imageUrl, onChangeText, onChangeImage }: QuestionContentFieldProps) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [imageError, setImageError] = useState<string | null>(null);
-    const previewUrl = useMemo(() => (image === null ? null : URL.createObjectURL(image)), [image]);
+    const objectUrl = useMemo(() => (image === null ? null : URL.createObjectURL(image)), [image]);
+    const previewUrl = objectUrl ?? imageUrl;
 
     useEffect(
         () => () => {
-            if (previewUrl !== null) {
-                URL.revokeObjectURL(previewUrl);
+            if (objectUrl !== null) {
+                URL.revokeObjectURL(objectUrl);
             }
         },
-        [previewUrl],
+        [objectUrl],
     );
 
     const handlePick = (event: ChangeEvent<HTMLInputElement>) => {

@@ -1,12 +1,4 @@
-import { useMemo } from 'react';
+import type { MenuAccess } from '@/helpers/menuAccess';
+import { useMenuAccess } from '@/hooks/useMenuAccess';
 
-import { readMaterialsAccess } from '@/helpers/menuAccess';
-import type { MaterialsAccess } from '@/helpers/menuAccess';
-import { useAuth } from '@/hooks/useAuth';
-
-export const useMaterialsAccess = (): MaterialsAccess => {
-    const { user } = useAuth();
-    const menu = user?.menu;
-
-    return useMemo(() => readMaterialsAccess(menu ?? []), [menu]);
-};
+export const useMaterialsAccess = (): MenuAccess => useMenuAccess('materials');

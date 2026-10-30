@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/Card';
 import { strings } from '@/locales/id';
 import { resultPath } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
-import { countDraftAnswers, formatValidUntil, readDraft } from '@/pages/Candidate/Quiz/quizModel';
+import { readDraft } from '@/pages/Candidate/Quiz/services/draftStore';
+import { countDraftAnswers } from '@/pages/Candidate/Quiz/utils/quizModel';
+import { formatValidUntil } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantQuizSummary } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 

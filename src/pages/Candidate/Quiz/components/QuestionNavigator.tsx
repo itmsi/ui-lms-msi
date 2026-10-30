@@ -2,8 +2,8 @@ import { Check } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
 
 import { strings } from '@/locales/id';
-import { describeQuestionState } from '@/pages/Candidate/Quiz/quizModel';
-import { popIn } from '@/pages/Candidate/Quiz/quizMotion';
+import { popIn } from '@/pages/Candidate/Quiz/utils/quizMotion';
+import { describeQuestionState } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantQuestion } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 

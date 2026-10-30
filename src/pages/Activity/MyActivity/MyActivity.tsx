@@ -2,7 +2,6 @@ import { Footprints, RotateCcw, SearchX } from 'lucide-react';
 
 import { ApiErrorState } from '@/components/patterns/ApiErrorState';
 import { DateRangeFilter } from '@/components/patterns/DateRangeFilter';
-import { PageHeader } from '@/components/patterns/PageHeader';
 import { SearchBar } from '@/components/patterns/SearchBar';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -73,45 +72,42 @@ export const MyActivity = () => {
 
     return (
         <section className="mx-auto flex w-full flex-col gap-5">
-            <PageHeader title={strings.nav.myActivity} description={strings.activityLog.mySubtitle} />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-                <SearchBar
-                    label={strings.activityLog.searchLabel}
-                    placeholder={strings.activityLog.searchPlaceholder}
-                    value={search}
-                    onSubmit={submitSearch}
-                    hasFilters={hasFilters}
-                    onClear={clearFilters}
-                    disabled={status === 'loading'}
-                />
-                <div className="w-1xl">
-                    <DateRangeFilter
-                        presets={RANGE_PRESET_OPTIONS}
-                        resolvePreset={presetRange}
-                        preset={rangePreset}
-                        range={dateRange}
-                        max={toIsoDate(new Date(now))}
-                        onSelectPreset={selectPreset}
-                        onChangeRange={selectCustomRange}
-                    />
-                </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <p aria-live="polite" className="text-caption text-muted tabular-nums">
-                    {total === null ? ' ' : `${String(total)} ${strings.activityLog.totalSuffix}`}
-                </p>
-
-                {moduleId === null ? null : (
-                    <FilterChip
-                        label={strings.activityLog.filterModuleChip}
-                        value={findModuleTitle(items, moduleId) ?? strings.activityLog.thisMaterial}
-                        onRemove={() => selectModule(null)}
-                    />
-                )}
-            </div>
 
             <WoodPanel className="flex flex-col gap-6">
+                <div className='flex flex-col md:flex-row gap-4 items-start md:items-center'>
+                    <div className="flex-1 shadow-[0_1px_2px_rgb(1_30_60_/_0.2),0_12px_18px_-10px_rgb(1_30_60_/_0.55)]">
+                        <SearchBar
+                            label={strings.activityLog.searchLabel}
+                            placeholder={strings.activityLog.searchPlaceholder}
+                            value={search}
+                            onSubmit={submitSearch}
+                            hasFilters={hasFilters}
+                            onClear={clearFilters}
+                            disabled={status === 'loading'}
+                        />
+                    </div>
+                    <div className="shadow-[0_1px_2px_rgb(1_30_60_/_0.2),0_12px_18px_-10px_rgb(1_30_60_/_0.55)] gap-2 basis-1/4 bg-surface border-line rounded-card flex min-h-11 items-center border p-0 transition-colors hover:border-primary/50">
+                        <DateRangeFilter
+                            presets={RANGE_PRESET_OPTIONS}
+                            resolvePreset={presetRange}
+                            preset={rangePreset}
+                            range={dateRange}
+                            max={toIsoDate(new Date(now))}
+                            onSelectPreset={selectPreset}
+                            onChangeRange={selectCustomRange}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                    {moduleId === null ? null : (
+                        <FilterChip
+                            label={strings.activityLog.filterModuleChip}
+                            value={findModuleTitle(items, moduleId) ?? strings.activityLog.thisMaterial}
+                            onRemove={() => selectModule(null)}
+                        />
+                    )}
+                </div>
                 {resumeItem === undefined ? null : <ResumeCard item={resumeItem} now={now} />}
 
                 {hasFilters ? null : <RecentMaterials items={items} now={now} />}

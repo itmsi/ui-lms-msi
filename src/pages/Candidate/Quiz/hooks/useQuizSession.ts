@@ -1,18 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { clearAttachments, readAttachments, writeAttachments } from '@/pages/Candidate/Quiz/attachmentStore';
-import {
-    clearDraft,
-    createDraft,
-    findAnsweredIds,
-    findUnanswered,
-    fitAttachments,
-    fitDraft,
-    readDraft,
-    writeDraft,
-} from '@/pages/Candidate/Quiz/quizModel';
-import type { QuizDraft } from '@/pages/Candidate/Quiz/quizModel';
+import { clearAttachments, readAttachments, writeAttachments } from '@/pages/Candidate/Quiz/services/attachmentStore';
+import { clearDraft, readDraft, writeDraft } from '@/pages/Candidate/Quiz/services/draftStore';
+import type { QuizDraft } from '@/pages/Candidate/Quiz/types';
+import { createDraft, findAnsweredIds, findUnanswered, fitAttachments, fitDraft } from '@/pages/Candidate/Quiz/utils/quizModel';
 import { submitQuizAttempt } from '@/services/quizService';
 import type { ParticipantQuiz, QuizAnswerValue, QuizAttachments, QuizFailureCode } from '@/types/quiz';
 

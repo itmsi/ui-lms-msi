@@ -13,9 +13,10 @@ import { cn } from '@/utils/cn';
 
 interface QuizContentEditorProps {
     content: QuizContentController;
+    readOnly: boolean;
 }
 
-export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
+export const QuizContentEditor = ({ content, readOnly }: QuizContentEditorProps) => {
     const navId = useId();
     const [navOpen, setNavOpen] = useState(false);
     const [pendingDelete, setPendingDelete] = useState<string | null>(null);
@@ -39,12 +40,17 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
         setNavOpen(false);
     };
 
-    const confirmDelete = () => {
-        if (pendingDelete !== null) {
-            content.deleteQuestion(pendingDelete);
+    const busyKeys = new Set([...content.savingKeys, ...content.deletingKeys]);
+    const isDeleting = pendingDelete !== null && content.deletingKeys.has(pendingDelete);
+
+    const confirmDelete = async () => {
+        if (pendingDelete === null) {
+            return;
         }
 
-        setPendingDelete(null);
+        if (await content.deleteQuestion(pendingDelete)) {
+            setPendingDelete(null);
+        }
     };
 
     return (
@@ -72,6 +78,9 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
                     <QuestionNavigation
                         questions={questions}
                         selectedKey={selectedKey}
+                        statuses={content.statuses}
+                        busyKeys={busyKeys}
+                        readOnly={readOnly}
                         onSelect={selectQuestion}
                         onAdd={addQuestion}
                         onDuplicate={content.duplicateQuestion}
@@ -87,15 +96,17 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
                         <EmptyState
                             icon={ListOrdered}
                             title={strings.quizContent.emptyTitle}
-                            description={strings.quizContent.emptyBody}
+                            description={readOnly ? strings.quizContent.emptyReadOnlyBody : strings.quizContent.emptyBody}
                             action={
-                                <Button
-                                    size="sm"
-                                    onClick={content.addQuestion}
-                                    leadingIcon={<Plus aria-hidden="true" className="size-4" />}
-                                >
-                                    {strings.quizContent.addQuestion}
-                                </Button>
+                                readOnly ? undefined : (
+                                    <Button
+                                        size="sm"
+                                        onClick={content.addQuestion}
+                                        leadingIcon={<Plus aria-hidden="true" className="size-4" />}
+                                    >
+                                        {strings.quizContent.addQuestion}
+                                    </Button>
+                                )
                             }
                         />
                     </Card>
@@ -105,6 +116,7 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
                         question={activeQuestion}
                         number={activeIndex + 1}
                         content={content}
+                        readOnly={readOnly}
                         onRequestDelete={() => setPendingDelete(activeQuestion.key)}
                     />
                 )}
@@ -116,7 +128,9 @@ export const QuizContentEditor = ({ content }: QuizContentEditorProps) => {
                 description={strings.quizContent.deleteBody}
                 confirmLabel={strings.quizContent.deleteConfirm}
                 cancelLabel={strings.quizContent.deleteCancel}
-                onConfirm={confirmDelete}
+                isConfirming={isDeleting}
+                confirmingLabel={strings.quizContent.deleting}
+                onConfirm={() => void confirmDelete()}
                 onCancel={() => setPendingDelete(null)}
             />
         </div>

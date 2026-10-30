@@ -5,7 +5,7 @@ import type { ChangeEvent, DragEvent } from 'react';
 
 import { IconButton } from '@/components/ui/IconButton';
 import { strings } from '@/locales/id';
-import { listItemMotion } from '@/pages/Candidate/Quiz/quizMotion';
+import { listItemMotion } from '@/pages/Candidate/Quiz/utils/quizMotion';
 import { cn } from '@/utils/cn';
 import { ATTACHMENT_ACCEPT, MAX_ATTACHMENTS, formatFileSize, isImageName, validateAttachment } from '@/utils/attachmentUpload';
 

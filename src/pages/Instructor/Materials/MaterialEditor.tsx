@@ -10,7 +10,7 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Select } from '@/components/ui/Select';
 import { useMaterialsAccess } from '@/hooks/useMaterialsAccess';
 import { strings } from '@/locales/id';
-import { BannerField } from '@/pages/Instructor/Materials/components/BannerField';
+import { BannerField } from '@/components/patterns/BannerField';
 import { LessonListField } from '@/pages/Instructor/Materials/components/LessonListField';
 import { LinkListField } from '@/pages/Instructor/Materials/components/LinkListField';
 import { useMaterialEditor } from '@/pages/Instructor/Materials/hooks/useMaterialEditor';

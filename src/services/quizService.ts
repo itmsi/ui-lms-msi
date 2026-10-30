@@ -17,6 +17,7 @@ import type {
     QuizOutcome,
     SubmittedAttachment,
 } from '@/types/quiz';
+import { toHttpsUrl } from '@/utils/httpsUrl';
 
 const LIST_PATH = 'quizzes/participant/get';
 const detailPath = (id: string) => `quizzes/participant/get/${encodeURIComponent(id)}`;
@@ -114,26 +115,12 @@ const toQuiz = (value: unknown): ParticipantQuiz | null => {
     return { ...toSummaryBase({ ...value, id: value.id }), questions };
 };
 
-const toHttpsUrl = (value: unknown): string | null => {
-    if (typeof value !== 'string' || value === '') {
-        return null;
-    }
-
-    try {
-        const url = new URL(value);
-
-        return url.protocol === 'https:' ? url.href : null;
-    } catch {
-        return null;
-    }
-};
-
 const toSubmittedAttachment = (value: unknown): SubmittedAttachment | null =>
     isRecord(value) && typeof value.name === 'string'
         ? { name: value.name, size: readNumber(value.size), url: toHttpsUrl(value.url) }
         : null;
 
-const toReview = (value: unknown): QuestionReview | null => {
+export const toQuestionReview = (value: unknown): QuestionReview | null => {
     if (isRecord(value) === false || typeof value.quiz_questions_id !== 'string' || isQuestionType(value.type) === false) {
         return null;
     }
@@ -170,7 +157,7 @@ const toAttempt = (value: unknown): QuizAttemptResult | null => {
         correctCount: readNumber(value.correct_count) ?? 0,
         questionCount: readNumber(value.question_count) ?? 0,
         review: Array.isArray(value.review)
-            ? (value.review as unknown[]).map(toReview).filter((item): item is QuestionReview => item !== null)
+            ? (value.review as unknown[]).map(toQuestionReview).filter((item): item is QuestionReview => item !== null)
             : [],
     };
 };

@@ -1,4 +1,4 @@
-import { Activity, BookOpen, ClipboardCheck, ClipboardList, LayoutDashboard, LibraryBig, Users } from 'lucide-react';
+import { Activity, BookOpen, ClipboardCheck, ClipboardList, LayoutDashboard, LibraryBig, ListChecks, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { strings } from '@/locales/id';
@@ -15,16 +15,16 @@ const NAV_BY_MENU_NAME: Record<string, NavItem> = {
     'materi lms': { to: '/materials', label: strings.nav.materials, icon: BookOpen },
     'perpustakaan lms': { to: '/library', label: strings.nav.library, icon: LibraryBig },
     'user activity lms': { to: '/user-activity', label: strings.nav.userActivity, icon: Users },
-    // 'materi quiz': { to: '/quizzes', label: strings.nav.quizMaterials, icon: ClipboardList },
+    'materi quiz lms': { to: '/quizzes', label: strings.nav.quizMaterials, icon: ClipboardList },
+    'quiz lms': { to: '/my-quizzes', label: strings.nav.myQuiz, icon: ClipboardCheck },
+    'hasil quiz lms': { to: '/quiz-results', label: strings.nav.quizResults, icon: ListChecks },
 };
 
 const ALWAYS_NAV_ITEMS: NavItem[] = [
-    { to: '/my-quizzes', label: strings.nav.myQuiz, icon: ClipboardCheck },
     { to: '/my-activity', label: strings.nav.myActivity, icon: Activity },
-    { to: '/quizzes', label: strings.nav.quizMaterials, icon: ClipboardList },
 ];
 
-const NAV_ORDER = ['/dashboard', '/library', '/my-quizzes', '/my-activity', '/user-activity', '/materials', '/quizzes'];
+const NAV_ORDER = ['/dashboard', '/library', '/my-quizzes', '/my-activity', '/user-activity', '/materials', '/quizzes', '/quiz-results'];
 
 const orderOf = (item: NavItem): number => {
     const index = NAV_ORDER.indexOf(item.to);

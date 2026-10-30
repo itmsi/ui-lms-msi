@@ -7,9 +7,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { WoodPanel } from '@/components/ui/WoodPanel';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuizResource } from '@/hooks/useQuizResource';
 import { strings } from '@/locales/id';
 import { QuizSummaryCard } from '@/pages/Candidate/Quiz/components/QuizSummaryCard';
-import { useQuizResource } from '@/pages/Candidate/Quiz/hooks/useQuizResource';
 import { fetchMyQuizzes } from '@/services/quizService';
 import { staggerDelayMs } from '@/utils/motion';
 

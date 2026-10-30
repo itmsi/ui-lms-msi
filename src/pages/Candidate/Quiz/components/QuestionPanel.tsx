@@ -5,10 +5,10 @@ import { Suspense, useEffect, useId, useRef } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { strings } from '@/locales/id';
-import { AnswerEditor } from '@/pages/Candidate/Quiz/answerEditor';
+import { AnswerEditor } from '@/pages/Candidate/Quiz/components/answerEditor';
 import { AnswerAttachments } from '@/pages/Candidate/Quiz/components/AnswerAttachments';
-import { formatEstimate } from '@/pages/Candidate/Quiz/quizModel';
-import { popIn } from '@/pages/Candidate/Quiz/quizMotion';
+import { popIn } from '@/pages/Candidate/Quiz/utils/quizMotion';
+import { formatEstimate } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantOption, ParticipantQuestion, QuizAnswerValue } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 

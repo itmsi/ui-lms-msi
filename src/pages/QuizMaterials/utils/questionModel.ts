@@ -11,6 +11,7 @@ export const createQuestion = (): QuizQuestion => ({
     type: 'multiple_choice',
     text: '',
     image: null,
+    imageUrl: null,
     options: [createOption(), createOption()],
     trueFalseAnswer: null,
     expectedAnswer: '',
@@ -22,6 +23,7 @@ export const createQuestion = (): QuizQuestion => ({
 export const duplicateQuestion = (question: QuizQuestion): QuizQuestion => ({
     ...question,
     key: createKey(),
+    imageUrl: null,
     options: question.options.map((option) => ({ ...option, key: createKey() })),
 });
 
@@ -39,7 +41,7 @@ export const changeQuestionType = (question: QuizQuestion, type: QuestionType): 
     };
 };
 
-const isChoiceType = (type: QuestionType): boolean => type === 'multiple_choice' || type === 'multiple_answers';
+export const isChoiceType = (type: QuestionType): boolean => type === 'multiple_choice' || type === 'multiple_answers';
 
 export const findIssues = (question: QuizQuestion): QuestionIssue[] => {
     const issues: QuestionIssue[] = [];
@@ -76,5 +78,6 @@ export const findIssues = (question: QuizQuestion): QuestionIssue[] => {
 export const hasQuestionContent = (question: QuizQuestion): boolean =>
     question.text.trim() !== '' ||
     question.image !== null ||
+    question.imageUrl !== null ||
     question.expectedAnswer.trim() !== '' ||
     question.options.some((option) => option.text.trim() !== '');
