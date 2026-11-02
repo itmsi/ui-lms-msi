@@ -5,40 +5,15 @@ import { fetchActivities } from '@/services/activityService';
 import type { ActivityListResult } from '@/types/activity';
 import type { DateRange } from '@/types/dateRange';
 import type { ApiFailureCode } from '@/types/module';
-import { fromIsoDate, toIsoDate } from '@/utils/dateTime';
+import { findModuleTitle } from '@/utils/activityText';
+import { toIsoDate } from '@/utils/dateTime';
 import { parsePageParam } from '@/utils/pageParam';
-import { DEFAULT_RANGE_PRESET, isRangePreset, presetRange } from '@/utils/rangePreset';
-import type { RangePreset, RangeSelectionPreset } from '@/utils/rangePreset';
+import { DEFAULT_RANGE_PRESET, readRangeParams, writeRangeParams } from '@/utils/rangePreset';
+import type { RangeChange, RangePreset } from '@/utils/rangePreset';
 
 export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
 const DEFAULT_PAGE_SIZE = 20;
-
-const RANGE_PARAM = 'range';
-const FROM_PARAM = 'from';
-const TO_PARAM = 'to';
-const CUSTOM = 'custom';
-
-interface RangeSelection {
-    preset: RangeSelectionPreset;
-    range: DateRange;
-}
-
-const readRange = (preset: string | null, from: string | null, to: string | null, todayIso: string): RangeSelection => {
-    if (preset === CUSTOM && from !== null && to !== null) {
-        const isValid = fromIsoDate(from) !== undefined && fromIsoDate(to) !== undefined && from <= to && to <= todayIso;
-
-        if (isValid) {
-            return { preset: CUSTOM, range: { start: from, end: to } };
-        }
-    }
-
-    const resolved = isRangePreset(preset) ? preset : DEFAULT_RANGE_PRESET;
-
-    return { preset: resolved, range: presetRange(resolved, fromIsoDate(todayIso)) };
-};
-
-type RangeChange = { preset: RangePreset } | { preset: typeof CUSTOM; range: DateRange };
 
 const parsePageSize = (value: string | null): number => {
     const size = Number.parseInt(value ?? '', 10);
@@ -67,7 +42,7 @@ export const useUserActivity = (now: number) => {
     const moduleId = searchParams.get('module');
     const employeeId = searchParams.get('employee');
     const todayIso = toIsoDate(new Date(now));
-    const selection = readRange(searchParams.get(RANGE_PARAM), searchParams.get(FROM_PARAM), searchParams.get(TO_PARAM), todayIso);
+    const selection = readRangeParams(searchParams, todayIso);
     const rangeStart = selection.range.start;
     const rangeEnd = selection.range.end;
 
@@ -128,19 +103,7 @@ export const useUserActivity = (now: number) => {
                     }
 
                     if (changes.dateRange !== undefined) {
-                        next.delete(FROM_PARAM);
-                        next.delete(TO_PARAM);
-
-                        if (changes.dateRange.preset === DEFAULT_RANGE_PRESET) {
-                            next.delete(RANGE_PARAM);
-                        } else {
-                            next.set(RANGE_PARAM, changes.dateRange.preset);
-                        }
-
-                        if (changes.dateRange.preset === CUSTOM) {
-                            next.set(FROM_PARAM, changes.dateRange.range.start);
-                            next.set(TO_PARAM, changes.dateRange.range.end);
-                        }
+                        writeRangeParams(next, changes.dateRange);
                     }
 
                     if (changes.limit !== undefined) {
@@ -172,7 +135,7 @@ export const useUserActivity = (now: number) => {
     const selectEmployee = useCallback((value: string | null) => applyParams({ employee: value }), [applyParams]);
     const selectPreset = useCallback((preset: RangePreset) => applyParams({ dateRange: { preset } }), [applyParams]);
     const selectCustomRange = useCallback(
-        (range: DateRange) => applyParams({ dateRange: { preset: CUSTOM, range } }),
+        (range: DateRange) => applyParams({ dateRange: { preset: 'custom', range } }),
         [applyParams],
     );
     const clearFilters = useCallback(
@@ -186,6 +149,10 @@ export const useUserActivity = (now: number) => {
     const selectPageSize = useCallback((next: number) => applyParams({ limit: next }), [applyParams]);
     const retry = useCallback(() => setReloadToken((token) => token + 1), []);
 
+    const items = state.status === 'success' ? state.result.items : [];
+    const isFirstPage = state.status === 'success' && state.result.pagination.page === 1;
+    const isNarrowed = search !== '' || moduleId !== null || rangeEnd !== todayIso;
+
     return {
         state,
         lastPagination,
@@ -194,10 +161,13 @@ export const useUserActivity = (now: number) => {
         selectPageSize,
         search,
         moduleId,
+        moduleTitle: moduleId === null ? null : findModuleTitle(items, moduleId),
         employeeId,
+        employeeFallbackName: employeeId === null ? null : (items.find((item) => item.createdBy === employeeId)?.createdByName ?? null),
+        total: state.status === 'success' ? state.result.pagination.total : null,
+        lastActiveAt: isFirstPage && isNarrowed === false ? (items[0]?.createdAt ?? null) : null,
         rangePreset: selection.preset,
         dateRange: selection.range,
-        rangeEndsToday: rangeEnd === todayIso,
         hasFilters: search !== '' || moduleId !== null || employeeId !== null || selection.preset !== DEFAULT_RANGE_PRESET,
         submitSearch,
         selectModule,

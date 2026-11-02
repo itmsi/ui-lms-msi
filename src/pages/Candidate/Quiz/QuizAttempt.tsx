@@ -193,40 +193,50 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                             }
                         />
                     ) : null}
-
-                    <div className="flex items-center justify-between gap-3">
-                        <Button
-                            variant="secondary"
-                            onClick={() => goTo(index - 1)}
-                            disabled={index === 0 || savingTarget !== null}
-                            loading={savingTarget !== null && savingTarget < index}
-                            loadingLabel={strings.myQuiz.saving}
-                            leadingIcon={<ChevronLeft aria-hidden="true" className="size-4" />}
-                            className={PRESSABLE_CLASS}
+                    <AnimatePresence mode="wait" initial={false} custom={direction}>
+                        <m.div
+                            key={question.id}
+                            custom={direction}
+                            variants={questionSlideVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
                         >
-                            {strings.myQuiz.previous}
-                        </Button>
-                        {isLast ? (
-                            <Button
-                                onClick={openReview}
-                                trailingIcon={<Send aria-hidden="true" className="size-4" />}
-                                className={PRESSABLE_CLASS}
-                            >
-                                {strings.myQuiz.review}
-                            </Button>
-                        ) : (
-                            <Button
-                                onClick={() => goTo(index + 1)}
-                                disabled={savingTarget !== null}
-                                loading={savingTarget !== null && savingTarget > index}
-                                loadingLabel={strings.myQuiz.saving}
-                                trailingIcon={<ChevronRight aria-hidden="true" className="size-4" />}
-                                className={PRESSABLE_CLASS}
-                            >
-                                {strings.myQuiz.next}
-                            </Button>
-                        )}
-                    </div>
+                            <div className="flex items-center justify-between gap-3">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => goTo(index - 1)}
+                                    disabled={index === 0 || savingTarget !== null}
+                                    loading={savingTarget !== null && savingTarget < index}
+                                    loadingLabel={strings.myQuiz.saving}
+                                    leadingIcon={<ChevronLeft aria-hidden="true" className="size-4" />}
+                                    className={PRESSABLE_CLASS}
+                                >
+                                    {strings.myQuiz.previous}
+                                </Button>
+                                {isLast ? (
+                                    <Button
+                                        onClick={openReview}
+                                        trailingIcon={<Send aria-hidden="true" className="size-4" />}
+                                        className={PRESSABLE_CLASS}
+                                    >
+                                        {strings.myQuiz.review}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={() => goTo(index + 1)}
+                                        disabled={savingTarget !== null}
+                                        loading={savingTarget !== null && savingTarget > index}
+                                        loadingLabel={strings.myQuiz.saving}
+                                        trailingIcon={<ChevronRight aria-hidden="true" className="size-4" />}
+                                        className={PRESSABLE_CLASS}
+                                    >
+                                        {strings.myQuiz.next}
+                                    </Button>
+                                )}
+                            </div>
+                        </m.div>
+                    </AnimatePresence>
                 </div>
             </div>
 

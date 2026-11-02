@@ -536,7 +536,6 @@ export const strings = {
         timeColumn: 'Waktu',
         employeeColumn: 'Karyawan',
         activityColumn: 'Aktivitas',
-        actionsColumn: 'Aksi',
         kind: {
             track: 'Track',
             module: 'Materi',

@@ -1,13 +1,15 @@
-import { ExternalLink, UserRound } from 'lucide-react';
-import { useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { ExternalLink, SearchX, UserRound, Users } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import type { TableColumn } from 'react-data-table-component';
 
 import { ActivityKindIcon } from '@/components/patterns/ActivityKindIcon';
+import { ApiErrorState } from '@/components/patterns/ApiErrorState';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { CustomDataTable } from '@/components/ui/CustomDataTable';
-import type { EmptyState } from '@/components/ui/EmptyState';
 import { strings } from '@/locales/id';
 import { ROWS_PER_PAGE_OPTIONS } from '@/pages/Activity/UserActivity/hooks/useUserActivity';
+import type { UserActivityState } from '@/pages/Activity/UserActivity/hooks/useUserActivity';
 import type { ActivityLog } from '@/types/activity';
 import type { Employee } from '@/types/employee';
 import type { ModulePagination } from '@/types/module';
@@ -101,45 +103,38 @@ const ActivityCell = ({ item }: { item: ActivityLog }) => {
     );
 };
 
-
 interface UserActivityTableProps {
-    items: ActivityLog[];
-    loading: boolean;
-    pagination: ModulePagination | null;
+    state: UserActivityState;
+    lastPagination: ModulePagination | null;
     page: number;
     pageSize: number;
-    onChangePage: (page: number) => void;
-    onChangeRowsPerPage: (pageSize: number) => void;
     now: number;
     employeeId: string | null;
-    moduleId: string | null;
     employees: Record<string, Employee>;
+    hasFilters: boolean;
+    onChangePage: (page: number) => void;
+    onChangeRowsPerPage: (pageSize: number) => void;
     onSelectEmployee: (id: string) => void;
-    onSelectModule: (id: string) => void;
-    emptyTitle: string;
-    emptyDescription: string;
-    emptyIcon: Parameters<typeof EmptyState>[0]['icon'];
-    emptyAction?: ReactNode;
+    onClearFilters: () => void;
+    onWidenRange: () => void;
+    onRetry: () => void;
 }
 
 export const UserActivityTable = ({
-    items,
-    loading,
-    pagination,
+    state,
+    lastPagination,
     page,
     pageSize,
-    onChangePage,
-    onChangeRowsPerPage,
     now,
     employeeId,
-    moduleId,
     employees,
+    hasFilters,
+    onChangePage,
+    onChangeRowsPerPage,
     onSelectEmployee,
-    onSelectModule,
-    emptyTitle,
-    emptyDescription,
-    emptyIcon,
-    emptyAction,
+    onClearFilters,
+    onWidenRange,
+    onRetry,
 }: UserActivityTableProps) => {
     const columns = useMemo<TableColumn<ActivityLog>[]>(
         () => [
@@ -170,32 +165,65 @@ export const UserActivityTable = ({
                 wrap: true,
                 cell: (item) => <ActivityCell item={item} />,
             },
-            // {
-            //     id: 'actions',
-            //     name: <span className="sr-only">{strings.activityLog.actionsColumn}</span>,
-            //     width: '140px',
-            //     right: true,
-            //     button: true,
-            //     cell: (item) => (
-            //         <ActionsCell item={item} canFilterModule={moduleId !== item.moduleId} onSelectModule={onSelectModule} />
-            //     ),
-            // },
         ],
-        [now, employees, employeeId, moduleId, onSelectEmployee, onSelectModule],
+        [now, employees, employeeId, onSelectEmployee],
     );
+
+    const handlePageChange = useCallback(
+        (next: number) => {
+            if (next !== page) {
+                onChangePage(next);
+            }
+        },
+        [onChangePage, page],
+    );
+
+    const handleRowsPerPageChange = useCallback(
+        (next: number) => {
+            if (next !== pageSize) {
+                onChangeRowsPerPage(next);
+            }
+        },
+        [onChangeRowsPerPage, pageSize],
+    );
+
+    if (state.status === 'error') {
+        return (
+            <Card>
+                <ApiErrorState
+                    code={state.code}
+                    message={state.message}
+                    unauthorizedTitle={strings.activityLog.unauthorizedTitle}
+                    onRetry={onRetry}
+                />
+            </Card>
+        );
+    }
+
+    const pagination = state.status === 'success' ? state.result.pagination : lastPagination;
 
     return (
         <CustomDataTable<ActivityLog>
             ariaLabel={strings.nav.userActivity}
             columns={columns}
-            data={items}
+            data={state.status === 'success' ? state.result.items : []}
             fixedHeader={true}
-            loading={loading}
+            loading={state.status === 'loading'}
             skeletonRows={8}
-            emptyTitle={emptyTitle}
-            emptyDescription={emptyDescription}
-            emptyIcon={emptyIcon}
-            emptyAction={emptyAction}
+            emptyIcon={hasFilters ? SearchX : Users}
+            emptyTitle={hasFilters ? strings.activityLog.filteredEmptyTitle : strings.activityLog.userRecentEmptyTitle}
+            emptyDescription={hasFilters ? strings.activityLog.filteredEmptyBody : strings.activityLog.userRecentEmptyBody}
+            emptyAction={
+                hasFilters ? (
+                    <Button variant="secondary" size="sm" onClick={onClearFilters}>
+                        {strings.library.clearFilters}
+                    </Button>
+                ) : (
+                    <Button variant="secondary" size="sm" onClick={onWidenRange}>
+                        {strings.activityLog.widenRange}
+                    </Button>
+                )
+            }
             fixedHeaderScrollHeight="625px"
             pagination
             paginationServer
@@ -203,8 +231,8 @@ export const UserActivityTable = ({
             paginationPerPage={pageSize}
             paginationTotalRows={pagination?.total ?? 0}
             paginationRowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-            onChangePage={onChangePage}
-            onChangeRowsPerPage={(nextPageSize) => onChangeRowsPerPage(nextPageSize)}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
         />
     );
 };

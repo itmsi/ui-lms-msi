@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SubmitEvent } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import type { SelectOption } from '@/components/ui/Select';
 import { strings } from '@/locales/id';
@@ -16,6 +16,7 @@ import type {
 } from '@/pages/Instructor/Materials/services/materialService';
 import { createMaterialDraft, toMaterialDraft } from '@/pages/Instructor/Materials/types';
 import type { DraftErrors, MaterialDraft } from '@/pages/Instructor/Materials/types';
+import { materialDetailPath, materialListPath } from '@/pages/Instructor/Materials/utils/paths';
 
 const failureMessage = (outcome: Extract<SaveMaterialOutcome, { ok: false }>): string => {
     if (outcome.code === 'validation' && outcome.message !== undefined) {
@@ -80,6 +81,7 @@ export type EditorLoadState = { status: 'loading' } | LoadedEditorState;
 
 export const useMaterialEditor = (materialId?: string) => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [draft, setDraft] = useState<MaterialDraft>(() => createMaterialDraft(DEFAULT_CATEGORY));
     const [errors, setErrors] = useState<DraftErrors>({});
@@ -197,7 +199,7 @@ export const useMaterialEditor = (materialId?: string) => {
 
                 if (outcome.ok) {
                     toast.success(materialId === undefined ? strings.materialEditor.saved : strings.materialEditor.updated);
-                    void navigate(materialId === undefined ? '/materials' : `/materials/${materialId}`);
+                    void navigate(materialId === undefined ? materialListPath() : materialDetailPath(materialId, location.search));
                     return;
                 }
 
@@ -207,12 +209,12 @@ export const useMaterialEditor = (materialId?: string) => {
 
             void save();
         },
-        [draft, isSubmitting, materialId, navigate],
+        [draft, isSubmitting, location.search, materialId, navigate],
     );
 
     const cancel = useCallback(() => {
-        void navigate(materialId === undefined ? '/materials' : `/materials/${materialId}`);
-    }, [materialId, navigate]);
+        void navigate(materialId === undefined ? materialListPath(location.search) : materialDetailPath(materialId, location.search));
+    }, [location.search, materialId, navigate]);
 
     return {
         draft,

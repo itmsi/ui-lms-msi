@@ -3,9 +3,9 @@ import type { Transition, Variants } from 'motion/react';
 const SLIDE_OFFSET_PX = 32;
 
 export const questionSlideVariants: Variants = {
-    enter: (direction: number) => ({ x: direction * SLIDE_OFFSET_PX, opacity: 0 }),
-    center: { x: 0, opacity: 1, transition: { duration: 0.3, ease: 'easeOut' } },
-    exit: (direction: number) => ({ x: direction * -SLIDE_OFFSET_PX, opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } }),
+    enter: (direction: number) => ({ y: direction * SLIDE_OFFSET_PX, opacity: 0 }),
+    center: { y: 0, opacity: 1, transition: { duration: 0.3, ease: 'easeOut' } },
+    exit: (direction: number) => ({ y: direction * -SLIDE_OFFSET_PX, opacity: 0, transition: { duration: 0.25, ease: 'easeOut' } }),
 };
 
 export const indicatorTransition: Transition = { duration: 0.15, ease: 'easeOut' };
