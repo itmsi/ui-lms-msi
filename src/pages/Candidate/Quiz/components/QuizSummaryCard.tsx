@@ -5,9 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { Card } from '@/components/ui/Card';
 import { strings } from '@/locales/id';
-import { resultPath } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
-import { readDraft } from '@/pages/Candidate/Quiz/services/draftStore';
-import { countDraftAnswers } from '@/pages/Candidate/Quiz/utils/quizModel';
+import { myQuizPath, myQuizResultPath } from '@/pages/Candidate/Quiz/utils/paths';
 import { formatValidUntil } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantQuizSummary } from '@/types/quiz';
 import { cn } from '@/utils/cn';
@@ -48,7 +46,9 @@ const Metric = ({ label, value }: { label: string; value: number | null }) => (
         <MetricRing value={value} />
         <div className="flex min-w-0 flex-col">
             <span className="text-caption truncate text-white/70">{label}</span>
-            <span className="text-body font-semibold text-white tabular-nums">{value === null ? '–' : `${String(Math.round(value))}%`}</span>
+            <span className="text-body font-semibold text-white tabular-nums">
+                {value === null ? '–' : `${String(Math.round(value))}%`}
+            </span>
         </div>
     </div>
 );
@@ -65,48 +65,39 @@ const BannerChip = ({ icon: Icon, label, light = false }: { icon: LucideIcon; la
     </span>
 );
 
-interface QuizSummaryCardProps {
-    quiz: ParticipantQuizSummary;
-    userId: string;
-}
-
-export const QuizSummaryCard = ({ quiz, userId }: QuizSummaryCardProps) => {
-    const [draftAnswered] = useState(() => {
-        const draft = readDraft(userId, quiz.id);
-
-        return draft === null ? null : countDraftAnswers(draft);
-    });
+export const QuizSummaryCard = ({ quiz }: { quiz: ParticipantQuizSummary }) => {
     const [bannerFailed, setBannerFailed] = useState(false);
-
-    const { lastAttempt, isCompleted } = quiz;
-    const activeDraft = isCompleted ? null : draftAnswered;
-    const showBanner = quiz.moduleBanner !== null && bannerFailed === false;
+    const { questionCount, completedCount, totalPoint, totalPossiblePoints, isCompleted } = quiz;
+    const isStarted = completedCount > 0;
+    const showBanner = quiz.banner !== null && bannerFailed === false;
     const footerText = formatValidUntil(quiz.endDate);
 
+    const progressPercent = questionCount > 0 ? Math.min(completedCount / questionCount, 1) * 100 : 0;
     const scorePercent =
-        lastAttempt === null || lastAttempt.maxScore === 0
-            ? null
-            : (lastAttempt.score / lastAttempt.maxScore) * 100;
-    const progressPercent = isCompleted
-        ? 100
-        : activeDraft !== null && quiz.questionCount > 0
-            ? (activeDraft / quiz.questionCount) * 100
-            : 0;
+        isCompleted && totalPoint !== null && totalPossiblePoints !== null && totalPossiblePoints > 0
+            ? (totalPoint / totalPossiblePoints) * 100
+            : null;
 
-    const actionLabel = isCompleted ? strings.myQuiz.viewScore : activeDraft === null ? strings.myQuiz.start : strings.myQuiz.resume;
-    const target = isCompleted && lastAttempt !== null ? resultPath(quiz.id, lastAttempt.id) : `/my-quizzes/${quiz.id}`;
+    const actionLabel = isCompleted ? strings.myQuiz.viewScore : isStarted ? strings.myQuiz.resume : strings.myQuiz.start;
+    const target = isCompleted ? myQuizResultPath(quiz.id) : myQuizPath(quiz.id);
     const statusChip = isCompleted
         ? { icon: ClipboardCheck, label: strings.myQuiz.lastSubmitted }
-        : activeDraft === null
-            ? null
-            : { icon: PencilLine, label: strings.myQuiz.inProgress };
+        : isStarted
+          ? { icon: PencilLine, label: strings.myQuiz.inProgress }
+          : null;
 
     return (
         <article className="sticky-note group h-full">
             <Card className="bg-gradiend flex h-full flex-col overflow-hidden border-0 p-1 shadow-none">
                 <div className="bg-primary-light relative aspect-2/1 w-full overflow-hidden rounded-[3px]">
                     {showBanner ? (
-                        <img src={quiz.moduleBanner ?? ''} alt="" loading="lazy" onError={() => setBannerFailed(true)} className="size-full object-cover" />
+                        <img
+                            src={quiz.banner ?? ''}
+                            alt=""
+                            loading="lazy"
+                            onError={() => setBannerFailed(true)}
+                            className="size-full object-cover"
+                        />
                     ) : (
                         <div className="text-primary/30 flex size-full items-center justify-center">
                             <ClipboardCheck aria-hidden="true" className="size-14" strokeWidth={1.5} />
@@ -137,24 +128,6 @@ export const QuizSummaryCard = ({ quiz, userId }: QuizSummaryCardProps) => {
                             <Metric label={strings.myQuiz.progressMetric} value={progressPercent} />
                         </div>
                     </div>
-
-                    {/* <div className="flex flex-wrap gap-2">
-                        <span className="text-caption inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-white/90">
-                            <BookOpen aria-hidden="true" className="size-3.5 shrink-0" />
-                            <span className="truncate">{quiz.moduleTitle}</span>
-                        </span>
-                        {timeLeft === null ? null : (
-                            <span
-                                className={cn(
-                                    'text-caption inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-medium',
-                                    timeLeft.urgent ? 'bg-warning-soft text-warning-ink border-warning/50' : 'border-white/15 bg-white/10 text-white/90',
-                                )}
-                            >
-                                <CalendarClock aria-hidden="true" className="size-3.5" />
-                                {timeLeft.label}
-                            </span>
-                        )}
-                    </div> */}
 
                     <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/15 pt-3">
                         <p className="text-caption flex min-w-0 items-center gap-1.5 text-white/70">

@@ -1,15 +1,22 @@
 import { strings } from '@/locales/id';
+import type { QuizFailureCode } from '@/types/quiz';
 import { formatShortDate, fromIsoDate } from '@/utils/dateTime';
 
-export const formatEstimate = (seconds: number | null): string | null => {
-    if (seconds === null || seconds <= 0) {
-        return null;
-    }
-
-    return seconds < 60
-        ? strings.myQuiz.underOneMinute
-        : `${strings.myQuiz.estimatePrefix} ${String(Math.ceil(seconds / 60))} ${strings.myQuiz.minutesSuffix}`;
+const FAILURE_TEXT: Partial<Record<QuizFailureCode, string>> = {
+    offline: strings.apiErrors.offlineHappened,
+    unauthorized: strings.apiErrors.unauthorizedHappened,
 };
+
+export const describeFailure = (code: QuizFailureCode, message?: string): string =>
+    message ?? FAILURE_TEXT[code] ?? strings.states.errorWhatHappened;
+
+const TIME_UNIT_LABEL: Record<string, string> = {
+    minutes: strings.myQuiz.minutesSuffix,
+    seconds: strings.myQuiz.secondsSuffix,
+};
+
+export const formatQuestionEstimate = (time: number | null, unit: string): string | null =>
+    time === null ? null : `${strings.myQuiz.estimatePrefix} ${String(time)} ${TIME_UNIT_LABEL[unit] ?? unit}`;
 
 export const formatValidUntil = (endDate: string): string => {
     const end = fromIsoDate(endDate);

@@ -5,13 +5,15 @@ import { strings } from '@/locales/id';
 import { createOption, createQuestion, isChoiceType } from '@/pages/QuizMaterials/utils/questionModel';
 import { QUESTION_TYPES, QUIZ_AUDIENCES } from '@/pages/QuizMaterials/types';
 import type {
+    QuestionSaveRequest,
     QuestionType,
-    QuizAudience,
     QuizDetail,
     QuizListItem,
     QuizListQuery,
     QuizListResult,
+    QuizPayload,
     QuizQuestion,
+    SavedQuestionResult,
     StoredQuestion,
     TrueFalseAnswer,
 } from '@/pages/QuizMaterials/types';
@@ -34,27 +36,6 @@ export type SaveFailure = { ok: false; code: QuizFailureCode; message?: string }
 
 type Outcome<T> = { ok: true; data: T } | SaveFailure;
 
-export interface SavedQuestionResult {
-    id: string;
-    stored: StoredQuestion | null;
-}
-
-export interface QuizPayload {
-    title: string;
-    moduleId: string;
-    audiences: QuizAudience[];
-    start: string;
-    end: string;
-    banner: File | null;
-}
-
-export interface QuestionSaveRequest {
-    quizId: string;
-    fields: Record<string, string>;
-    image: File | null;
-    removeImage: boolean;
-}
-
 interface OptionPayload {
     line: number;
     text: string;
@@ -72,9 +53,9 @@ const toOptionPayloads = (question: QuizQuestion): OptionPayload[] => {
         return question.trueFalseAnswer === null
             ? []
             : [
-                  { line: 1, text: strings.quizContent.trueLabel, is_correct: question.trueFalseAnswer === 'true' },
-                  { line: 2, text: strings.quizContent.falseLabel, is_correct: question.trueFalseAnswer === 'false' },
-              ];
+                { line: 1, text: strings.quizContent.trueLabel, is_correct: question.trueFalseAnswer === 'true' },
+                { line: 2, text: strings.quizContent.falseLabel, is_correct: question.trueFalseAnswer === 'false' },
+            ];
     }
 
     return question.expectedAnswer === '' ? [] : [{ line: 1, text: question.expectedAnswer, is_correct: true }];
@@ -228,12 +209,12 @@ const send = async <T>(
 
 const toSavedQuestion =
     (knownId: string | null) =>
-    (data: unknown): SavedQuestionResult | null => {
-        const stored = toStoredQuestion(data);
-        const id = stored?.id ?? readId(data) ?? knownId;
+        (data: unknown): SavedQuestionResult | null => {
+            const stored = toStoredQuestion(data);
+            const id = stored?.id ?? readId(data) ?? knownId;
 
-        return id === null ? null : { id, stored };
-    };
+            return id === null ? null : { id, stored };
+        };
 
 const readIsoDate = (value: unknown): string | null => (typeof value === 'string' && fromIsoDate(value) !== undefined ? value : null);
 
@@ -254,7 +235,8 @@ const toQuizListItem = (value: unknown): QuizListItem | null => {
         audiences: QUIZ_AUDIENCES.filter((audience) => types.includes(audience)),
         period: start === null || end === null ? null : { start, end },
         questionCount: typeof value.question_count === 'number' && Number.isFinite(value.question_count) ? value.question_count : 0,
-        createdAt: typeof value.created_at === 'string' && value.created_at !== '' ? value.created_at : null,
+        createdAt: typeof value.created_at === 'string' && value.updated_at !== '' ? value.created_at : null,
+        updatedAt: typeof value.updated_at === 'string' && value.updated_at !== '' ? value.updated_at : null,
     };
 };
 
@@ -275,14 +257,14 @@ const toQuizDetail = (data: unknown): QuizDetail | null => {
                 item.moduleId === ''
                     ? null
                     : {
-                          id: item.moduleId,
-                          title: item.moduleTitle,
-                          description: null,
-                          descriptionClean: null,
-                          banner: null,
-                          linkMaterials: [],
-                          category: null,
-                      },
+                        id: item.moduleId,
+                        title: item.moduleTitle,
+                        description: null,
+                        descriptionClean: null,
+                        banner: null,
+                        linkMaterials: [],
+                        category: null,
+                    },
             audiences: item.audiences,
             period: item.period,
             banner: null,
@@ -312,9 +294,9 @@ export const fetchQuizzes = (query: QuizListQuery, signal?: AbortSignal): Promis
         (data) =>
             isRecord(data) && Array.isArray(data.items)
                 ? {
-                      items: (data.items as unknown[]).map(toQuizListItem).filter((item): item is QuizListItem => item !== null),
-                      pagination: toPagination(data.pagination, { page: query.page, limit: query.limit }),
-                  }
+                    items: (data.items as unknown[]).map(toQuizListItem).filter((item): item is QuizListItem => item !== null),
+                    pagination: toPagination(data.pagination, { page: query.page, limit: query.limit }),
+                }
                 : null,
     );
 
@@ -384,9 +366,9 @@ export const fetchQuizQuestions = async (quizId: string, signal?: AbortSignal): 
             (data) =>
                 isRecord(data) && Array.isArray(data.items)
                     ? {
-                          items: (data.items as unknown[]).map(toStoredQuestion).filter((item): item is StoredQuestion => item !== null),
-                          totalPages: toPagination(data.pagination, { page, limit: QUESTION_PAGE_LIMIT }).totalPages,
-                      }
+                        items: (data.items as unknown[]).map(toStoredQuestion).filter((item): item is StoredQuestion => item !== null),
+                        totalPages: toPagination(data.pagination, { page, limit: QUESTION_PAGE_LIMIT }).totalPages,
+                    }
                     : null,
         );
 

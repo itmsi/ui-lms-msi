@@ -2,8 +2,8 @@ import { useCallback, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { strings } from '@/locales/id';
-import type { QuizPayload, SaveFailure } from '@/pages/QuizMaterials/services/quizMaterialService';
-import type { QuizInfo, QuizInfoErrors, QuizInfoField } from '@/pages/QuizMaterials/types';
+import type { SaveFailure } from '@/pages/QuizMaterials/services/quizMaterialService';
+import type { QuizInfo, QuizInfoErrors, QuizInfoField, QuizPayload } from '@/pages/QuizMaterials/types';
 import { toFailureMessage } from '@/utils/failureMessage';
 import type { FailureMessages } from '@/utils/failureMessage';
 

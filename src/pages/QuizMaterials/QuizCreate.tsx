@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
 import { PermissionDenied } from '@/components/patterns/PermissionDenied';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useBackToList } from '@/hooks/useBackToList';
 import { useBeforeUnloadWarning } from '@/hooks/useBeforeUnloadWarning';
 import { useMenuAccess } from '@/hooks/useMenuAccess';
 import { useNow } from '@/hooks/useNow';
@@ -32,9 +33,7 @@ export const QuizCreate = () => {
 
     useBeforeUnloadWarning(isDirty && isSubmitting === false);
 
-    const leave = useCallback(() => {
-        void navigate(QUIZ_LIST_PATH);
-    }, [navigate]);
+    const leave = useBackToList(QUIZ_LIST_PATH);
 
     const requestLeave = useCallback(() => {
         if (isDirty) {

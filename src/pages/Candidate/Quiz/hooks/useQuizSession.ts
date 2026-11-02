@@ -1,74 +1,61 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { clearAttachments, readAttachments, writeAttachments } from '@/pages/Candidate/Quiz/services/attachmentStore';
-import { clearDraft, readDraft, writeDraft } from '@/pages/Candidate/Quiz/services/draftStore';
-import type { QuizDraft } from '@/pages/Candidate/Quiz/types';
-import { createDraft, findAnsweredIds, findUnanswered, fitAttachments, fitDraft } from '@/pages/Candidate/Quiz/utils/quizModel';
-import { submitQuizAttempt } from '@/services/quizService';
-import type { ParticipantQuiz, QuizAnswerValue, QuizAttachments, QuizFailureCode } from '@/types/quiz';
+import { useQuestionDetail } from '@/pages/Candidate/Quiz/hooks/useQuestionDetail';
+import type { QuizDraft, SavedAnswer } from '@/pages/Candidate/Quiz/types';
+import {
+    createDraft,
+    findAnsweredIds,
+    findUnanswered,
+    isAnsweredOnServer,
+    isFinalAnswer,
+    isSameSavedAnswer,
+    restoreSavedAnswer,
+    toAnswerEntries,
+    toSavedAnswer,
+} from '@/pages/Candidate/Quiz/utils/quizModel';
+import { myQuizResultPath } from '@/pages/Candidate/Quiz/utils/paths';
+import { saveQuizAnswer } from '@/services/quizService';
+import type { ParticipantQuestion, ParticipantQuiz, QuizAnswerValue, QuizAttachments, QuizFailureCode, QuizOutcome } from '@/types/quiz';
 
 export type QuizPhase = 'intro' | 'answering';
 
 export type SubmitState = { status: 'idle' } | { status: 'submitting' } | { status: 'error'; code: QuizFailureCode; message?: string };
 
-export const resultPath = (quizId: string, attemptId: string) => `/my-quizzes/${quizId}/result/${attemptId}`;
+export type SaveState =
+    | { status: 'idle' }
+    | { status: 'saving'; target: number }
+    | { status: 'error'; target: number; code: QuizFailureCode; message?: string };
 
-const NO_ATTACHMENTS: QuizAttachments = {};
+const NO_FILES: readonly File[] = [];
 
 export const useQuizSession = (quiz: ParticipantQuiz, userId: string) => {
     const navigate = useNavigate();
-    const [draft, setDraft] = useState<QuizDraft | null>(() => {
-        const stored = readDraft(userId, quiz.id);
-
-        return stored === null ? null : fitDraft(stored, quiz);
-    });
-    const [attachments, setAttachments] = useState<QuizAttachments>(NO_ATTACHMENTS);
+    const [draft, setDraft] = useState<QuizDraft | null>(null);
+    const [attachments, setAttachments] = useState<QuizAttachments>({});
     const [phase, setPhase] = useState<QuizPhase>('intro');
+    const [saveState, setSaveState] = useState<SaveState>({ status: 'idle' });
     const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
-    const submittingRef = useRef(false);
-    const attachmentsLoadedRef = useRef(false);
+    const busyRef = useRef(false);
+    const restoreAnswer = useCallback((question: ParticipantQuestion) => {
+        setDraft((current) => (current === null ? current : restoreSavedAnswer(current, question)));
+    }, []);
+    const detail = useQuestionDetail(
+        phase === 'answering' && draft !== null ? quiz.questions[draft.currentIndex].id : null,
+        userId,
+        restoreAnswer,
+    );
 
-    useEffect(() => {
-        if (draft !== null) {
-            writeDraft(userId, quiz.id, draft);
-        }
-    }, [draft, quiz.id, userId]);
-
-    useEffect(() => {
-        let cancelled = false;
-
-        void readAttachments(userId, quiz.id).then((stored) => {
-            if (cancelled) {
-                return;
-            }
-
-            attachmentsLoadedRef.current = true;
-            setAttachments((current) => (current === NO_ATTACHMENTS ? fitAttachments(stored, quiz) : current));
-        });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [quiz, userId]);
-
-    useEffect(() => {
-        if (attachmentsLoadedRef.current && attachments !== NO_ATTACHMENTS) {
-            void writeAttachments(userId, quiz.id, attachments);
-        }
-    }, [attachments, quiz.id, userId]);
+    const answeredIds = useMemo(
+        () => findAnsweredIds(quiz.questions, draft ?? createDraft(), attachments),
+        [attachments, draft, quiz.questions],
+    );
+    const unanswered = useMemo(() => findUnanswered(quiz.questions, answeredIds), [answeredIds, quiz.questions]);
 
     const start = useCallback(() => {
-        clearDraft(userId, quiz.id);
-        void clearAttachments(userId, quiz.id);
-        setDraft(createDraft());
-        setAttachments({});
+        setDraft({ ...createDraft(), currentIndex: unanswered.at(0) ?? 0 });
         setPhase('answering');
-    }, [quiz, userId]);
-
-    const resume = useCallback(() => {
-        setPhase('answering');
-    }, []);
+    }, [unanswered]);
 
     const setAnswer = useCallback((questionId: string, value: QuizAnswerValue) => {
         setDraft((current) => (current === null ? current : { ...current, answers: { ...current.answers, [questionId]: value } }));
@@ -78,42 +65,107 @@ export const useQuizSession = (quiz: ParticipantQuiz, userId: string) => {
         setAttachments((current) => ({ ...current, [questionId]: files }));
     }, []);
 
-    const goTo = useCallback(
-        (index: number) => {
-            const lastIndex = quiz.questions.length - 1;
+    const syncAnswer = useCallback(
+        async (questionId: string, current: QuizDraft): Promise<QuizOutcome<SavedAnswer | null>> => {
+            const value = current.answers[questionId];
+            const files = attachments[questionId] ?? NO_FILES;
+            const snapshot = toSavedAnswer(value, files);
+            const previous = current.saved[questionId] as SavedAnswer | undefined;
 
-            setDraft((current) => (current === null ? current : { ...current, currentIndex: Math.min(Math.max(index, 0), lastIndex) }));
+            if (isSameSavedAnswer(previous, snapshot)) {
+                return { ok: true, data: null };
+            }
+
+            const question = detail.loaded[questionId] ?? null;
+
+            if (
+                question === null ||
+                (previous === undefined && question.hasSavedAnswer && snapshot.answer === '' && snapshot.files === '')
+            ) {
+                return { ok: true, data: null };
+            }
+
+            const saved = await saveQuizAnswer(
+                questionId,
+                toAnswerEntries(question, value),
+                snapshot.files === (previous?.files ?? '') ? NO_FILES : files,
+                isFinalAnswer(questionId, quiz.questions, current, attachments) ? new Date().toISOString() : null,
+            );
+
+            return saved.ok
+                ? { ok: true, data: { answer: snapshot.answer, files: snapshot.files === '' ? (previous?.files ?? '') : snapshot.files } }
+                : saved;
         },
-        [quiz.questions.length],
+        [attachments, detail.loaded, quiz.questions],
+    );
+
+    const goTo = useCallback(
+        async (index: number) => {
+            const target = Math.min(Math.max(index, 0), quiz.questions.length - 1);
+
+            if (draft === null || busyRef.current || target === draft.currentIndex) {
+                return;
+            }
+
+            const questionId = quiz.questions[draft.currentIndex].id;
+
+            busyRef.current = true;
+            setSaveState({ status: 'saving', target });
+
+            const outcome = await syncAnswer(questionId, draft);
+
+            busyRef.current = false;
+
+            if (outcome.ok === false) {
+                setSaveState({ status: 'error', target, code: outcome.code, message: outcome.message });
+                return;
+            }
+
+            setSaveState({ status: 'idle' });
+            setDraft((current) =>
+                current === null
+                    ? current
+                    : {
+                          ...current,
+                          currentIndex: target,
+                          saved: outcome.data === null ? current.saved : { ...current.saved, [questionId]: outcome.data },
+                      },
+            );
+        },
+        [draft, quiz.questions, syncAnswer],
     );
 
     const submit = useCallback(async () => {
-        if (draft === null || submittingRef.current) {
+        if (draft === null || busyRef.current) {
             return;
         }
 
-        submittingRef.current = true;
+        busyRef.current = true;
         setSubmitState({ status: 'submitting' });
 
-        const outcome = await submitQuizAttempt(quiz, draft.answers, attachments);
+        const savedNow: Record<string, SavedAnswer> = {};
 
-        if (outcome.ok) {
-            clearDraft(userId, quiz.id);
-            void clearAttachments(userId, quiz.id);
-            void navigate(resultPath(quiz.id, outcome.data.id), { replace: true });
-            return;
+        for (const question of quiz.questions.filter((item) => isAnsweredOnServer(item, draft, attachments) === false)) {
+            const outcome = await syncAnswer(question.id, { ...draft, saved: { ...draft.saved, ...savedNow } });
+
+            if (outcome.ok === false) {
+                busyRef.current = false;
+                setDraft((current) => (current === null ? current : { ...current, saved: { ...current.saved, ...savedNow } }));
+                setSubmitState({ status: 'error', code: outcome.code, message: outcome.message });
+                return;
+            }
+
+            if (outcome.data !== null) {
+                savedNow[question.id] = outcome.data;
+            }
         }
 
-        submittingRef.current = false;
-        setSubmitState({ status: 'error', code: outcome.code, message: outcome.message });
-    }, [attachments, draft, navigate, quiz, userId]);
+        void navigate(myQuizResultPath(quiz.id), { replace: true });
+    }, [attachments, draft, navigate, quiz, syncAnswer]);
 
     const resetSubmit = useCallback(() => {
         setSubmitState({ status: 'idle' });
     }, []);
-
-    const answers = draft?.answers;
-    const answeredIds = useMemo(() => findAnsweredIds(quiz.questions, answers ?? {}, attachments), [answers, attachments, quiz.questions]);
 
     return {
         phase,
@@ -121,10 +173,13 @@ export const useQuizSession = (quiz: ParticipantQuiz, userId: string) => {
         attachments,
         answeredIds,
         answeredCount: answeredIds.size,
-        unanswered: findUnanswered(quiz.questions, answeredIds),
+        unanswered,
+        question: detail.question,
+        questionState: detail.state,
+        retryQuestion: detail.retry,
+        saveState,
         submitState,
         start,
-        resume,
         setAnswer,
         setQuestionAttachments,
         goTo,

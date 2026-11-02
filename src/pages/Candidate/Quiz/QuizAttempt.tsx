@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, ClipboardCheck, ClipboardX, FileClock, LayoutGrid, Send } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
-import { useEffect, useId, useState } from 'react';
+import { useId, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ApiErrorState } from '@/components/patterns/ApiErrorState';
@@ -13,30 +13,31 @@ import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { useAuth } from '@/hooks/useAuth';
+import { useBackToList } from '@/hooks/useBackToList';
+import { useQuizResource } from '@/hooks/useQuizResource';
 import { strings } from '@/locales/id';
-import { preloadAnswerEditor } from '@/pages/Candidate/Quiz/components/answerEditor';
 import { QuestionNavigator } from '@/pages/Candidate/Quiz/components/QuestionNavigator';
 import { QuestionPanel } from '@/pages/Candidate/Quiz/components/QuestionPanel';
 import { QuestionStepper } from '@/pages/Candidate/Quiz/components/QuestionStepper';
 import { QuizIntro } from '@/pages/Candidate/Quiz/components/QuizIntro';
+import { QuizFailureNotice } from '@/pages/Candidate/Quiz/components/QuizFailureNotice';
 import { QuizMotionProvider } from '@/pages/Candidate/Quiz/components/QuizMotionProvider';
 import { SubmitDialog } from '@/pages/Candidate/Quiz/components/SubmitDialog';
-import { useQuizResource } from '@/hooks/useQuizResource';
-import { resultPath, useQuizSession } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
+import { useQuizSession } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
+import { MY_QUIZ_LIST_PATH, myQuizResultPath } from '@/pages/Candidate/Quiz/utils/paths';
 import { PRESSABLE_CLASS, questionSlideVariants } from '@/pages/Candidate/Quiz/utils/quizMotion';
-import { formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
+import { describeFailure, formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
 import { fetchParticipantQuiz } from '@/services/quizService';
 import type { ParticipantQuiz } from '@/types/quiz';
-
-const LIST_PATH = '/my-quizzes';
+import { toHttpsUrl } from '@/utils/httpsUrl';
 
 const NO_FILES: readonly File[] = [];
 
 const AttemptSkeleton = () => (
     <LoadingBlock label={strings.common.loading}>
         <Card className="flex flex-col gap-5 p-5 sm:p-6">
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {Array.from({ length: 4 }, (_, index) => (
+            <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 2 }, (_, index) => (
                     <Skeleton key={index} className="h-14 rounded-lg" />
                 ))}
             </div>
@@ -49,6 +50,18 @@ const AttemptSkeleton = () => (
     </LoadingBlock>
 );
 
+const QuestionSkeleton = () => (
+    <LoadingBlock label={strings.common.loading}>
+        <Card className="flex flex-col gap-5 p-5 sm:p-6">
+            <Skeleton className="h-6 w-28 rounded-full" />
+            <Skeleton className="h-5 w-full max-w-lg" />
+            {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-12 rounded-lg" />
+            ))}
+        </Card>
+    </LoadingBlock>
+);
+
 const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }) => {
     const session = useQuizSession(quiz, userId);
     const [reviewOpen, setReviewOpen] = useState(false);
@@ -56,38 +69,29 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
     const [hasNavigated, setHasNavigated] = useState(false);
     const [direction, setDirection] = useState(1);
     const navigatorTitleId = useId();
-    const needsEditor = quiz.questions.some((item) => item.type === 'short_answer');
-
-    useEffect(() => {
-        if (needsEditor) {
-            preloadAnswerEditor();
-        }
-    }, [needsEditor]);
 
     if (session.phase === 'intro' || session.draft === null) {
-        return (
-            <QuizIntro
-                quiz={quiz}
-                draftAnswered={session.draft === null ? null : session.answeredCount}
-                onStart={session.start}
-                onResume={session.resume}
-            />
-        );
+        return <QuizIntro quiz={quiz} answeredCount={session.answeredCount} onStart={session.start} />;
     }
 
-    const { draft } = session;
+    const { draft, saveState, questionState } = session;
     const total = quiz.questions.length;
     const index = draft.currentIndex;
     const question = quiz.questions[index];
     const isLast = index === total - 1;
+    const savingTarget = saveState.status === 'saving' ? saveState.target : null;
 
     const goTo = (target: number) => {
         setHasNavigated(true);
         setDirection(target < index ? -1 : 1);
-        session.goTo(target);
+        void session.goTo(target);
     };
 
     const openReview = () => {
+        if (savingTarget !== null) {
+            return;
+        }
+
         if (session.submitState.status === 'error') {
             session.resetSubmit();
         }
@@ -136,17 +140,6 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                             onSelect={goTo}
                         />
                     </div>
-                    {/* <div className="border-line border-t pt-3">
-                        <Button
-                            size="sm"
-                            fullWidth
-                            onClick={openReview}
-                            leadingIcon={<Send aria-hidden="true" className="size-4" />}
-                            className={PRESSABLE_CLASS}
-                        >
-                            {strings.myQuiz.review}
-                        </Button>
-                    </div> */}
                 </Card>
 
                 <div className="flex min-w-0 flex-col gap-4">
@@ -160,26 +153,54 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                                 animate="center"
                                 exit="exit"
                             >
-                                <QuestionPanel
-                                    question={question}
-                                    index={index}
-                                    total={total}
-                                    options={question.options}
-                                    value={draft.answers[question.id]}
-                                    onChange={(value) => session.setAnswer(question.id, value)}
-                                    attachments={session.attachments[question.id] ?? NO_FILES}
-                                    onChangeAttachments={(files) => session.setQuestionAttachments(question.id, files)}
-                                    focusOnMount={hasNavigated}
-                                />
+                                {session.question !== null ? (
+                                    <QuestionPanel
+                                        question={session.question}
+                                        index={index}
+                                        total={total}
+                                        options={session.question.options}
+                                        value={draft.answers[question.id]}
+                                        onChange={(value) => session.setAnswer(question.id, value)}
+                                        attachments={session.attachments[question.id] ?? NO_FILES}
+                                        onChangeAttachments={(files) => session.setQuestionAttachments(question.id, files)}
+                                        savedFileUrl={toHttpsUrl(draft.saved[question.id]?.files)}
+                                        focusOnMount={hasNavigated}
+                                    />
+                                ) : questionState.status === 'error' ? (
+                                    <Card>
+                                        <ApiErrorState
+                                            code={questionState.code === 'not_found' ? 'unknown' : questionState.code}
+                                            message={questionState.message}
+                                            unauthorizedTitle={strings.myQuiz.unauthorizedTitle}
+                                            onRetry={session.retryQuestion}
+                                        />
+                                    </Card>
+                                ) : (
+                                    <QuestionSkeleton />
+                                )}
                             </m.div>
                         </AnimatePresence>
                     </div>
+
+                    {saveState.status === 'error' ? (
+                        <QuizFailureNotice
+                            title={strings.myQuiz.saveFailedTitle}
+                            body={`${describeFailure(saveState.code, saveState.message)} ${strings.myQuiz.saveFailedKeep}`}
+                            action={
+                                <Button variant="secondary" size="sm" onClick={() => void session.goTo(saveState.target)}>
+                                    {strings.common.retry}
+                                </Button>
+                            }
+                        />
+                    ) : null}
 
                     <div className="flex items-center justify-between gap-3">
                         <Button
                             variant="secondary"
                             onClick={() => goTo(index - 1)}
-                            disabled={index === 0}
+                            disabled={index === 0 || savingTarget !== null}
+                            loading={savingTarget !== null && savingTarget < index}
+                            loadingLabel={strings.myQuiz.saving}
                             leadingIcon={<ChevronLeft aria-hidden="true" className="size-4" />}
                             className={PRESSABLE_CLASS}
                         >
@@ -196,6 +217,9 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
                         ) : (
                             <Button
                                 onClick={() => goTo(index + 1)}
+                                disabled={savingTarget !== null}
+                                loading={savingTarget !== null && savingTarget > index}
+                                loadingLabel={strings.myQuiz.saving}
                                 trailingIcon={<ChevronRight aria-hidden="true" className="size-4" />}
                                 className={PRESSABLE_CLASS}
                             >
@@ -238,7 +262,7 @@ const QuizSession = ({ quiz, userId }: { quiz: ParticipantQuiz; userId: string }
     );
 };
 
-const CompletedQuiz = ({ quiz }: { quiz: ParticipantQuiz }) => (
+const CompletedQuiz = ({ quiz, onBack }: { quiz: ParticipantQuiz; onBack: () => void }) => (
     <Card>
         <EmptyState
             icon={ClipboardCheck}
@@ -246,18 +270,12 @@ const CompletedQuiz = ({ quiz }: { quiz: ParticipantQuiz }) => (
             description={strings.myQuiz.completedBody}
             action={
                 <div className="flex flex-wrap justify-center gap-2">
-                    <LinkButton to={LIST_PATH} size="sm" variant="secondary">
+                    <Button size="sm" variant="secondary" onClick={onBack}>
                         {strings.myQuiz.backToList}
+                    </Button>
+                    <LinkButton to={myQuizResultPath(quiz.id)} size="sm" leadingIcon={<FileClock aria-hidden="true" className="size-4" />}>
+                        {strings.myQuiz.viewScore}
                     </LinkButton>
-                    {quiz.lastAttempt === null ? null : (
-                        <LinkButton
-                            to={resultPath(quiz.id, quiz.lastAttempt.id)}
-                            size="sm"
-                            leadingIcon={<FileClock aria-hidden="true" className="size-4" />}
-                        >
-                            {strings.myQuiz.viewScore}
-                        </LinkButton>
-                    )}
                 </div>
             }
         />
@@ -268,6 +286,7 @@ export const QuizAttempt = () => {
     const { quizId } = useParams<{ quizId: string }>();
     const { user } = useAuth();
     const { state, retry } = useQuizResource(quizId, fetchParticipantQuiz);
+    const backToList = useBackToList(MY_QUIZ_LIST_PATH);
 
     const quiz = state.status === 'success' ? state.data : null;
     const isCompleted = quiz?.isCompleted === true;
@@ -280,7 +299,7 @@ export const QuizAttempt = () => {
                 <PageHeaderDetail
                     title={quiz?.title ?? strings.nav.myQuiz}
                     subtitle={quiz === null ? null : `${strings.myQuiz.materialPrefix} ${quiz.moduleTitle}`}
-                    backPath={LIST_PATH}
+                    backPath={backToList}
                 />
 
                 {state.status === 'loading' ? <AttemptSkeleton /> : null}
@@ -292,9 +311,9 @@ export const QuizAttempt = () => {
                             title={strings.myQuiz.notFoundTitle}
                             description={strings.myQuiz.notFoundBody}
                             action={
-                                <LinkButton to={LIST_PATH} size="sm" variant="secondary">
+                                <Button size="sm" variant="secondary" onClick={backToList}>
                                     {strings.myQuiz.backToList}
-                                </LinkButton>
+                                </Button>
                             }
                         />
                     </Card>
@@ -311,7 +330,7 @@ export const QuizAttempt = () => {
                     </Card>
                 ) : null}
 
-                {quiz !== null && isCompleted ? <CompletedQuiz quiz={quiz} /> : null}
+                {quiz !== null && isCompleted ? <CompletedQuiz quiz={quiz} onBack={backToList} /> : null}
 
                 {quiz !== null && isCompleted === false && isMissing === false ? (
                     <QuizSession key={quiz.id} quiz={quiz} userId={user?.id ?? ''} />

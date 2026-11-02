@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check, Clock } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
 import { Suspense, useEffect, useId, useRef } from 'react';
 
@@ -7,8 +7,9 @@ import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import { strings } from '@/locales/id';
 import { AnswerEditor } from '@/pages/Candidate/Quiz/components/answerEditor';
 import { AnswerAttachments } from '@/pages/Candidate/Quiz/components/AnswerAttachments';
+import { QuestionImage } from '@/pages/Candidate/Quiz/components/QuestionImage';
 import { popIn } from '@/pages/Candidate/Quiz/utils/quizMotion';
-import { formatEstimate } from '@/pages/Candidate/Quiz/utils/quizText';
+import { formatQuestionEstimate } from '@/pages/Candidate/Quiz/utils/quizText';
 import type { ParticipantOption, ParticipantQuestion, QuizAnswerValue } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
@@ -98,6 +99,7 @@ interface QuestionPanelProps {
     onChange: (value: QuizAnswerValue) => void;
     attachments: readonly File[];
     onChangeAttachments: (files: File[]) => void;
+    savedFileUrl: string | null;
     focusOnMount: boolean;
 }
 
@@ -110,6 +112,7 @@ export const QuestionPanel = ({
     onChange,
     attachments,
     onChangeAttachments,
+    savedFileUrl,
     focusOnMount,
 }: QuestionPanelProps) => {
     const baseId = useId();
@@ -124,21 +127,23 @@ export const QuestionPanel = ({
     }, [focusOnMount]);
 
     const position = `${strings.myQuiz.questionLabel} ${String(index + 1)} ${strings.myQuiz.of} ${String(total)}`;
-    const estimate = formatEstimate(question.estimatedSeconds);
-    const meta = [question.points === null ? null : `${String(question.points)} ${strings.myQuiz.pointsSuffix}`, estimate].filter(
-        (part): part is string => part !== null,
-    );
+    const estimate = formatQuestionEstimate(question.estimatedTime, question.estimatedTimeUnit);
 
     return (
         <Card className="flex flex-col gap-5 p-5 sm:p-6">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
                 <span
                     aria-hidden="true"
                     className="bg-primary-light text-primary-dark text-caption rounded-full px-2.5 py-1 font-semibold tabular-nums"
                 >
                     {position}
                 </span>
-                <span className="text-caption text-muted">{meta.join(' · ')}</span>
+                {estimate === null ? null : (
+                    <span className="text-caption text-muted flex items-center gap-1">
+                        <Clock aria-hidden="true" className="size-3.5" />
+                        {estimate}
+                    </span>
+                )}
             </div>
 
             <h2 ref={headingRef} id={titleId} tabIndex={-1} className="text-card text-ink font-sans whitespace-pre-line outline-none">
@@ -146,14 +151,7 @@ export const QuestionPanel = ({
                 {question.text}
             </h2>
 
-            {question.imageUrl === null ? null : (
-                <img
-                    src={question.imageUrl}
-                    alt={strings.myQuiz.questionImageAlt}
-                    loading="lazy"
-                    className="border-line max-h-80 w-full rounded-lg border object-contain"
-                />
-            )}
+            {question.imageUrl === null ? null : <QuestionImage url={question.imageUrl} />}
 
             <p id={hintId} className="text-caption text-muted -mb-2">
                 {strings.myQuiz.typeHint[question.type]}
@@ -169,7 +167,7 @@ export const QuestionPanel = ({
                             allowTables
                         />
                     </Suspense>
-                    <AnswerAttachments files={attachments} onChange={onChangeAttachments} />
+                    <AnswerAttachments files={attachments} onChange={onChangeAttachments} savedFileUrl={savedFileUrl} />
                 </div>
             ) : (
                 <ChoiceList

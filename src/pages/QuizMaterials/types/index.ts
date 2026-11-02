@@ -30,6 +30,7 @@ export interface QuizListItem {
     period: DateRange | null;
     questionCount: number;
     createdAt: string | null;
+    updatedAt: string | null;
 }
 
 export interface QuizDetail {
@@ -88,4 +89,25 @@ export interface StoredQuestion {
     id: string;
     line: number;
     question: QuizQuestion;
+}
+
+export interface SavedQuestionResult {
+    id: string;
+    stored: StoredQuestion | null;
+}
+
+export interface QuizPayload {
+    title: string;
+    moduleId: string;
+    audiences: QuizAudience[];
+    start: string;
+    end: string;
+    banner: File | null;
+}
+
+export interface QuestionSaveRequest {
+    quizId: string;
+    fields: Record<string, string>;
+    image: File | null;
+    removeImage: boolean;
 }

@@ -4,8 +4,7 @@ import { strings } from '@/locales/id';
 import { QuizInfoForm } from '@/pages/QuizMaterials/components/QuizInfoForm';
 import { useQuizDraft } from '@/pages/QuizMaterials/hooks/useQuizDraft';
 import { updateQuiz } from '@/pages/QuizMaterials/services/quizMaterialService';
-import type { QuizPayload } from '@/pages/QuizMaterials/services/quizMaterialService';
-import type { QuizDetail, QuizInfo } from '@/pages/QuizMaterials/types';
+import type { QuizDetail, QuizInfo, QuizPayload } from '@/pages/QuizMaterials/types';
 
 interface QuizInfoEditPanelProps {
     quiz: QuizDetail;

@@ -4,11 +4,11 @@ import { AnimatePresence, m } from 'motion/react';
 import { strings } from '@/locales/id';
 import { popIn } from '@/pages/Candidate/Quiz/utils/quizMotion';
 import { describeQuestionState } from '@/pages/Candidate/Quiz/utils/quizText';
-import type { ParticipantQuestion } from '@/types/quiz';
+import type { ParticipantQuestionRef } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
 interface QuestionNavigatorProps {
-    questions: readonly ParticipantQuestion[];
+    questions: readonly ParticipantQuestionRef[];
     answeredIds: ReadonlySet<string>;
     currentIndex: number;
     onSelect: (index: number) => void;

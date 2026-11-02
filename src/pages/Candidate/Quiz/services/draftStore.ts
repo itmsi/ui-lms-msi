@@ -1,5 +1,5 @@
 import { isRecord } from '@/helpers/authParsers';
-import type { QuizDraft } from '@/pages/Candidate/Quiz/types';
+import type { QuizDraft, SavedAnswer } from '@/pages/Candidate/Quiz/types';
 import type { QuizAnswers, QuizAnswerValue } from '@/types/quiz';
 
 const DRAFT_PREFIX = 'msi-learning:quiz-draft';
@@ -14,6 +14,14 @@ const toAnswers = (value: unknown): QuizAnswers =>
         ? Object.fromEntries(Object.entries(value).filter((entry): entry is [string, QuizAnswerValue] => isAnswerValue(entry[1])))
         : {};
 
+const isSavedAnswer = (value: unknown): value is SavedAnswer =>
+    isRecord(value) && typeof value.answer === 'string' && typeof value.files === 'string';
+
+const toSaved = (value: unknown): Record<string, SavedAnswer> =>
+    isRecord(value)
+        ? Object.fromEntries(Object.entries(value).filter((entry): entry is [string, SavedAnswer] => isSavedAnswer(entry[1])))
+        : {};
+
 export const readDraft = (userId: string, quizId: string): QuizDraft | null => {
     try {
         const raw = localStorage.getItem(draftKey(userId, quizId));
@@ -26,6 +34,7 @@ export const readDraft = (userId: string, quizId: string): QuizDraft | null => {
         return {
             answers: toAnswers(parsed.answers),
             currentIndex: typeof parsed.currentIndex === 'number' ? parsed.currentIndex : 0,
+            saved: toSaved(parsed.saved),
         };
     } catch {
         return null;

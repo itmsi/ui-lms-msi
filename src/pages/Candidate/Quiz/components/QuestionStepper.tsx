@@ -5,11 +5,11 @@ import { useEffect, useRef } from 'react';
 import { strings } from '@/locales/id';
 import { popIn } from '@/pages/Candidate/Quiz/utils/quizMotion';
 import { describeQuestionState } from '@/pages/Candidate/Quiz/utils/quizText';
-import type { ParticipantQuestion } from '@/types/quiz';
+import type { ParticipantQuestionRef } from '@/types/quiz';
 import { cn } from '@/utils/cn';
 
 interface QuestionStepperProps {
-    questions: readonly ParticipantQuestion[];
+    questions: readonly ParticipantQuestionRef[];
     answeredIds: ReadonlySet<string>;
     currentIndex: number;
     onSelect: (index: number) => void;
@@ -93,7 +93,7 @@ export const QuestionStepper = ({ questions, answeredIds, currentIndex, onSelect
                                             current ? 'text-ink/80' : 'text-muted',
                                         )}
                                     >
-                                        {question.text}
+                                        {question.preview}
                                     </span>
                                 </span>
                             </button>

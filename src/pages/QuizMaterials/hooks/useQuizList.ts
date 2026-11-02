@@ -129,6 +129,18 @@ export const useQuizList = () => {
     const selectPageSize = useCallback((next: number) => applyParams({ limit: next }), [applyParams]);
     const retry = useCallback(() => setReloadToken((token) => token + 1), []);
 
+    const items = state.status === 'success' ? state.result.items : [];
+    const isLastOnPage = items.length === 1 && page > 1;
+
+    const reloadAfterDelete = useCallback(() => {
+        if (isLastOnPage) {
+            goToPage(page - 1);
+            return;
+        }
+
+        retry();
+    }, [goToPage, isLastOnPage, page, retry]);
+
     return {
         state,
         lastPagination,
@@ -136,6 +148,7 @@ export const useQuizList = () => {
         pageSize,
         search,
         moduleId,
+        moduleTitle: moduleId === null ? null : (items.find((item) => item.moduleId === moduleId)?.moduleTitle ?? null),
         audience,
         hasFilters: search !== '' || moduleId !== null || audience !== 'all',
         submitSearch,
@@ -145,5 +158,6 @@ export const useQuizList = () => {
         goToPage,
         selectPageSize,
         retry,
+        reloadAfterDelete,
     };
 };

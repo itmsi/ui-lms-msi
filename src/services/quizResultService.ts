@@ -1,9 +1,7 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
-import { toApiFailureCode, toPagination } from '@/services/moduleService';
-import { mockQuizResultRequest } from '@/services/mocks/quizResultMock';
-import { toQuestionReview } from '@/services/quizService';
-import type { QuizOutcome } from '@/types/quiz';
+import { toPagination } from '@/services/moduleService';
+import { send, toQuestionReview } from '@/services/quizService';
 import type {
     GradingAttempt,
     GradingPoints,
@@ -105,61 +103,42 @@ const toGradingAttempt = (value: unknown): GradingAttempt | null => {
     };
 };
 
-const request = async <T>(
-    path: string,
-    parse: (data: unknown) => T | null,
-    payload?: unknown,
-    signal?: AbortSignal,
-): Promise<QuizOutcome<T>> => {
-    if (navigator.onLine === false) {
-        return { ok: false, code: 'offline' };
-    }
-
-    try {
-        const { data: body } = await mockQuizResultRequest(path, payload, signal);
-        const envelope = readEnvelope(body);
-
-        if (envelope.ok === false) {
-            return envelope.message === null
-                ? { ok: false, code: 'unknown' }
-                : { ok: false, code: 'validation', message: envelope.message };
-        }
-
-        const parsed = parse(envelope.data);
-
-        return parsed === null ? { ok: false, code: 'not_found' } : { ok: true, data: parsed };
-    } catch (error) {
-        const status = isRecord(error) && typeof error.status === 'number' ? error.status : null;
-
-        return status === 404 ? { ok: false, code: 'not_found' } : { ok: false, code: toApiFailureCode(error) };
-    }
-};
-
 export const fetchQuizResults = (query: QuizResultQuery, signal?: AbortSignal) =>
-    request(
-        LIST_PATH,
+    send(
+        () =>
+            apiPost<unknown>(
+                LIST_PATH,
+                {
+                    page: query.page,
+                    limit: query.limit,
+                    search: query.search,
+                    quizzes_id: query.quizId ?? '',
+                    status: query.status === 'all' ? '' : query.status,
+                },
+                { signal },
+            ),
         toListResult(query),
-        {
-            page: query.page,
-            limit: query.limit,
-            search: query.search,
-            quizzes_id: query.quizId ?? '',
-            status: query.status === 'all' ? '' : query.status,
-        },
-        signal,
     );
 
 export const fetchQuizOptions = (signal?: AbortSignal) =>
-    request(
-        QUIZ_LIST_PATH,
+    send(
+        () =>
+            apiPost<unknown>(
+                QUIZ_LIST_PATH,
+                { page: 1, limit: QUIZ_OPTIONS_LIMIT, search: '', sort_by: 'created_at', sort_order: 'desc' },
+                { signal },
+            ),
         toQuizOptions,
-        { page: 1, limit: QUIZ_OPTIONS_LIMIT, search: '', sort_by: 'created_at', sort_order: 'desc' },
-        signal,
     );
 
-export const fetchGradingAttempt = (id: string, signal?: AbortSignal) => request(detailPath(id), toGradingAttempt, undefined, signal);
+export const fetchGradingAttempt = (id: string, signal?: AbortSignal) =>
+    send(() => apiGet<unknown>(detailPath(id), undefined, { signal }), toGradingAttempt);
 
 export const saveGradingPoints = (id: string, points: GradingPoints) =>
-    request(updatePath(id), toGradingAttempt, {
-        points: Object.entries(points).map(([questionId, value]) => ({ quiz_questions_id: questionId, points_earned: value })),
-    });
+    send(
+        () =>
+            apiPut<unknown>(updatePath(id), {
+                points: Object.entries(points).map(([questionId, value]) => ({ quiz_questions_id: questionId, points_earned: value })),
+            }),
+        toGradingAttempt,
+    );

@@ -134,6 +134,12 @@ export const apiPost = async <T = unknown>(
     config?: AxiosRequestConfig,
 ): Promise<ApiResponse<T>> => request<T>(() => api.post<T>(url, data, config));
 
+export const apiPut = async <T = unknown>(
+    url: string,
+    data?: Record<string, unknown>,
+    config?: AxiosRequestConfig,
+): Promise<ApiResponse<T>> => request<T>(() => api.put<T>(url, data, config));
+
 export const apiDelete = async <T = unknown>(url: string): Promise<ApiResponse<T>> =>
     request<T>(() => api.delete<T>(url));
 

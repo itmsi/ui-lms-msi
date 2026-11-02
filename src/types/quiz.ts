@@ -1,31 +1,48 @@
-import type { ApiFailureCode } from '@/types/module';
+import type { ApiFailureCode, ModulePagination } from '@/types/module';
+import type { CandidateProgram } from '@/types/user';
 
 export type ParticipantQuestionType = 'multiple_choice' | 'multiple_answers' | 'true_false' | 'short_answer';
-
-export interface QuizLastAttempt {
-    id: string;
-    score: number;
-    maxScore: number;
-    submittedAt: string;
-}
 
 export interface ParticipantQuizSummary {
     id: string;
     title: string;
     moduleId: string;
     moduleTitle: string;
-    moduleBanner: string | null;
+    banner: string | null;
     startDate: string;
     endDate: string;
     questionCount: number;
-    estimatedSeconds: number | null;
+    completedCount: number;
+    totalPoint: number | null;
+    totalPossiblePoints: number | null;
     isCompleted: boolean;
-    lastAttempt: QuizLastAttempt | null;
+}
+
+export interface ParticipantQuizQuery {
+    page: number;
+    limit: number;
+    search: string;
+    moduleId: string | null;
+    program: CandidateProgram | null;
+    userId: string;
+}
+
+export interface ParticipantQuizListResult {
+    items: ParticipantQuizSummary[];
+    pagination: ModulePagination;
 }
 
 export interface ParticipantOption {
     id: string;
+    line: number;
     text: string;
+}
+
+export interface ParticipantQuestionRef {
+    id: string;
+    line: number;
+    preview: string;
+    isAnswered: boolean;
 }
 
 export interface ParticipantQuestion {
@@ -34,13 +51,22 @@ export interface ParticipantQuestion {
     type: ParticipantQuestionType;
     text: string;
     imageUrl: string | null;
-    estimatedSeconds: number | null;
+    estimatedTime: number | null;
+    estimatedTimeUnit: string;
     points: number | null;
     options: ParticipantOption[];
+    hasSavedAnswer: boolean;
+    savedEntries: QuizAnswerEntry[];
+    savedFileUrl: string | null;
+}
+
+export interface QuizAnswerEntry {
+    line: number;
+    text: string;
 }
 
 export interface ParticipantQuiz extends ParticipantQuizSummary {
-    questions: ParticipantQuestion[];
+    questions: ParticipantQuestionRef[];
 }
 
 export type QuizAnswerValue = string | string[];
@@ -60,6 +86,7 @@ export interface QuestionReview {
     line: number;
     type: ParticipantQuestionType;
     text: string;
+    imageUrl: string | null;
     yourAnswer: string[];
     yourAttachments: SubmittedAttachment[];
     correctAnswer: string[];
@@ -69,7 +96,6 @@ export interface QuestionReview {
 }
 
 export interface QuizAttemptResult {
-    id: string;
     quizId: string;
     quizTitle: string;
     moduleTitle: string;

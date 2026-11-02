@@ -1,24 +1,30 @@
-import { AlertCircle, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
-import type { ReactNode } from 'react';
+import { AlertCircle, ClipboardList, SearchX, Trash2 } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
 import type { TableColumn } from 'react-data-table-component';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { ApiErrorState } from '@/components/patterns/ApiErrorState';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { ClickThroughCell } from '@/components/ui/ClickThroughCell';
 import { CustomDataTable } from '@/components/ui/CustomDataTable';
 import { EmptyCell } from '@/components/ui/EmptyCell';
-import type { EmptyState } from '@/components/ui/EmptyState';
 import { IconButton } from '@/components/ui/IconButton';
 import { ModuleCategoryBadge } from '@/components/ui/ModuleCategoryBadge';
+import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
+import { QuizCreateButton } from '@/pages/QuizMaterials/components/QuizCreateButton';
 import { QuizScheduleBadge } from '@/pages/QuizMaterials/components/QuizScheduleBadge';
 import { QUIZ_LIST_PAGE_SIZES } from '@/pages/QuizMaterials/hooks/useQuizList';
+import type { QuizListState } from '@/pages/QuizMaterials/hooks/useQuizList';
 import { quizDetailPath } from '@/pages/QuizMaterials/utils/paths';
 import { resolveSchedule } from '@/pages/QuizMaterials/utils/quizSchedule';
 import type { QuizListItem } from '@/pages/QuizMaterials/types';
 import type { ModulePagination } from '@/types/module';
 import { formatIsoRange } from '@/utils/dateRangeText';
-import { formatFullDateTime } from '@/utils/dateTime';
+import { formatFullDateTime, toIsoDate } from '@/utils/dateTime';
+
+const NOW_TICK_MS = 60_000;
 
 const AudienceCell = ({ item }: { item: QuizListItem }) =>
     item.audiences.length === 0 ? (
@@ -113,11 +119,11 @@ const buildColumns = (today: string, onDelete: ((item: QuizListItem) => void) | 
         width: '170px',
         cell: (item) => (
             <ClickThroughCell>
-                {item.createdAt === null ? (
+                {item.updatedAt === null ? (
                     <EmptyCell />
                 ) : (
-                    <time dateTime={item.createdAt} className="text-body text-ink tabular-nums">
-                        {formatFullDateTime(item.createdAt)}
+                    <time dateTime={item.updatedAt} className="text-body text-ink tabular-nums">
+                        {formatFullDateTime(item.updatedAt)}
                     </time>
                 )}
             </ClickThroughCell>
@@ -126,69 +132,107 @@ const buildColumns = (today: string, onDelete: ((item: QuizListItem) => void) | 
     ...(onDelete === null
         ? []
         : [
-              {
-                  id: 'actions',
-                  name: strings.quizMaterials.actionsColumn,
-                  width: '80px',
-                  button: true,
-                  cell: (item: QuizListItem) => (
-                      <IconButton
-                          label={`${strings.quizMaterials.deleteAction} ${item.title}`}
-                          tone="danger"
-                          icon={<Trash2 aria-hidden="true" className="size-4" />}
-                          onClick={() => onDelete(item)}
-                      />
-                  ),
-              },
-          ]),
+            {
+                id: 'actions',
+                name: strings.quizMaterials.actionsColumn,
+                width: '80px',
+                button: true,
+                cell: (item: QuizListItem) => (
+                    <IconButton
+                        label={`${strings.quizMaterials.deleteAction} ${item.title}`}
+                        tone="danger"
+                        icon={<Trash2 aria-hidden="true" className="size-4" />}
+                        onClick={() => onDelete(item)}
+                    />
+                ),
+            },
+        ]),
 ];
 
 interface QuizListTableProps {
-    items: QuizListItem[];
-    today: string;
-    loading: boolean;
-    pagination: ModulePagination | null;
+    state: QuizListState;
+    lastPagination: ModulePagination | null;
     page: number;
     pageSize: number;
+    hasFilters: boolean;
+    canCreate: boolean;
     onChangePage: (page: number) => void;
     onChangeRowsPerPage: (pageSize: number) => void;
-    emptyTitle: string;
-    emptyDescription: string;
-    emptyIcon: Parameters<typeof EmptyState>[0]['icon'];
-    emptyAction?: ReactNode;
+    onClearFilters: () => void;
+    onRetry: () => void;
     onDelete: ((item: QuizListItem) => void) | null;
 }
 
 export const QuizListTable = ({
-    items,
-    today,
-    loading,
-    pagination,
+    state,
+    lastPagination,
     page,
     pageSize,
+    hasFilters,
+    canCreate,
     onChangePage,
     onChangeRowsPerPage,
-    emptyTitle,
-    emptyDescription,
-    emptyIcon,
-    emptyAction,
+    onClearFilters,
+    onRetry,
     onDelete,
 }: QuizListTableProps) => {
     const navigate = useNavigate();
+    const today = toIsoDate(new Date(useNow(NOW_TICK_MS)));
     const columns = useMemo(() => buildColumns(today, onDelete), [today, onDelete]);
+
+    const handlePageChange = useCallback(
+        (next: number) => {
+            if (next !== page) {
+                onChangePage(next);
+            }
+        },
+        [onChangePage, page],
+    );
+
+    const handleRowsPerPageChange = useCallback(
+        (next: number) => {
+            if (next !== pageSize) {
+                onChangeRowsPerPage(next);
+            }
+        },
+        [onChangeRowsPerPage, pageSize],
+    );
+
+    if (state.status === 'error') {
+        return (
+            <Card>
+                <ApiErrorState
+                    code={state.code === 'not_found' ? 'unknown' : state.code}
+                    message={state.message}
+                    unauthorizedTitle={strings.quizMaterials.unauthorizedTitle}
+                    onRetry={onRetry}
+                />
+            </Card>
+        );
+    }
+
+    const pagination = state.status === 'success' ? state.result.pagination : lastPagination;
 
     return (
         <CustomDataTable<QuizListItem>
             ariaLabel={strings.quizMaterials.tableLabel}
             columns={columns}
-            data={items}
+            data={state.status === 'success' ? state.result.items : []}
             keyField="id"
-            loading={loading}
+            loading={state.status === 'loading'}
             skeletonRows={6}
-            emptyTitle={emptyTitle}
-            emptyDescription={emptyDescription}
-            emptyIcon={emptyIcon}
-            emptyAction={emptyAction}
+            emptyIcon={hasFilters ? SearchX : ClipboardList}
+            emptyTitle={hasFilters ? strings.quizMaterials.filteredEmptyTitle : strings.quizMaterials.emptyTitle}
+            emptyDescription={hasFilters ? strings.quizMaterials.filteredEmptyBody : strings.quizMaterials.emptyBody}
+            emptyAction={
+                hasFilters ? (
+                    <Button variant="secondary" size="sm" onClick={onClearFilters}>
+                        {strings.quizMaterials.clearFilters}
+                    </Button>
+                ) : canCreate ? (
+                    <QuizCreateButton />
+                ) : undefined
+            }
             onRowClicked={(item) => void navigate(quizDetailPath(item.id))}
             pagination
             paginationServer
@@ -196,8 +240,8 @@ export const QuizListTable = ({
             paginationPerPage={pageSize}
             paginationTotalRows={pagination?.total ?? 0}
             paginationRowsPerPageOptions={QUIZ_LIST_PAGE_SIZES}
-            onChangePage={onChangePage}
-            onChangeRowsPerPage={(nextPageSize) => onChangeRowsPerPage(nextPageSize)}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
         />
     );
 };

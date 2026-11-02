@@ -1,21 +1,23 @@
 import { ClipboardCheck, ClipboardX } from 'lucide-react';
+import { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ApiErrorState } from '@/components/patterns/ApiErrorState';
 import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { LinkButton } from '@/components/ui/LinkButton';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useAuth } from '@/hooks/useAuth';
+import { useBackToList } from '@/hooks/useBackToList';
+import { useQuizResource } from '@/hooks/useQuizResource';
 import { strings } from '@/locales/id';
 import { AnswerReviewList } from '@/pages/Candidate/Quiz/components/AnswerReviewList';
-import { useQuizResource } from '@/hooks/useQuizResource';
-import { fetchQuizAttempt } from '@/services/quizService';
+import { MY_QUIZ_LIST_PATH } from '@/pages/Candidate/Quiz/utils/paths';
+import { fetchQuizResult } from '@/services/quizService';
 import type { QuizAttemptResult } from '@/types/quiz';
 import { formatFullDateTime } from '@/utils/dateTime';
-
-const LIST_PATH = '/my-quizzes';
 
 const ResultSkeleton = () => (
     <LoadingBlock label={strings.common.loading}>
@@ -45,7 +47,7 @@ const ScoreSummary = ({ result }: { result: QuizAttemptResult }) => {
     );
 };
 
-const ResultView = ({ result }: { result: QuizAttemptResult }) => (
+const ResultView = ({ result, onBack }: { result: QuizAttemptResult; onBack: () => void }) => (
     <>
         <Card className="motion-rise flex flex-col items-center gap-5 p-6 text-center sm:p-8">
             <span aria-hidden="true" className="bg-primary-light text-primary flex size-14 items-center justify-center rounded-full">
@@ -63,7 +65,7 @@ const ResultView = ({ result }: { result: QuizAttemptResult }) => (
                 <p className="text-caption text-muted">{`${strings.myQuiz.submittedAt} ${formatFullDateTime(result.submittedAt)}`}</p>
             )}
 
-            <LinkButton to={LIST_PATH}>{strings.myQuiz.backToList}</LinkButton>
+            <Button onClick={onBack}>{strings.myQuiz.backToList}</Button>
         </Card>
 
         {result.review.length > 0 ? <AnswerReviewList items={result.review} /> : null}
@@ -71,8 +73,12 @@ const ResultView = ({ result }: { result: QuizAttemptResult }) => (
 );
 
 export const QuizResult = () => {
-    const { attemptId } = useParams<{ attemptId: string }>();
-    const { state, retry } = useQuizResource(attemptId, fetchQuizAttempt);
+    const { quizId } = useParams<{ quizId: string }>();
+    const { user } = useAuth();
+    const userId = user?.id ?? '';
+    const load = useCallback((id: string, signal: AbortSignal) => fetchQuizResult(id, userId, signal), [userId]);
+    const { state, retry } = useQuizResource(quizId, load);
+    const backToList = useBackToList(MY_QUIZ_LIST_PATH);
 
     const result = state.status === 'success' ? state.data : null;
 
@@ -81,7 +87,7 @@ export const QuizResult = () => {
             <PageHeaderDetail
                 title={result?.quizTitle ?? strings.nav.myQuiz}
                 subtitle={result === null ? null : `${strings.myQuiz.materialPrefix} ${result.moduleTitle}`}
-                backPath={LIST_PATH}
+                backPath={backToList}
             />
 
             {state.status === 'loading' ? <ResultSkeleton /> : null}
@@ -93,9 +99,9 @@ export const QuizResult = () => {
                         title={strings.myQuiz.resultNotFoundTitle}
                         description={strings.myQuiz.resultNotFoundBody}
                         action={
-                            <LinkButton to={LIST_PATH} size="sm" variant="secondary">
+                            <Button size="sm" variant="secondary" onClick={backToList}>
                                 {strings.myQuiz.backToList}
-                            </LinkButton>
+                            </Button>
                         }
                     />
                 </Card>
@@ -112,7 +118,7 @@ export const QuizResult = () => {
                 </Card>
             ) : null}
 
-            {result === null ? null : <ResultView result={result} />}
+            {result === null ? null : <ResultView result={result} onBack={backToList} />}
         </section>
     );
 };

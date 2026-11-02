@@ -1,15 +1,14 @@
-import { FileText, Upload, X } from 'lucide-react';
+import { ExternalLink, FileText, Upload, X } from 'lucide-react';
 import { AnimatePresence, m } from 'motion/react';
 import { useCallback, useId, useState } from 'react';
 import type { ChangeEvent, DragEvent } from 'react';
 
 import { IconButton } from '@/components/ui/IconButton';
 import { strings } from '@/locales/id';
+import { fileKey } from '@/pages/Candidate/Quiz/utils/quizModel';
 import { listItemMotion } from '@/pages/Candidate/Quiz/utils/quizMotion';
 import { cn } from '@/utils/cn';
 import { ATTACHMENT_ACCEPT, MAX_ATTACHMENTS, formatFileSize, isImageName, validateAttachment } from '@/utils/attachmentUpload';
-
-const fileKey = (file: File) => `${file.name}:${String(file.size)}:${String(file.lastModified)}`;
 
 const AttachmentThumb = ({ file }: { file: File }) => {
     const attachPreview = useCallback(
@@ -33,9 +32,10 @@ const AttachmentThumb = ({ file }: { file: File }) => {
 interface AnswerAttachmentsProps {
     files: readonly File[];
     onChange: (files: File[]) => void;
+    savedFileUrl: string | null;
 }
 
-export const AnswerAttachments = ({ files, onChange }: AnswerAttachmentsProps) => {
+export const AnswerAttachments = ({ files, onChange, savedFileUrl }: AnswerAttachmentsProps) => {
     const baseId = useId();
     const labelId = `${baseId}-label`;
     const hintId = `${baseId}-hint`;
@@ -165,6 +165,24 @@ export const AnswerAttachments = ({ files, onChange }: AnswerAttachmentsProps) =
                     </p>
                 ))}
             </div>
+
+            {files.length > 0 || savedFileUrl === null ? null : (
+                <a
+                    href={savedFileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border-line bg-surface hover:border-primary/60 focus-visible:outline-primary flex items-center gap-3 rounded-lg border py-2 pr-3 pl-2 focus-visible:outline-2"
+                >
+                    <span
+                        aria-hidden="true"
+                        className="bg-primary-light text-primary flex size-11 shrink-0 items-center justify-center rounded-md"
+                    >
+                        <FileText className="size-5" />
+                    </span>
+                    <span className="text-body text-primary min-w-0 flex-1 truncate font-medium">{strings.myQuiz.savedFileLink}</span>
+                    <ExternalLink aria-hidden="true" className="text-muted size-4 shrink-0" />
+                </a>
+            )}
 
             {files.length === 0 ? null : (
                 <ul className="flex flex-col gap-2">

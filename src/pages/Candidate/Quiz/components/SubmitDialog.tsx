@@ -1,18 +1,14 @@
-import { CircleAlert, Send, TriangleAlert } from 'lucide-react';
+import { Send, TriangleAlert } from 'lucide-react';
 import { m } from 'motion/react';
 import { useId } from 'react';
 
 import { Button } from '@/components/ui/Button';
 import { SheetDialog } from '@/components/ui/SheetDialog';
 import { strings } from '@/locales/id';
+import { QuizFailureNotice } from '@/pages/Candidate/Quiz/components/QuizFailureNotice';
 import type { SubmitState } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
 import { PRESSABLE_CLASS, reviewItemVariants, reviewListVariants } from '@/pages/Candidate/Quiz/utils/quizMotion';
-import { formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
-
-const FAILURE_TEXT: Record<string, string> = {
-    offline: strings.apiErrors.offlineHappened,
-    unauthorized: strings.apiErrors.unauthorizedHappened,
-};
+import { describeFailure, formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
 
 interface SubmitDialogProps {
     open: boolean;
@@ -65,18 +61,10 @@ export const SubmitDialog = ({ open, answered, total, unanswered, submitState, o
                 )}
 
                 {submitState.status === 'error' ? (
-                    <m.div
-                        role="alert"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-danger-soft text-danger-ink flex items-start gap-2 rounded-lg p-3.5"
-                    >
-                        <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-                        <div className="text-body flex flex-col gap-0.5">
-                            <p className="font-semibold">{strings.myQuiz.submitFailedTitle}</p>
-                            <p>{`${submitState.message ?? FAILURE_TEXT[submitState.code] ?? strings.states.errorWhatHappened} ${strings.myQuiz.submitFailedKeep}`}</p>
-                        </div>
-                    </m.div>
+                    <QuizFailureNotice
+                        title={strings.myQuiz.submitFailedTitle}
+                        body={`${describeFailure(submitState.code, submitState.message)} ${strings.myQuiz.submitFailedKeep}`}
+                    />
                 ) : null}
 
                 <m.footer
