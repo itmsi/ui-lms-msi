@@ -25,10 +25,10 @@ import { QuizFailureNotice } from '@/pages/Candidate/Quiz/components/QuizFailure
 import { QuizMotionProvider } from '@/pages/Candidate/Quiz/components/QuizMotionProvider';
 import { SubmitDialog } from '@/pages/Candidate/Quiz/components/SubmitDialog';
 import { useQuizSession } from '@/pages/Candidate/Quiz/hooks/useQuizSession';
+import { fetchParticipantQuiz } from '@/pages/Candidate/Quiz/services/quizService';
 import { MY_QUIZ_LIST_PATH, myQuizResultPath } from '@/pages/Candidate/Quiz/utils/paths';
 import { PRESSABLE_CLASS, questionSlideVariants } from '@/pages/Candidate/Quiz/utils/quizMotion';
 import { describeFailure, formatAnsweredCount } from '@/pages/Candidate/Quiz/utils/quizText';
-import { fetchParticipantQuiz } from '@/services/quizService';
 import type { ParticipantQuiz } from '@/types/quiz';
 import { toHttpsUrl } from '@/utils/httpsUrl';
 

@@ -1,9 +1,7 @@
+import { toPagination } from '@/helpers/apiEnvelope';
 import { apiGet, apiPost, apiPut } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import { strings } from '@/locales/id';
-import { toPagination } from '@/services/moduleService';
-import { send, toQuestionReview } from '@/services/quizService';
-import type { ParticipantQuestionType, SubmittedAttachment } from '@/types/quiz';
 import type {
     GradingAttempt,
     GradingPoints,
@@ -11,7 +9,9 @@ import type {
     QuizResultListResult,
     QuizResultQuery,
     QuizResultRow,
-} from '@/types/quizResult';
+} from '@/pages/QuizResults/types';
+import { send } from '@/services/quizRequest';
+import type { ParticipantQuestionType, SubmittedAttachment } from '@/types/quiz';
 import { toHttpsUrl } from '@/utils/httpsUrl';
 
 const LIST_PATH = '/quiz_results/get';
@@ -39,6 +39,12 @@ const toGradingAttachments = (value: unknown): SubmittedAttachment[] => {
     const url = toHttpsUrl(value);
 
     return url === null ? [] : [{ name: strings.myQuiz.savedFileLink, size: null, url }];
+};
+
+const toQuestionImageUrl = (value: unknown): string | null => {
+    const url = toHttpsUrl(value);
+
+    return url === null ? null : `${url}/preview`;
 };
 
 const toRow = (value: unknown): QuizResultRow | null => {
@@ -82,19 +88,6 @@ const toListResult =
         };
 
 const toGradingReview = (value: unknown): GradingReview | null => {
-    const review = toQuestionReview(value);
-
-    if (review === null || isRecord(value) === false || typeof value.quiz_answer_id !== 'string') {
-        return null;
-    }
-    return {
-        ...review,
-        quizAnswerId: value.quiz_answer_id,
-        autoPointsEarned: readNumeric(value.auto_points_earned) ?? review.pointsEarned,
-    };
-};
-
-const toApiGradingReview = (value: unknown): GradingReview | null => {
     if (
         isRecord(value) === false ||
         typeof value.quiz_question_id !== 'string' ||
@@ -111,7 +104,7 @@ const toApiGradingReview = (value: unknown): GradingReview | null => {
         line: readNumeric(value.line) ?? 0,
         type: value.type,
         text: readString(value.question),
-        imageUrl: toHttpsUrl(value.question_file) + '/preview',
+        imageUrl: toQuestionImageUrl(value.question_file),
         yourAnswer: readAnswerTexts(value.user_answer),
         yourAttachments: toGradingAttachments(value.user_answer_file),
         correctAnswer: readAnswerTexts(value.question_answer),
@@ -135,15 +128,10 @@ const toGradingAttempt = (value: unknown): GradingAttempt | null => {
 
     const review = Array.isArray(value.question_answers)
         ? (value.question_answers as unknown[])
-            .map(toApiGradingReview)
+            .map(toGradingReview)
             .filter((item): item is GradingReview => item !== null)
             .sort((left, right) => left.line - right.line)
-        : Array.isArray(value.review)
-            ? (value.review as unknown[])
-                .map(toGradingReview)
-                .filter((item): item is GradingReview => item !== null)
-                .sort((left, right) => left.line - right.line)
-            : [];
+        : [];
 
     return {
         id,

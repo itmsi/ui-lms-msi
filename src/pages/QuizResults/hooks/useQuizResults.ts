@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { fetchQuizResults } from '@/services/quizResultService';
+import { fetchQuizResults } from '@/pages/QuizResults/services/quizResultService';
+import type { QuizResultListResult, QuizResultStatusFilter } from '@/pages/QuizResults/types';
 import type { QuizFailureCode } from '@/types/quiz';
-import type { QuizResultListResult, QuizResultStatusFilter } from '@/types/quizResult';
 import { parsePageParam } from '@/utils/pageParam';
 
 export const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];

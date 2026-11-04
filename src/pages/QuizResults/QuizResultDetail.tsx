@@ -16,9 +16,9 @@ import { GradingQuestionCard } from '@/pages/QuizResults/components/GradingQuest
 import { GradingSaveBar } from '@/pages/QuizResults/components/GradingSaveBar';
 import { GradingSummary } from '@/pages/QuizResults/components/GradingSummary';
 import { useQuizGrading } from '@/pages/QuizResults/hooks/useQuizGrading';
+import { fetchGradingAttempt } from '@/pages/QuizResults/services/quizResultService';
+import type { GradingAttempt } from '@/pages/QuizResults/types';
 import { QUIZ_RESULTS_PATH } from '@/pages/QuizResults/utils/paths';
-import { fetchGradingAttempt } from '@/services/quizResultService';
-import type { GradingAttempt } from '@/types/quizResult';
 
 const DetailSkeleton = () => (
     <LoadingBlock label={strings.common.loading} className="flex flex-col gap-4">

@@ -2,7 +2,7 @@ import { CircleCheck, Clock } from 'lucide-react';
 
 import { Badge } from '@/components/ui/Badge';
 import { strings } from '@/locales/id';
-import type { QuizResultStatus } from '@/types/quizResult';
+import type { QuizResultStatus } from '@/pages/QuizResults/types';
 
 const STATUS_STYLE = {
     completed: { icon: CircleCheck, tone: 'success' },

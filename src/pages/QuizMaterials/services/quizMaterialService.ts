@@ -1,4 +1,4 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { readEnvelope, toApiFailureCode, toPagination } from '@/helpers/apiEnvelope';
 import { apiDelete, apiGet, apiPost, apiPostMultipart, apiPutMultipart } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import { strings } from '@/locales/id';
@@ -17,7 +17,6 @@ import type {
     StoredQuestion,
     TrueFalseAnswer,
 } from '@/pages/QuizMaterials/types';
-import { toApiFailureCode, toPagination } from '@/services/moduleService';
 import type { QuizFailureCode } from '@/types/quiz';
 import { fromIsoDate } from '@/utils/dateTime';
 import { toHttpsUrl } from '@/utils/httpsUrl';

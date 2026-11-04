@@ -1,8 +1,8 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { readEnvelope, toApiFailureCode } from '@/helpers/apiEnvelope';
 import { apiDelete, apiPostMultipart, apiPutMultipart } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import type { LinkDraft, MaterialDraft } from '@/pages/Instructor/Materials/types';
-import { fetchModuleDetail, toApiFailureCode } from '@/services/moduleService';
+import { fetchModuleDetail } from '@/services/moduleService';
 import type { ApiFailureCode, MaterialLink, ModuleDetailOutcome } from '@/types/module';
 import { toDescriptionExcerpt } from '@/utils/htmlText';
 

@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 
 import { useQuizResource } from '@/hooks/useQuizResource';
-import { fetchParticipantQuestion } from '@/services/quizService';
+import { fetchParticipantQuestion } from '@/pages/Candidate/Quiz/services/quizService';
 import type { ParticipantQuestion } from '@/types/quiz';
 
 export const useQuestionDetail = (questionId: string | null, userId: string, onLoaded: (question: ParticipantQuestion) => void) => {

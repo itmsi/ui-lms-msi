@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useActivityLog } from '@/hooks/useActivityLog';
 import { useQuestionDetail } from '@/pages/Candidate/Quiz/hooks/useQuestionDetail';
+import { saveQuizAnswer } from '@/pages/Candidate/Quiz/services/quizService';
 import type { QuizDraft, SavedAnswer } from '@/pages/Candidate/Quiz/types';
 import {
     createDraft,
@@ -16,7 +17,6 @@ import {
     toSavedAnswer,
 } from '@/pages/Candidate/Quiz/utils/quizModel';
 import { myQuizResultPath } from '@/pages/Candidate/Quiz/utils/paths';
-import { saveQuizAnswer } from '@/services/quizService';
 import type { ParticipantQuestion, ParticipantQuiz, QuizAnswerValue, QuizAttachments, QuizFailureCode, QuizOutcome } from '@/types/quiz';
 
 export type QuizPhase = 'intro' | 'answering';

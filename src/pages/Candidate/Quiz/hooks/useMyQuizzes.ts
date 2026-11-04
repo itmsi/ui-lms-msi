@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
 import { useQuizResource } from '@/hooks/useQuizResource';
-import { fetchMyQuizzes } from '@/services/quizService';
+import { fetchMyQuizzes } from '@/pages/Candidate/Quiz/services/quizService';
 import { parsePageParam } from '@/utils/pageParam';
 
 const PAGE_SIZE = 10;

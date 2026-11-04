@@ -15,8 +15,8 @@ import { useBackToList } from '@/hooks/useBackToList';
 import { useQuizResource } from '@/hooks/useQuizResource';
 import { strings } from '@/locales/id';
 import { AnswerReviewList } from '@/pages/Candidate/Quiz/components/AnswerReviewList';
+import { fetchQuizResult } from '@/pages/Candidate/Quiz/services/quizService';
 import { MY_QUIZ_LIST_PATH } from '@/pages/Candidate/Quiz/utils/paths';
-import { fetchQuizResult } from '@/services/quizService';
 import type { QuizAttemptResult } from '@/types/quiz';
 import { formatFullDateTime } from '@/utils/dateTime';
 

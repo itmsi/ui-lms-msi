@@ -6,8 +6,8 @@ import type { SegmentedOption } from '@/components/ui/SegmentedControl';
 import { useEmployeeSelection } from '@/hooks/useEmployeeSelection';
 import { useRememberedSelection } from '@/hooks/useRememberedSelection';
 import { strings } from '@/locales/id';
+import type { QuizResultStatusFilter } from '@/pages/QuizResults/types';
 import type { QuizOption } from '@/types/quiz';
-import type { QuizResultStatusFilter } from '@/types/quizResult';
 
 const STATUS_OPTIONS: SegmentedOption<QuizResultStatusFilter>[] = [
     { value: 'all', label: strings.quizResults.statusAll },

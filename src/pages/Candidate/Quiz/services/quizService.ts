@@ -1,8 +1,8 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { toPagination } from '@/helpers/apiEnvelope';
 import { apiGet, apiPost, apiPostMultipart } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import { strings } from '@/locales/id';
-import { toApiFailureCode, toPagination } from '@/services/moduleService';
+import { send } from '@/services/quizRequest';
 import type {
     ParticipantOption,
     ParticipantQuestion,
@@ -15,7 +15,6 @@ import type {
     QuestionReview,
     QuizAnswerEntry,
     QuizAttemptResult,
-    QuizOutcome,
     SubmittedAttachment,
 } from '@/types/quiz';
 import { toHttpsUrl } from '@/utils/httpsUrl';
@@ -38,9 +37,6 @@ const readString = (value: unknown): string => (typeof value === 'string' ? valu
 const readNumber = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? value : null);
 
 const readNumeric = (value: unknown): number | null => readNumber(typeof value === 'string' && value.trim() !== '' ? Number(value) : value);
-
-const readStringList = (value: unknown): string[] =>
-    Array.isArray(value) ? (value as unknown[]).filter((item): item is string => typeof item === 'string') : [];
 
 const isQuestionType = (value: unknown): value is ParticipantQuestionType => QUESTION_TYPES.some((type) => type === value);
 
@@ -133,36 +129,6 @@ const toQuiz = (value: unknown): ParticipantQuiz | null => {
     };
 };
 
-const toSubmittedAttachment = (value: unknown): SubmittedAttachment | null =>
-    isRecord(value) && typeof value.name === 'string'
-        ? { name: value.name, size: readNumber(value.size), url: toHttpsUrl(value.url) }
-        : null;
-
-const toSubmittedAttachments = (value: unknown): SubmittedAttachment[] =>
-    Array.isArray(value)
-        ? (value as unknown[]).map(toSubmittedAttachment).filter((item): item is SubmittedAttachment => item !== null)
-        : [];
-
-export const toQuestionReview = (value: unknown): QuestionReview | null => {
-    if (isRecord(value) === false || typeof value.quiz_questions_id !== 'string' || isQuestionType(value.type) === false) {
-        return null;
-    }
-
-    return {
-        questionId: value.quiz_questions_id,
-        line: readNumber(value.line) ?? 0,
-        type: value.type,
-        text: readString(value.question),
-        imageUrl: toHttpsUrl(value.image),
-        yourAnswer: readStringList(value.your_answer),
-        yourAttachments: toSubmittedAttachments(value.your_attachments),
-        correctAnswer: readStringList(value.correct_answer),
-        isCorrect: value.is_correct === true,
-        pointsEarned: readNumber(value.points_earned) ?? 0,
-        points: readNumber(value.points) ?? 0,
-    };
-};
-
 const toSavedFiles = (value: unknown): SubmittedAttachment[] => {
     const url = toHttpsUrl(value);
 
@@ -219,31 +185,6 @@ const toResult = (value: unknown): QuizAttemptResult | null => {
         questionCount: review.length,
         review,
     };
-};
-
-export const send = async <T>(run: () => Promise<{ data: unknown }>, parse: (data: unknown) => T | null): Promise<QuizOutcome<T>> => {
-    if (navigator.onLine === false) {
-        return { ok: false, code: 'offline' };
-    }
-
-    try {
-        const { data: body } = await run();
-        const envelope = readEnvelope(body);
-
-        if (envelope.ok === false) {
-            return envelope.message === null
-                ? { ok: false, code: 'unknown' }
-                : { ok: false, code: 'validation', message: envelope.message };
-        }
-
-        const parsed = parse(envelope.data);
-
-        return parsed === null ? { ok: false, code: 'not_found' } : { ok: true, data: parsed };
-    } catch (error) {
-        const status = isRecord(error) && typeof error.status === 'number' ? error.status : null;
-
-        return status === 404 ? { ok: false, code: 'not_found' } : { ok: false, code: toApiFailureCode(error) };
-    }
 };
 
 const toListResult =

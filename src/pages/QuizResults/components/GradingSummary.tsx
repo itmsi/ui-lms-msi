@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { strings } from '@/locales/id';
-import type { GradingAttempt } from '@/types/quizResult';
+import type { GradingAttempt } from '@/pages/QuizResults/types';
 import { formatFullDateTime } from '@/utils/dateTime';
 
 const Fact = ({ label, children }: { label: string; children: ReactNode }) => (

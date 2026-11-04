@@ -1,7 +1,7 @@
+import { toPagination } from '@/helpers/apiEnvelope';
 import { apiPost } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
-import { toPagination } from '@/services/moduleService';
-import { send } from '@/services/quizService';
+import { send } from '@/services/quizRequest';
 import type { QuizOption, QuizOptionListResult, QuizOptionQuery } from '@/types/quiz';
 
 const LIST_PATH = 'quizzes/get';

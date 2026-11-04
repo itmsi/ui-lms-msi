@@ -3,9 +3,9 @@ import toast from 'react-hot-toast';
 
 import { useBeforeUnloadWarning } from '@/hooks/useBeforeUnloadWarning';
 import { strings } from '@/locales/id';
-import { fetchGradingAttempt, saveGradingPoints } from '@/services/quizResultService';
+import { fetchGradingAttempt, saveGradingPoints } from '@/pages/QuizResults/services/quizResultService';
+import type { GradingAttempt, GradingPoints, GradingReview } from '@/pages/QuizResults/types';
 import type { QuizOutcome } from '@/types/quiz';
-import type { GradingAttempt, GradingPoints, GradingReview } from '@/types/quizResult';
 
 export interface GradingRow {
     item: GradingReview;

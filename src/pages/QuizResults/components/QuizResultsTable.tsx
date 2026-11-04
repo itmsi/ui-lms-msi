@@ -14,9 +14,9 @@ import { strings } from '@/locales/id';
 import { QuizResultStatusBadge } from '@/pages/QuizResults/components/QuizResultStatusBadge';
 import { ROWS_PER_PAGE_OPTIONS } from '@/pages/QuizResults/hooks/useQuizResults';
 import type { QuizResultsState } from '@/pages/QuizResults/hooks/useQuizResults';
+import type { QuizResultRow } from '@/pages/QuizResults/types';
 import { quizResultDetailPath } from '@/pages/QuizResults/utils/paths';
 import type { ModulePagination } from '@/types/module';
-import type { QuizResultRow } from '@/types/quizResult';
 import { formatFullDateTime } from '@/utils/dateTime';
 
 const ScoreCell = ({ row }: { row: QuizResultRow }) => {
