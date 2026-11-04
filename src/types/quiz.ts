@@ -107,6 +107,23 @@ export interface QuizAttemptResult {
     review: QuestionReview[];
 }
 
+export interface QuizOption {
+    id: string;
+    title: string;
+    moduleTitle: string | null;
+}
+
+export interface QuizOptionQuery {
+    page: number;
+    limit: number;
+    search: string;
+}
+
+export interface QuizOptionListResult {
+    items: QuizOption[];
+    pagination: ModulePagination;
+}
+
 export type QuizFailureCode = ApiFailureCode | 'not_found';
 
 export type QuizOutcome<T> = { ok: true; data: T } | { ok: false; code: QuizFailureCode; message?: string };

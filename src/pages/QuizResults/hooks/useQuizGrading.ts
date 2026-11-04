@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 
 import { useBeforeUnloadWarning } from '@/hooks/useBeforeUnloadWarning';
 import { strings } from '@/locales/id';
-import { saveGradingPoints } from '@/services/quizResultService';
+import { fetchGradingAttempt, saveGradingPoints } from '@/services/quizResultService';
 import type { QuizOutcome } from '@/types/quiz';
 import type { GradingAttempt, GradingPoints, GradingReview } from '@/types/quizResult';
 
@@ -43,12 +43,11 @@ const failureMessage = (outcome: Extract<QuizOutcome<unknown>, { ok: false }>): 
     return outcome.code === 'offline' ? strings.quizResults.saveOffline : strings.quizResults.saveFailed;
 };
 
-export const useQuizGrading = (initial: GradingAttempt) => {
+export const useQuizGrading = (initial: GradingAttempt, resultId: string, onReload: () => void) => {
     const [saved, setSaved] = useState(initial);
     const [draft, setDraft] = useState(() => toDraft(initial));
     const [isSaving, setIsSaving] = useState(false);
     const savingRef = useRef(false);
-
     const rows: GradingRow[] = saved.review.map((item) => {
         const value = draft[item.questionId] ?? String(item.pointsEarned);
 
@@ -59,10 +58,14 @@ export const useQuizGrading = (initial: GradingAttempt) => {
             isChanged: value.trim() !== String(item.pointsEarned),
         };
     });
-
     const changes: GradingPoints = Object.fromEntries(
-        rows.flatMap((row) => (row.points !== null && row.points !== row.item.pointsEarned ? [[row.item.questionId, row.points]] : [])),
+        rows.flatMap((row) =>
+            row.points !== null && row.points !== row.item.pointsEarned
+                ? [[row.item.quizAnswerId, row.points]]
+                : [],
+        ),
     );
+
     const hasErrors = rows.some((row) => row.points === null);
     const changedCount = rows.filter((row) => row.isChanged).length;
     const isDirty = changedCount > 0;
@@ -86,7 +89,6 @@ export const useQuizGrading = (initial: GradingAttempt) => {
     const discard = useCallback(() => {
         setDraft(toDraft(saved));
     }, [saved]);
-
     const save = async () => {
         if (savingRef.current || isDirty === false) {
             return;
@@ -104,20 +106,29 @@ export const useQuizGrading = (initial: GradingAttempt) => {
 
         savingRef.current = true;
         setIsSaving(true);
+        const outcome = await saveGradingPoints(saved.quizId, changes);
 
-        const outcome = await saveGradingPoints(saved.id, changes);
+        if (outcome.ok === false) {
+            savingRef.current = false;
+            setIsSaving(false);
+            toast.error(failureMessage(outcome));
+            return;
+        }
+
+        toast.success(strings.quizResults.saved);
+
+        const refreshed = await fetchGradingAttempt(resultId);
 
         savingRef.current = false;
         setIsSaving(false);
 
-        if (outcome.ok) {
-            setSaved(outcome.data);
-            setDraft(toDraft(outcome.data));
-            toast.success(strings.quizResults.saved);
+        if (refreshed.ok) {
+            setSaved(refreshed.data);
+            setDraft(toDraft(refreshed.data));
             return;
         }
 
-        toast.error(failureMessage(outcome));
+        onReload();
     };
 
     return { saved, rows, changedCount, isDirty, draftScore, isSaving, setPoints, stepPoints, discard, save };

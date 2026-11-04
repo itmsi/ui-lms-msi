@@ -6,14 +6,13 @@ export type QuizResultStatus = 'completed' | 'not_completed';
 export type QuizResultStatusFilter = 'all' | QuizResultStatus;
 
 export interface QuizResultRow {
-    id: string;
-    employeeId: string;
+    // employeeId: string;
     employeeName: string;
     quizId: string;
     quizTitle: string;
     moduleTitle: string;
     status: QuizResultStatus;
-    attemptId: string | null;
+    // attemptId: string | null;
     score: number | null;
     maxScore: number;
     submittedAt: string | null;
@@ -32,15 +31,12 @@ export interface QuizResultQuery {
     limit: number;
     search: string;
     quizId: string | null;
+    employeeId: string | null;
     status: QuizResultStatusFilter;
 }
 
-export interface QuizOption {
-    id: string;
-    title: string;
-}
-
 export interface GradingReview extends QuestionReview {
+    quizAnswerId: string;
     autoPointsEarned: number;
 }
 
@@ -49,7 +45,6 @@ export interface GradingAttempt {
     quizId: string;
     quizTitle: string;
     moduleTitle: string;
-    employeeId: string;
     employeeName: string;
     submittedAt: string;
     score: number;

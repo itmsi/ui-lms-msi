@@ -1,12 +1,12 @@
 import { PageHeader } from '@/components/patterns/PageHeader';
 import { WoodPanel } from '@/components/ui/WoodPanel';
+import { useEmployeeSelection } from '@/hooks/useEmployeeSelection';
 import { useNow } from '@/hooks/useNow';
 import { strings } from '@/locales/id';
 import { EmployeeSummary } from '@/pages/Activity/UserActivity/components/EmployeeSummary';
 import { ExportExcelButton } from '@/pages/Activity/UserActivity/components/ExportExcelButton';
 import { FilterSection } from '@/pages/Activity/UserActivity/components/FilterSection';
 import { UserActivityTable } from '@/pages/Activity/UserActivity/components/UserActivityTable';
-import { useEmployeeDirectory } from '@/pages/Activity/UserActivity/hooks/useEmployeeDirectory';
 import { useUserActivity } from '@/pages/Activity/UserActivity/hooks/useUserActivity';
 
 const NOW_TICK_MS = 60_000;
@@ -14,7 +14,7 @@ const NOW_TICK_MS = 60_000;
 export const UserActivity = () => {
     const now = useNow(NOW_TICK_MS);
     const list = useUserActivity(now);
-    const directory = useEmployeeDirectory(list.employeeId);
+    const directory = useEmployeeSelection(list.employeeId, list.selectEmployee);
 
     const isLoading = list.state.status === 'loading';
 
@@ -34,7 +34,7 @@ export const UserActivity = () => {
             <FilterSection
                 searchValue={list.search}
                 employeeId={list.employeeId}
-                selectedEmployee={directory.selected}
+                selectedEmployee={directory.selectedEmployee}
                 employeeFallbackName={list.employeeFallbackName}
                 moduleId={list.moduleId}
                 moduleTitle={list.moduleTitle}
@@ -44,7 +44,7 @@ export const UserActivity = () => {
                 hasFilters={list.hasFilters}
                 disabled={isLoading}
                 onSearchSubmit={list.submitSearch}
-                onSelectEmployee={list.selectEmployee}
+                onSelectEmployee={directory.selectEmployee}
                 onEmployeesLoaded={directory.rememberEmployees}
                 onSelectModule={list.selectModule}
                 onSelectPreset={list.selectPreset}
@@ -56,7 +56,7 @@ export const UserActivity = () => {
                 {list.employeeId === null ? null : (
                     <EmployeeSummary
                         employeeId={list.employeeId}
-                        employee={directory.selected}
+                        employee={directory.selectedEmployee}
                         fallbackName={list.employeeFallbackName}
                         total={list.total}
                         totalIsFiltered

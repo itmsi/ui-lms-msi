@@ -136,7 +136,7 @@ export const apiPost = async <T = unknown>(
 
 export const apiPut = async <T = unknown>(
     url: string,
-    data?: Record<string, unknown>,
+    data?: Record<string, unknown> | unknown[],
     config?: AxiosRequestConfig,
 ): Promise<ApiResponse<T>> => request<T>(() => api.put<T>(url, data, config));
 

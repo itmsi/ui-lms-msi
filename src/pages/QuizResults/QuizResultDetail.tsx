@@ -16,7 +16,7 @@ import { GradingQuestionCard } from '@/pages/QuizResults/components/GradingQuest
 import { GradingSaveBar } from '@/pages/QuizResults/components/GradingSaveBar';
 import { GradingSummary } from '@/pages/QuizResults/components/GradingSummary';
 import { useQuizGrading } from '@/pages/QuizResults/hooks/useQuizGrading';
-import { QUIZ_RESULTS_PATH } from '@/pages/QuizResults/paths';
+import { QUIZ_RESULTS_PATH } from '@/pages/QuizResults/utils/paths';
 import { fetchGradingAttempt } from '@/services/quizResultService';
 import type { GradingAttempt } from '@/types/quizResult';
 
@@ -41,13 +41,19 @@ const DetailSkeleton = () => (
     </LoadingBlock>
 );
 
-const GradingView = ({ attempt }: { attempt: GradingAttempt }) => {
-    const grading = useQuizGrading(attempt);
+interface GradingViewProps {
+    attempt: GradingAttempt;
+    resultId: string;
+    onReload: () => void;
+}
+
+const GradingView = ({ attempt, resultId, onReload }: GradingViewProps) => {
+
+    const grading = useQuizGrading(attempt, resultId, onReload);
     const backToList = useBackToList(QUIZ_RESULTS_PATH);
     const [leaveOpen, setLeaveOpen] = useState(false);
     const headingId = useId();
     const { saved } = grading;
-
     return (
         <>
             <PageHeaderDetail
@@ -66,12 +72,12 @@ const GradingView = ({ attempt }: { attempt: GradingAttempt }) => {
             <GradingSummary attempt={saved} draftScore={grading.draftScore} isDirty={grading.isDirty} />
 
             <section aria-labelledby={headingId} className="flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
+                {/* <div className="flex flex-col gap-1">
                     <h2 id={headingId} className="text-section font-sans">
                         {strings.quizResults.gradingHeading}
                     </h2>
                     <p className="text-body text-muted max-w-3xl">{strings.quizResults.gradingHint}</p>
-                </div>
+                </div> */}
 
                 <ol className="flex flex-col gap-3">
                     {grading.rows.map((row) => (
@@ -87,17 +93,17 @@ const GradingView = ({ attempt }: { attempt: GradingAttempt }) => {
                 </ol>
             </section>
 
-            {grading.isDirty ? (
-                <GradingSaveBar
-                    changedCount={grading.changedCount}
-                    draftScore={grading.draftScore}
-                    savedScore={saved.score}
-                    maxScore={saved.maxScore}
-                    isSaving={grading.isSaving}
-                    onDiscard={grading.discard}
-                    onSave={() => void grading.save()}
-                />
-            ) : null}
+            {/* {grading.isDirty ? ( */}
+            <GradingSaveBar
+                changedCount={grading.changedCount}
+                draftScore={grading.draftScore}
+                savedScore={saved.score}
+                maxScore={saved.maxScore}
+                isSaving={grading.isSaving}
+                onDiscard={grading.discard}
+                onSave={() => void grading.save()}
+            />
+            {/* ) : null} */}
 
             <ConfirmDialog
                 open={leaveOpen}
@@ -116,14 +122,13 @@ const GradingView = ({ attempt }: { attempt: GradingAttempt }) => {
 };
 
 export const QuizResultDetail = () => {
-    const { attemptId } = useParams<{ attemptId: string }>();
-    const { state, retry } = useQuizResource(attemptId, fetchGradingAttempt);
+    const { quizId } = useParams<{ quizId: string }>();
+    const { state, retry } = useQuizResource(quizId, fetchGradingAttempt);
     const backToList = useBackToList(QUIZ_RESULTS_PATH);
-
-    if (state.status === 'success') {
+    if (state.status === 'success' && quizId !== undefined) {
         return (
             <section className="flex flex-col gap-5">
-                <GradingView key={state.data.id} attempt={state.data} />
+                <GradingView key={state.data.id} attempt={state.data} resultId={quizId} onReload={retry} />
             </section>
         );
     }

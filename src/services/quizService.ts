@@ -69,10 +69,10 @@ const toSummary = (value: unknown): ParticipantQuizSummary | null =>
 const readEntries = (value: unknown): QuizAnswerEntry[] =>
     Array.isArray(value)
         ? (value as unknown[])
-              .flatMap((item) =>
-                  isRecord(item) && typeof item.line === 'number' ? [{ line: item.line, text: readString(item.text) }] : [],
-              )
-              .sort((left, right) => left.line - right.line)
+            .flatMap((item) =>
+                isRecord(item) && typeof item.line === 'number' ? [{ line: item.line, text: readString(item.text) }] : [],
+            )
+            .sort((left, right) => left.line - right.line)
         : [];
 
 const toChoiceOptions = (value: unknown): ParticipantOption[] =>
@@ -121,9 +121,9 @@ const toQuiz = (value: unknown): ParticipantQuiz | null => {
 
     const questions = Array.isArray(value.questions)
         ? (value.questions as unknown[])
-              .map(toQuestionRef)
-              .filter((item): item is ParticipantQuestionRef => item !== null)
-              .sort((left, right) => left.line - right.line)
+            .map(toQuestionRef)
+            .filter((item): item is ParticipantQuestionRef => item !== null)
+            .sort((left, right) => left.line - right.line)
         : [];
 
     return {
@@ -203,9 +203,9 @@ const toResult = (value: unknown): QuizAttemptResult | null => {
 
     const review = Array.isArray(value.questions)
         ? (value.questions as unknown[])
-              .map(toResultReview)
-              .filter((item): item is QuestionReview => item !== null)
-              .sort((left, right) => left.line - right.line)
+            .map(toResultReview)
+            .filter((item): item is QuestionReview => item !== null)
+            .sort((left, right) => left.line - right.line)
         : [];
 
     return {
@@ -248,13 +248,13 @@ export const send = async <T>(run: () => Promise<{ data: unknown }>, parse: (dat
 
 const toListResult =
     (query: ParticipantQuizQuery) =>
-    (data: unknown): ParticipantQuizListResult | null =>
-        isRecord(data) && Array.isArray(data.items)
-            ? {
-                  items: (data.items as unknown[]).map(toSummary).filter((item): item is ParticipantQuizSummary => item !== null),
-                  pagination: toPagination(data.pagination, { page: query.page, limit: query.limit }),
-              }
-            : null;
+        (data: unknown): ParticipantQuizListResult | null =>
+            isRecord(data) && Array.isArray(data.items)
+                ? {
+                    items: (data.items as unknown[]).map(toSummary).filter((item): item is ParticipantQuizSummary => item !== null),
+                    pagination: toPagination(data.pagination, { page: query.page, limit: query.limit }),
+                }
+                : null;
 
 export const fetchMyQuizzes = (query: ParticipantQuizQuery, signal?: AbortSignal) =>
     send(

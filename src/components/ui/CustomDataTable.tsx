@@ -15,6 +15,7 @@ const BASE_STYLES: TableStyles = {
             minHeight: '44px',
             backgroundColor: 'var(--color-primary-dark)',
             borderBottom: '1px solid var(--color-line)',
+            // fontFamily: 'var(--font-display)',
         },
     },
     headCells: {
@@ -32,6 +33,7 @@ const BASE_STYLES: TableStyles = {
             fontSize: '14px',
             color: 'var(--color-ink)',
             borderBottom: '1px solid var(--color-line)',
+            // fontFamily: 'var(--font-display)',
         },
         highlightOnHoverStyle: {
             backgroundColor: 'var(--color-background)',

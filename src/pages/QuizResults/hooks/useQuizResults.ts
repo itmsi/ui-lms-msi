@@ -18,11 +18,13 @@ const parsePageSize = (value: string | null): number => {
 
 const parseStatus = (value: string | null): QuizResultStatusFilter => (value === 'completed' || value === 'not_completed' ? value : 'all');
 
+const readLabel = (value: string | undefined): string | null => (value === undefined || value === '' ? null : value);
+
 type LoadedState = { status: 'success'; result: QuizResultListResult } | { status: 'error'; code: QuizFailureCode; message?: string };
 
 export type QuizResultsState = { status: 'loading' } | LoadedState;
 
-type ParamChanges = Partial<Record<'q' | 'quiz', string | null>> & {
+type ParamChanges = Partial<Record<'q' | 'quiz' | 'employee', string | null>> & {
     status?: QuizResultStatusFilter;
     page?: number;
     limit?: number;
@@ -35,10 +37,11 @@ export const useQuizResults = () => {
     const pageSize = parsePageSize(searchParams.get('limit'));
     const search = searchParams.get('q') ?? '';
     const quizId = searchParams.get('quiz');
+    const employeeId = searchParams.get('employee');
     const status = parseStatus(searchParams.get('status'));
 
     const [reloadToken, setReloadToken] = useState(0);
-    const queryKey = `${String(page)}|${String(pageSize)}|${search}|${quizId ?? ''}|${status}|${String(reloadToken)}`;
+    const queryKey = `${String(page)}|${String(pageSize)}|${search}|${quizId ?? ''}|${employeeId ?? ''}|${status}|${String(reloadToken)}`;
     const [loaded, setLoaded] = useState<{ key: string; value: LoadedState } | null>(null);
 
     const state: QuizResultsState = loaded !== null && loaded.key === queryKey ? loaded.value : { status: 'loading' };
@@ -48,8 +51,7 @@ export const useQuizResults = () => {
         const controller = new AbortController();
 
         const run = async () => {
-            const outcome = await fetchQuizResults({ page, limit: pageSize, search, quizId, status }, controller.signal);
-
+            const outcome = await fetchQuizResults({ page, limit: pageSize, search, quizId, employeeId, status }, controller.signal);
             if (controller.signal.aborted) {
                 return;
             }
@@ -67,7 +69,7 @@ export const useQuizResults = () => {
         return () => {
             controller.abort();
         };
-    }, [queryKey, page, pageSize, search, quizId, status]);
+    }, [queryKey, page, pageSize, search, quizId, employeeId, status]);
 
     const applyParams = useCallback(
         (changes: ParamChanges) => {
@@ -75,7 +77,7 @@ export const useQuizResults = () => {
                 (current) => {
                     const next = new URLSearchParams(current);
 
-                    for (const key of ['q', 'quiz'] as const) {
+                    for (const key of ['q', 'quiz', 'employee'] as const) {
                         const value = changes[key];
 
                         if (value === undefined) {
@@ -123,11 +125,14 @@ export const useQuizResults = () => {
 
     const submitSearch = useCallback((value: string) => applyParams({ q: value.trim() }), [applyParams]);
     const selectQuiz = useCallback((value: string | null) => applyParams({ quiz: value }), [applyParams]);
+    const selectEmployee = useCallback((value: string | null) => applyParams({ employee: value }), [applyParams]);
     const selectStatus = useCallback((value: QuizResultStatusFilter) => applyParams({ status: value }), [applyParams]);
-    const clearFilters = useCallback(() => applyParams({ q: null, quiz: null, status: 'all' }), [applyParams]);
+    const clearFilters = useCallback(() => applyParams({ q: null, quiz: null, employee: null, status: 'all' }), [applyParams]);
     const goToPage = useCallback((next: number) => applyParams({ page: next }), [applyParams]);
     const selectPageSize = useCallback((next: number) => applyParams({ limit: next }), [applyParams]);
     const retry = useCallback(() => setReloadToken((token) => token + 1), []);
+
+    const firstRow = state.status === 'success' ? state.result.items.at(0) : undefined;
 
     return {
         state,
@@ -136,10 +141,14 @@ export const useQuizResults = () => {
         pageSize,
         search,
         quizId,
+        quizTitle: quizId === null ? null : readLabel(firstRow?.quizTitle),
+        employeeId,
+        employeeName: employeeId === null ? null : readLabel(firstRow?.employeeName),
         status,
-        hasFilters: search !== '' || quizId !== null || status !== 'all',
+        hasFilters: search !== '' || quizId !== null || employeeId !== null || status !== 'all',
         submitSearch,
         selectQuiz,
+        selectEmployee,
         selectStatus,
         clearFilters,
         goToPage,

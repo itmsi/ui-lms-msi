@@ -26,27 +26,25 @@ export const GradingSummary = ({ attempt, draftScore, isDirty }: GradingSummaryP
 
     return (
         <Card className="flex flex-col gap-4 p-5 sm:p-6">
-            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1.4fr_1fr_1.2fr]">
-                <Fact label={strings.quizResults.employeeLabel}>
-                    <span className="font-medium">{attempt.employeeName}</span>
-                </Fact>
-                <Fact label={strings.quizResults.quizLabel}>
-                    <span className="flex flex-col gap-0.5">
-                        <span className="font-medium">{attempt.quizTitle}</span>
-                        {attempt.moduleTitle === '' ? null : (
-                            <span className="text-caption text-muted">{`${strings.myQuiz.materialPrefix} ${attempt.moduleTitle}`}</span>
+            <h3 className="text-section font-display">{attempt.quizTitle}</h3>
+            <dl className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                <div className="gap-3 flex flex-col">
+                    <Fact label={strings.myQuiz.materialPrefix}>
+                        <span className="font-medium">{attempt.moduleTitle}</span>
+                    </Fact>
+                    <Fact label={strings.quizResults.employeeLabel}>
+                        <span className="font-medium">{attempt.employeeName}</span>
+                    </Fact>
+                    <Fact label={strings.quizResults.submittedLabel}>
+                        {attempt.submittedAt === '' ? (
+                            '—'
+                        ) : (
+                            <time dateTime={attempt.submittedAt} className="tabular-nums">
+                                {formatFullDateTime(attempt.submittedAt)}
+                            </time>
                         )}
-                    </span>
-                </Fact>
-                <Fact label={strings.quizResults.submittedLabel}>
-                    {attempt.submittedAt === '' ? (
-                        '—'
-                    ) : (
-                        <time dateTime={attempt.submittedAt} className="tabular-nums">
-                            {formatFullDateTime(attempt.submittedAt)}
-                        </time>
-                    )}
-                </Fact>
+                    </Fact>
+                </div>
                 <Fact label={strings.quizResults.scoreLabel}>
                     <span className="flex flex-col gap-2">
                         <span className="flex flex-wrap items-baseline gap-x-2 tabular-nums">

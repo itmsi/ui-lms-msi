@@ -1,5 +1,3 @@
-import { useCallback } from 'react';
-
 import { DateRangeFilter } from '@/components/patterns/DateRangeFilter';
 import { EmployeeSelect } from '@/components/patterns/EmployeeSelect';
 import { MateriSelect } from '@/components/patterns/MateriSelect';
@@ -25,7 +23,7 @@ interface FilterSectionProps {
     hasFilters: boolean;
     disabled: boolean;
     onSearchSubmit: (value: string) => void;
-    onSelectEmployee: (employeeId: string | null) => void;
+    onSelectEmployee: (employee: Employee | null) => void;
     onEmployeesLoaded: (employees: Employee[]) => void;
     onSelectModule: (moduleId: string | null) => void;
     onSelectPreset: (preset: RangePreset) => void;
@@ -55,17 +53,6 @@ export const FilterSection = ({
 }: FilterSectionProps) => {
     const { selectedMaterial, rememberMaterials, selectMaterial } = useMaterialSelection(moduleId, onSelectModule);
 
-    const handleSelectEmployee = useCallback(
-        (employee: Employee | null) => {
-            if (employee !== null) {
-                onEmployeesLoaded([employee]);
-            }
-
-            onSelectEmployee(employee?.id ?? null);
-        },
-        [onEmployeesLoaded, onSelectEmployee],
-    );
-
     return (
         <div className="flex flex-col gap-3">
             <SearchBar
@@ -81,7 +68,7 @@ export const FilterSection = ({
                 <EmployeeSelect
                     value={employeeId}
                     selected={selectedEmployee}
-                    onChange={handleSelectEmployee}
+                    onChange={onSelectEmployee}
                     onEmployeesLoaded={onEmployeesLoaded}
                     fallbackLabel={employeeFallbackName}
                     label={strings.activityLog.employeeFilterLabel}

@@ -77,7 +77,7 @@ const buildColumns = (today: string, onDelete: ((item: QuizListItem) => void) | 
                         {item.title}
                     </Link>
                     {item.moduleTitle === '' ? null : (
-                        <span className="text-caption text-muted line-clamp-1">{`${strings.quizMaterials.modulePrefix} ${item.moduleTitle}`}</span>
+                        <span className="text-caption text-muted">{`${strings.quizMaterials.modulePrefix} ${item.moduleTitle}`}</span>
                     )}
                 </div>
             </ClickThroughCell>
@@ -87,6 +87,7 @@ const buildColumns = (today: string, onDelete: ((item: QuizListItem) => void) | 
         id: 'audience',
         name: strings.quizMaterials.audienceColumn,
         width: '180px',
+        center: true,
         cell: (item) => (
             <ClickThroughCell>
                 <AudienceCell item={item} />

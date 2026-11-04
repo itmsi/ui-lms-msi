@@ -17,8 +17,8 @@ export const useQuizResource = <T>(key: string | undefined, load: Loader<T>) => 
         key === undefined
             ? { status: 'error', code: 'not_found' }
             : loaded !== null && loaded.key === queryKey
-              ? loaded.value
-              : { status: 'loading' };
+                ? loaded.value
+                : { status: 'loading' };
 
     useEffect(() => {
         if (key === undefined) {
