@@ -12,6 +12,7 @@ import { LinkButton } from '@/components/ui/LinkButton';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SheetDialog } from '@/components/ui/SheetDialog';
+import { useActivityLog, useLogOnce } from '@/hooks/useActivityLog';
 import { useAuth } from '@/hooks/useAuth';
 import { useBackToList } from '@/hooks/useBackToList';
 import { useQuizResource } from '@/hooks/useQuizResource';
@@ -297,11 +298,18 @@ export const QuizAttempt = () => {
     const { user } = useAuth();
     const { state, retry } = useQuizResource(quizId, fetchParticipantQuiz);
     const backToList = useBackToList(MY_QUIZ_LIST_PATH);
+    const activity = useActivityLog();
 
     const quiz = state.status === 'success' ? state.data : null;
     const isCompleted = quiz?.isCompleted === true;
     const isMissing =
         (state.status === 'error' && state.code === 'not_found') || (quiz !== null && isCompleted === false && quiz.questions.length === 0);
+
+    useLogOnce(quiz !== null && isMissing === false ? quiz.id : null, () => {
+        if (quiz !== null) {
+            activity.quizOpened(quiz.title);
+        }
+    });
 
     return (
         <QuizMotionProvider>

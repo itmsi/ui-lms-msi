@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { useActivityLog } from '@/hooks/useActivityLog';
 import { useQuestionDetail } from '@/pages/Candidate/Quiz/hooks/useQuestionDetail';
 import type { QuizDraft, SavedAnswer } from '@/pages/Candidate/Quiz/types';
 import {
@@ -31,6 +32,8 @@ const NO_FILES: readonly File[] = [];
 
 export const useQuizSession = (quiz: ParticipantQuiz, userId: string) => {
     const navigate = useNavigate();
+    const activity = useActivityLog();
+    const submitLoggedRef = useRef(false);
     const [draft, setDraft] = useState<QuizDraft | null>(null);
     const [attachments, setAttachments] = useState<QuizAttachments>({});
     const [phase, setPhase] = useState<QuizPhase>('intro');
@@ -85,18 +88,26 @@ export const useQuizSession = (quiz: ParticipantQuiz, userId: string) => {
                 return { ok: true, data: null };
             }
 
+            const isFinal = isFinalAnswer(questionId, quiz.questions, current, attachments);
             const saved = await saveQuizAnswer(
                 questionId,
                 toAnswerEntries(question, value),
                 snapshot.files === (previous?.files ?? '') ? NO_FILES : files,
-                isFinalAnswer(questionId, quiz.questions, current, attachments) ? new Date().toISOString() : null,
+                isFinal ? new Date().toISOString() : null,
             );
 
-            return saved.ok
-                ? { ok: true, data: { answer: snapshot.answer, files: snapshot.files === '' ? (previous?.files ?? '') : snapshot.files } }
-                : saved;
+            if (saved.ok === false) {
+                return saved;
+            }
+
+            if (isFinal && submitLoggedRef.current === false) {
+                submitLoggedRef.current = true;
+                activity.quizSubmitted(quiz.title);
+            }
+
+            return { ok: true, data: { answer: snapshot.answer, files: snapshot.files === '' ? (previous?.files ?? '') : snapshot.files } };
         },
-        [attachments, detail.loaded, quiz.questions],
+        [activity, attachments, detail.loaded, quiz.questions, quiz.title],
     );
 
     const goTo = useCallback(

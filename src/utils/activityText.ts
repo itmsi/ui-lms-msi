@@ -3,6 +3,7 @@ import type { ActivityKind, ActivityLog } from '@/types/activity';
 
 const LESSON_PREFIX = /^lesson-(\d+)\s+/;
 const LESSON_TOKEN = /lesson-(\d+)/g;
+const QUIZ_PREFIXES = [strings.activity.quizOpened, strings.activity.quizSubmitted, strings.activity.quizResultViewed];
 
 export const toActivityKind = ({ activity, type }: Pick<ActivityLog, 'activity' | 'type'>): ActivityKind => {
     if (
@@ -19,6 +20,10 @@ export const toActivityKind = ({ activity, type }: Pick<ActivityLog, 'activity' 
 
     if (activity.startsWith(strings.activity.moduleOpened)) {
         return 'module';
+    }
+
+    if (QUIZ_PREFIXES.some((prefix) => activity.startsWith(prefix))) {
+        return 'quiz';
     }
 
     return LESSON_PREFIX.test(activity) ? 'lesson' : 'other';

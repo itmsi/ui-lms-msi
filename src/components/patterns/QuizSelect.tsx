@@ -38,7 +38,16 @@ interface QuizSelectProps {
     className?: string;
 }
 
-export const QuizSelect = ({ value, selected, onChange, onQuizzesLoaded, fallbackLabel, label, placeholder, className }: QuizSelectProps) => {
+export const QuizSelect = ({
+    value,
+    selected,
+    onChange,
+    onQuizzesLoaded,
+    fallbackLabel,
+    label,
+    placeholder,
+    className,
+}: QuizSelectProps) => {
     const [query, setQuery] = useState('');
     const [open, setOpen] = useState(false);
     const source = useQuizSearch(query, open, onQuizzesLoaded);

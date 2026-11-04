@@ -30,7 +30,6 @@ export const useMyQuizzes = () => {
         userId === null ? undefined : [String(page), search, moduleId ?? '', program ?? '', userId].join('|'),
         load,
     );
-
     const applyParams = useCallback(
         (changes: ParamChanges) => {
             setSearchParams(

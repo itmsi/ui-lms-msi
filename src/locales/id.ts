@@ -483,6 +483,9 @@ export const strings = {
         fileOpened: 'Membuka file',
         linkIn: 'di',
         materialContext: 'materi',
+        quizOpened: 'Membuka quiz',
+        quizSubmitted: 'Mengirim jawaban quiz',
+        quizResultViewed: 'Melihat hasil quiz',
     },
     activityLog: {
         mySubtitle: 'Jejak belajar Anda di MSI Learning. Ketuk aktivitas untuk kembali ke materinya.',
@@ -552,6 +555,7 @@ export const strings = {
             module: 'Materi',
             lesson: 'Lesson',
             link: 'Tautan',
+            quiz: 'Quiz',
             other: 'Aktivitas',
         },
     },

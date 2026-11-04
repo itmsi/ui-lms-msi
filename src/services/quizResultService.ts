@@ -105,14 +105,13 @@ const toApiGradingReview = (value: unknown): GradingReview | null => {
     }
 
     const pointsEarned = readNumeric(value.user_point) ?? 0;
-
     return {
         questionId: value.quiz_question_id,
         quizAnswerId: value.quiz_answer_id,
         line: readNumeric(value.line) ?? 0,
         type: value.type,
         text: readString(value.question),
-        imageUrl: toHttpsUrl(value.image),
+        imageUrl: toHttpsUrl(value.question_file) + '/preview',
         yourAnswer: readAnswerTexts(value.user_answer),
         yourAttachments: toGradingAttachments(value.user_answer_file),
         correctAnswer: readAnswerTexts(value.question_answer),

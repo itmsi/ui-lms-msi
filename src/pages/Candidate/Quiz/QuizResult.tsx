@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { LoadingBlock, Skeleton } from '@/components/ui/LoadingSkeleton';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useActivityLog, useLogOnce } from '@/hooks/useActivityLog';
 import { useAuth } from '@/hooks/useAuth';
 import { useBackToList } from '@/hooks/useBackToList';
 import { useQuizResource } from '@/hooks/useQuizResource';
@@ -79,8 +80,15 @@ export const QuizResult = () => {
     const load = useCallback((id: string, signal: AbortSignal) => fetchQuizResult(id, userId, signal), [userId]);
     const { state, retry } = useQuizResource(quizId, load);
     const backToList = useBackToList(MY_QUIZ_LIST_PATH);
+    const activity = useActivityLog();
 
     const result = state.status === 'success' ? state.data : null;
+
+    useLogOnce(result === null ? null : (quizId ?? null), () => {
+        if (result !== null) {
+            activity.quizResultViewed(result.quizTitle);
+        }
+    });
 
     return (
         <section className="flex flex-col gap-5">
