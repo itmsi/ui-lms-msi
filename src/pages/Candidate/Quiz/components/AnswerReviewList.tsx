@@ -6,7 +6,11 @@ import { QuestionImage } from '@/pages/Candidate/Quiz/components/QuestionImage';
 import type { QuestionReview } from '@/types/quiz';
 import { hasSubmittedAnswer } from '@/utils/quizReview';
 
-const statusOf = (item: QuestionReview): ReviewStatus => {
+const statusOf = (item: QuestionReview, isPending: boolean): ReviewStatus => {
+    if (isPending && hasSubmittedAnswer(item)) {
+        return 'pending';
+    }
+
     if (item.isCorrect) {
         return 'correct';
     }
@@ -14,11 +18,11 @@ const statusOf = (item: QuestionReview): ReviewStatus => {
     return hasSubmittedAnswer(item) ? 'incorrect' : 'unanswered';
 };
 
-export const AnswerReviewList = ({ items }: { items: QuestionReview[] }) => (
+export const AnswerReviewList = ({ items, isPending }: { items: QuestionReview[]; isPending: boolean }) => (
     <section aria-label={strings.myQuiz.reviewHeading}>
         <ol className="flex flex-col gap-3">
             {items.map((item) => {
-                const status = statusOf(item);
+                const status = statusOf(item, isPending);
 
                 return (
                     <li key={item.questionId}>
@@ -28,9 +32,11 @@ export const AnswerReviewList = ({ items }: { items: QuestionReview[] }) => (
                                     {`${strings.myQuiz.questionLabel} ${String(item.line)}`}
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <span className="text-caption text-muted tabular-nums">
-                                        {`${String(item.pointsEarned)}/${String(item.points)} ${strings.myQuiz.pointsSuffix}`}
-                                    </span>
+                                    {isPending ? null : (
+                                        <span className="text-caption text-muted tabular-nums">
+                                            {`${String(item.pointsEarned)}/${String(item.points)} ${strings.myQuiz.pointsSuffix}`}
+                                        </span>
+                                    )}
                                     <ReviewStatusBadge status={status} />
                                 </span>
                             </div>
@@ -46,7 +52,7 @@ export const AnswerReviewList = ({ items }: { items: QuestionReview[] }) => (
                                     filesLabel={strings.myQuiz.yourFiles}
                                     status={status}
                                 />
-                                {status === 'correct' ? null : (
+                                {status === 'correct' || isPending ? null : (
                                     <AnswerLine
                                         label={strings.myQuiz.correctAnswer}
                                         values={item.correctAnswer}

@@ -11,9 +11,13 @@ import { cn } from '@/utils/cn';
 import { hasSubmittedAnswer } from '@/utils/quizReview';
 import { QuestionImage } from '@/pages/Candidate/Quiz/components/QuestionImage';
 
-const statusOf = (row: GradingRow): ReviewStatus => {
+const statusOf = (row: GradingRow, isPending: boolean): ReviewStatus => {
     if (hasSubmittedAnswer(row.item) === false) {
         return 'unanswered';
+    }
+
+    if (isPending) {
+        return 'pending';
     }
 
     const points = row.points ?? row.item.pointsEarned;
@@ -23,15 +27,16 @@ const statusOf = (row: GradingRow): ReviewStatus => {
 
 interface GradingQuestionCardProps {
     row: GradingRow;
+    isPending: boolean;
     disabled: boolean;
     onChange: (value: string) => void;
     onStep: (delta: number) => void;
 }
 
-export const GradingQuestionCard = ({ row, disabled, onChange, onStep }: GradingQuestionCardProps) => {
+export const GradingQuestionCard = ({ row, isPending, disabled, onChange, onStep }: GradingQuestionCardProps) => {
     const { item } = row;
     const points = row.points ?? item.pointsEarned;
-    const status = statusOf(row);
+    const status = statusOf(row, isPending);
     return (
         <Card className={cn('flex flex-col gap-4 p-4 transition-shadow sm:p-5', row.isChanged && 'ring-primary/40 ring-2')}>
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -60,29 +65,31 @@ export const GradingQuestionCard = ({ row, disabled, onChange, onStep }: Grading
                 />
             </dl>
 
-            <div className="border-line flex flex-wrap items-end justify-between gap-3 border-t pt-4">
-                <PointsStepper
-                    label={`${strings.quizResults.pointsLabel} ${String(item.line)}`}
-                    value={row.value}
-                    points={row.points}
-                    max={item.points}
-                    disabled={disabled}
-                    onChange={onChange}
-                    onStep={onStep}
-                />
-                <div className="flex flex-wrap items-center gap-2 pb-2.5">
-                    {item.autoPointsEarned === points ? null : (
-                        <span className="text-caption text-muted tabular-nums">
-                            {`${strings.quizResults.autoPoints}: ${String(item.autoPointsEarned)} ${strings.myQuiz.pointsSuffix}`}
-                        </span>
-                    )}
-                    {row.isChanged ? (
-                        <Badge tone="primary" size="sm" icon={CircleDot}>
-                            {strings.quizResults.unsavedChip}
-                        </Badge>
-                    ) : null}
+            {isPending ? null : (
+                <div className="border-line flex flex-wrap items-end justify-between gap-3 border-t pt-4">
+                    <PointsStepper
+                        label={`${strings.quizResults.pointsLabel} ${String(item.line)}`}
+                        value={row.value}
+                        points={row.points}
+                        max={item.points}
+                        disabled={disabled}
+                        onChange={onChange}
+                        onStep={onStep}
+                    />
+                    <div className="flex flex-wrap items-center gap-2 pb-2.5">
+                        {item.autoPointsEarned === points ? null : (
+                            <span className="text-caption text-muted tabular-nums">
+                                {`${strings.quizResults.autoPoints}: ${String(item.autoPointsEarned)} ${strings.myQuiz.pointsSuffix}`}
+                            </span>
+                        )}
+                        {row.isChanged ? (
+                            <Badge tone="primary" size="sm" icon={CircleDot}>
+                                {strings.quizResults.unsavedChip}
+                            </Badge>
+                        ) : null}
+                    </div>
                 </div>
-            </div>
+            )}
         </Card>
     );
 };

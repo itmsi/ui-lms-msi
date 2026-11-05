@@ -19,6 +19,7 @@ import { useQuizGrading } from '@/pages/QuizResults/hooks/useQuizGrading';
 import { fetchGradingAttempt } from '@/pages/QuizResults/services/quizResultService';
 import type { GradingAttempt } from '@/pages/QuizResults/types';
 import { QUIZ_RESULTS_PATH } from '@/pages/QuizResults/utils/paths';
+import { isGradingPending } from '@/utils/quizReview';
 
 const DetailSkeleton = () => (
     <LoadingBlock label={strings.common.loading} className="flex flex-col gap-4">
@@ -54,6 +55,7 @@ const GradingView = ({ attempt, resultId, onReload }: GradingViewProps) => {
     const [leaveOpen, setLeaveOpen] = useState(false);
     const headingId = useId();
     const { saved } = grading;
+    const isPending = isGradingPending(saved.gradingStatus);
     return (
         <>
             <PageHeaderDetail
@@ -84,6 +86,7 @@ const GradingView = ({ attempt, resultId, onReload }: GradingViewProps) => {
                         <li key={row.item.questionId}>
                             <GradingQuestionCard
                                 row={row}
+                                isPending={isPending}
                                 disabled={grading.isSaving}
                                 onChange={(value) => grading.setPoints(row.item.questionId, value)}
                                 onStep={(delta) => grading.stepPoints(row.item, delta)}
@@ -94,15 +97,17 @@ const GradingView = ({ attempt, resultId, onReload }: GradingViewProps) => {
             </section>
 
             {/* {grading.isDirty ? ( */}
-            <GradingSaveBar
-                changedCount={grading.changedCount}
-                draftScore={grading.draftScore}
-                savedScore={saved.score}
-                maxScore={saved.maxScore}
-                isSaving={grading.isSaving}
-                onDiscard={grading.discard}
-                onSave={() => void grading.save()}
-            />
+            {isPending ? null : (
+                <GradingSaveBar
+                    changedCount={grading.changedCount}
+                    draftScore={grading.draftScore}
+                    savedScore={saved.score}
+                    maxScore={saved.maxScore}
+                    isSaving={grading.isSaving}
+                    onDiscard={grading.discard}
+                    onSave={() => void grading.save()}
+                />
+            )}
             {/* ) : null} */}
 
             <ConfirmDialog

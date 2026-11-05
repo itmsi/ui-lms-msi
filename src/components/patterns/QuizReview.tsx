@@ -1,4 +1,4 @@
-import { CircleCheck, CircleDashed, CircleDot, FileImage, FileText } from 'lucide-react';
+import { CircleCheck, CircleDashed, CircleDot, FileImage, FileText, Hourglass } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -11,11 +11,12 @@ import type { QuestionReview, SubmittedAttachment } from '@/types/quiz';
 import { formatFileSize, isImageName } from '@/utils/attachmentUpload';
 import { cn } from '@/utils/cn';
 
-export type ReviewStatus = 'correct' | 'incorrect' | 'unanswered';
+export type ReviewStatus = 'correct' | 'incorrect' | 'pending' | 'unanswered';
 
 const STATUS_STYLE: Record<ReviewStatus, { icon: LucideIcon; label: string; tone: BadgeTone }> = {
     correct: { icon: CircleCheck, label: strings.myQuiz.reviewCorrect, tone: 'success' },
     incorrect: { icon: CircleDot, label: strings.myQuiz.reviewIncorrect, tone: 'warning' },
+    pending: { icon: Hourglass, label: strings.myQuiz.reviewPending, tone: 'primary' },
     unanswered: { icon: CircleDashed, label: strings.myQuiz.noAnswer, tone: 'neutral' },
 };
 

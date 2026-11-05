@@ -29,7 +29,6 @@ export const useQuizResource = <T>(key: string | undefined, load: Loader<T>) => 
 
         const run = async () => {
             const outcome = await load(key, controller.signal);
-
             if (controller.signal.aborted) {
                 return;
             }

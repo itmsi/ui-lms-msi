@@ -19,6 +19,7 @@ import { fetchQuizResult } from '@/pages/Candidate/Quiz/services/quizService';
 import { MY_QUIZ_LIST_PATH } from '@/pages/Candidate/Quiz/utils/paths';
 import type { QuizAttemptResult } from '@/types/quiz';
 import { formatFullDateTime } from '@/utils/dateTime';
+import { isGradingPending } from '@/utils/quizReview';
 
 const ResultSkeleton = () => (
     <LoadingBlock label={strings.common.loading}>
@@ -48,30 +49,35 @@ const ScoreSummary = ({ result }: { result: QuizAttemptResult }) => {
     );
 };
 
-const ResultView = ({ result, onBack }: { result: QuizAttemptResult; onBack: () => void }) => (
-    <>
-        <Card className="motion-rise flex flex-col items-center gap-5 p-6 text-center sm:p-8">
-            <span aria-hidden="true" className="bg-primary-light text-primary flex size-14 items-center justify-center rounded-full">
-                <ClipboardCheck className="size-7" />
-            </span>
+const ResultView = ({ result, onBack }: { result: QuizAttemptResult; onBack: () => void }) => {
+    const isPending = isGradingPending(result.gradingStatus);
+    return (
+        <>
+            <Card className="motion-rise flex flex-col items-center gap-5 p-6 text-center sm:p-8">
+                <span aria-hidden="true" className="bg-primary-light text-primary flex size-14 items-center justify-center rounded-full">
+                    <ClipboardCheck className="size-7" />
+                </span>
 
-            <div role="status" className="flex flex-col gap-1.5">
-                <h2 className="text-section font-sans">{strings.myQuiz.resultTitle}</h2>
-                <p className="text-body text-muted mx-auto max-w-md">{strings.myQuiz.resultMessage}</p>
-            </div>
+                <div role="status" className="flex flex-col gap-1.5">
+                    <h2 className="text-section font-sans">{strings.myQuiz.resultTitle}</h2>
+                    <p className="text-body text-muted mx-auto max-w-md">
+                        {isPending ? strings.myQuiz.resultPendingMessage : strings.myQuiz.resultMessage}
+                    </p>
+                </div>
 
-            <ScoreSummary result={result} />
+                {isPending ? null : <ScoreSummary result={result} />}
 
-            {result.submittedAt === '' ? null : (
-                <p className="text-caption text-muted">{`${strings.myQuiz.submittedAt} ${formatFullDateTime(result.submittedAt)}`}</p>
-            )}
+                {result.submittedAt === '' ? null : (
+                    <p className="text-caption text-muted">{`${strings.myQuiz.submittedAt} ${formatFullDateTime(result.submittedAt)}`}</p>
+                )}
 
-            <Button onClick={onBack}>{strings.myQuiz.backToList}</Button>
-        </Card>
+                <Button onClick={onBack}>{strings.myQuiz.backToList}</Button>
+            </Card>
 
-        {result.review.length > 0 ? <AnswerReviewList items={result.review} /> : null}
-    </>
-);
+            {result.review.length > 0 ? <AnswerReviewList items={result.review} isPending={isPending} /> : null}
+        </>
+    );
+};
 
 export const QuizResult = () => {
     const { quizId } = useParams<{ quizId: string }>();

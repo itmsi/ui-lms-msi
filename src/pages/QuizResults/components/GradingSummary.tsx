@@ -1,11 +1,13 @@
 import { ArrowRight, PencilLine } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import { ReviewStatusBadge } from '@/components/patterns/QuizReview';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { strings } from '@/locales/id';
 import type { GradingAttempt } from '@/pages/QuizResults/types';
 import { formatFullDateTime } from '@/utils/dateTime';
+import { isGradingPending } from '@/utils/quizReview';
 
 const Fact = ({ label, children }: { label: string; children: ReactNode }) => (
     <div className="flex min-w-0 flex-col gap-1">
@@ -46,23 +48,27 @@ export const GradingSummary = ({ attempt, draftScore, isDirty }: GradingSummaryP
                     </Fact>
                 </div>
                 <Fact label={strings.quizResults.scoreLabel}>
-                    <span className="flex flex-col gap-2">
-                        <span className="flex flex-wrap items-baseline gap-x-2 tabular-nums">
-                            {isDirty && draftScore !== attempt.score ? (
-                                <>
-                                    <span className="text-muted line-through">{attempt.score}</span>
-                                    <ArrowRight aria-hidden="true" className="text-muted size-4 self-center" />
-                                    <span className="sr-only">{`${strings.quizResults.newScore}:`}</span>
-                                </>
-                            ) : null}
-                            <span className="text-section text-ink font-semibold">{shownScore}</span>
-                            <span className="text-muted">{`/ ${String(attempt.maxScore)} ${strings.myQuiz.pointsSuffix}`}</span>
+                    {isGradingPending(attempt.gradingStatus) ? (
+                        <ReviewStatusBadge status="pending" />
+                    ) : (
+                        <span className="flex flex-col gap-2">
+                            <span className="flex flex-wrap items-baseline gap-x-2 tabular-nums">
+                                {isDirty && draftScore !== attempt.score ? (
+                                    <>
+                                        <span className="text-muted line-through">{attempt.score}</span>
+                                        <ArrowRight aria-hidden="true" className="text-muted size-4 self-center" />
+                                        <span className="sr-only">{`${strings.quizResults.newScore}:`}</span>
+                                    </>
+                                ) : null}
+                                <span className="text-section text-ink font-semibold">{shownScore}</span>
+                                <span className="text-muted">{`/ ${String(attempt.maxScore)} ${strings.myQuiz.pointsSuffix}`}</span>
+                            </span>
+                            <ProgressBar value={percentage} label={strings.quizResults.scoreLabel} showValue={false} />
+                            <span className="text-caption text-muted tabular-nums">
+                                {`${String(attempt.correctCount)} ${strings.myQuiz.of} ${String(attempt.questionCount)} ${strings.quizResults.correctSuffix}`}
+                            </span>
                         </span>
-                        <ProgressBar value={percentage} label={strings.quizResults.scoreLabel} showValue={false} />
-                        <span className="text-caption text-muted tabular-nums">
-                            {`${String(attempt.correctCount)} ${strings.myQuiz.of} ${String(attempt.questionCount)} ${strings.quizResults.correctSuffix}`}
-                        </span>
-                    </span>
+                    )}
                 </Fact>
             </dl>
 

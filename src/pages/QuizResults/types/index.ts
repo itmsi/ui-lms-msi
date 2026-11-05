@@ -1,5 +1,5 @@
 import type { ModulePagination } from '@/types/module';
-import type { QuestionReview } from '@/types/quiz';
+import type { QuestionReview, QuizGradingStatus } from '@/types/quiz';
 
 export type QuizResultStatus = 'completed' | 'not_completed';
 
@@ -51,6 +51,7 @@ export interface GradingAttempt {
     maxScore: number;
     correctCount: number;
     questionCount: number;
+    gradingStatus: QuizGradingStatus;
     adjustedAt: string | null;
     adjustedByName: string | null;
     review: GradingReview[];

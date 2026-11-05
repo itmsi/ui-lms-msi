@@ -18,6 +18,7 @@ import type {
     SubmittedAttachment,
 } from '@/types/quiz';
 import { toHttpsUrl } from '@/utils/httpsUrl';
+import { toQuizGradingStatus } from '@/utils/quizReview';
 
 const LIST_PATH = 'quiz-answers/quizzes/get';
 const detailPath = (id: string) => `quiz-answers/quizzes/get/${encodeURIComponent(id)}`;
@@ -166,14 +167,12 @@ const toResult = (value: unknown): QuizAttemptResult | null => {
     if (isRecord(value) === false || typeof value.quizzes_id !== 'string') {
         return null;
     }
-
     const review = Array.isArray(value.questions)
         ? (value.questions as unknown[])
             .map(toResultReview)
             .filter((item): item is QuestionReview => item !== null)
             .sort((left, right) => left.line - right.line)
         : [];
-
     return {
         quizId: value.quizzes_id,
         quizTitle: readString(value.title),
@@ -183,6 +182,7 @@ const toResult = (value: unknown): QuizAttemptResult | null => {
         maxScore: review.reduce((total, item) => total + item.points, 0),
         correctCount: review.filter((item) => item.isCorrect).length,
         questionCount: review.length,
+        gradingStatus: toQuizGradingStatus(value.status_proses),
         review,
     };
 };

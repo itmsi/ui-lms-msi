@@ -13,6 +13,7 @@ import type {
 import { send } from '@/services/quizRequest';
 import type { ParticipantQuestionType, SubmittedAttachment } from '@/types/quiz';
 import { toHttpsUrl } from '@/utils/httpsUrl';
+import { toQuizGradingStatus } from '@/utils/quizReview';
 
 const LIST_PATH = '/quiz_results/get';
 const detailPath = (id: string) => `quiz_results/${encodeURIComponent(id)}`;
@@ -144,6 +145,7 @@ const toGradingAttempt = (value: unknown): GradingAttempt | null => {
         maxScore: readNumeric(value.max_points) ?? readNumeric(value.total_possible_points) ?? 0,
         correctCount: review.filter((item) => item.isCorrect).length,
         questionCount: review.length || (readNumeric(value.question_count) ?? 0),
+        gradingStatus: toQuizGradingStatus(value.status_proses),
         adjustedAt: typeof value.updated_at === 'string' && value.updated_at !== '' ? value.updated_at : null,
         adjustedByName: typeof value.updated_by_name === 'string' && value.updated_by_name !== ''
             ? value.updated_by_name

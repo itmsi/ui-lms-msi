@@ -95,6 +95,8 @@ export interface QuestionReview {
     points: number;
 }
 
+export type QuizGradingStatus = 'completed' | 'pending' | 'failed';
+
 export interface QuizAttemptResult {
     quizId: string;
     quizTitle: string;
@@ -104,6 +106,7 @@ export interface QuizAttemptResult {
     maxScore: number;
     correctCount: number;
     questionCount: number;
+    gradingStatus: QuizGradingStatus;
     review: QuestionReview[];
 }
 
