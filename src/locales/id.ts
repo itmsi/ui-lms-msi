@@ -1,6 +1,6 @@
 export const strings = {
     app: {
-        name: 'MSI Academy',
+        name: 'MS Learning',
     },
     common: {
         retry: 'Coba lagi',
