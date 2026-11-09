@@ -58,6 +58,15 @@ export const useActivityLog = () => {
                     resolveLinkType(material.link),
                 );
             },
+            quizOpened: (quizTitle: string) => {
+                send(null, `${strings.activity.quizOpened} ${quizTitle}`, null, null);
+            },
+            quizSubmitted: (quizTitle: string) => {
+                send(null, `${strings.activity.quizSubmitted} ${quizTitle}`, null, null);
+            },
+            quizResultViewed: (quizTitle: string) => {
+                send(null, `${strings.activity.quizResultViewed} ${quizTitle}`, null, null);
+            },
         };
     }, [userId]);
 };

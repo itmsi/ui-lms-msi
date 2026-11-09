@@ -1,7 +1,7 @@
 import type { DateRange } from '@/types/dateRange';
 import type { ApiFailureCode, ModulePagination } from '@/types/module';
 
-export type ActivityKind = 'track' | 'module' | 'lesson' | 'link' | 'other';
+export type ActivityKind = 'track' | 'module' | 'lesson' | 'link' | 'quiz' | 'other';
 
 export interface ActivityLog {
     id: string;

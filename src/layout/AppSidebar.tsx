@@ -27,11 +27,8 @@ export const AppSidebar = ({ items, collapsed }: AppSidebarProps) => (
                 collapsed ? 'justify-center px-0' : 'px-5',
             )}
         >
-            <span className="flex size-9 shrink-0 items-center justify-center">
-                {/* <img src="/msi_logo_white.svg" alt="Motorsights" /> */}
-                <img src="/msi-logo-transparent.png" alt="Motorsights" />
-                {/* <img src="/mi_logo.svg" alt="Motorsights" /> */}
-                {/* <img src="/mi_logo_white.svg" alt="Motorsights" /> */}
+            <span className="flex size-10 shrink-0 items-center justify-center">
+                <img src="/ms-learning-collapse.png" alt="Motorsights" />
             </span>
             {collapsed ? null : (
                 <span className="login-serif text-card font-display whitespace-nowrap text-white">{strings.app.name}</span>

@@ -1,6 +1,6 @@
 const BLOCK_BOUNDARY = /<(br|\/p|\/li|\/h[1-6]|\/div|\/blockquote)\b[^>]*>/gi;
 
-const htmlToPlainText = (html: string): string => {
+export const htmlToPlainText = (html: string): string => {
     if (html === '') {
         return '';
     }

@@ -1,4 +1,4 @@
-import { Activity, BookOpen, ExternalLink, FileText, Route } from 'lucide-react';
+import { Activity, BookOpen, ClipboardCheck, ExternalLink, FileText, Route } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import type { ActivityKind } from '@/types/activity';
@@ -9,6 +9,7 @@ const ICON_BY_KIND: Record<ActivityKind, LucideIcon> = {
     module: BookOpen,
     lesson: FileText,
     link: ExternalLink,
+    quiz: ClipboardCheck,
     other: Activity,
 };
 
@@ -17,6 +18,7 @@ const TONE_BY_KIND: Record<ActivityKind, string> = {
     module: 'bg-primary-light text-primary-dark',
     lesson: 'bg-surface text-primary border-primary/40 border',
     link: 'bg-neutral-soft text-neutral-ink',
+    quiz: 'bg-primary-dark text-white',
     other: 'bg-neutral-soft text-neutral-ink',
 };
 

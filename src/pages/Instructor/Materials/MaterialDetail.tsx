@@ -1,7 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { ModuleDetailView } from '@/components/patterns/ModuleDetailView';
 import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
@@ -13,6 +13,7 @@ import { useModuleDetail } from '@/hooks/useModuleDetail';
 import { strings } from '@/locales/id';
 import { deleteMaterial } from '@/pages/Instructor/Materials/services/materialService';
 import type { DeleteMaterialOutcome } from '@/pages/Instructor/Materials/services/materialService';
+import { materialEditPath, materialListPath, materialListPathAfterDelete } from '@/pages/Instructor/Materials/utils/paths';
 
 const deleteFailureMessage = (outcome: Extract<DeleteMaterialOutcome, { ok: false }>): string => {
     if (outcome.code === 'validation' && outcome.message !== undefined) {
@@ -29,6 +30,7 @@ const deleteFailureMessage = (outcome: Extract<DeleteMaterialOutcome, { ok: fals
 export const MaterialDetail = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { state, retry } = useModuleDetail(id);
     const { canUpdate, canDelete } = useMaterialsAccess();
 
@@ -49,7 +51,7 @@ export const MaterialDetail = () => {
 
             if (outcome.ok) {
                 toast.success(strings.materialDetail.deleted);
-                void navigate('/materials');
+                void navigate(materialListPathAfterDelete(location.search));
                 return;
             }
 
@@ -59,7 +61,7 @@ export const MaterialDetail = () => {
         };
 
         void run();
-    }, [id, isDeleting, navigate]);
+    }, [id, isDeleting, location.search, navigate]);
 
     const actions =
         state.status === 'success' && (canUpdate || canDelete) ? (
@@ -73,7 +75,7 @@ export const MaterialDetail = () => {
                         size="sm"
                         onClick={() => {
                             if (id !== undefined) {
-                                void navigate(`/materials/${id}/edit`);
+                                void navigate(materialEditPath(id, location.search));
                             }
                         }}
                         leadingIcon={<Pencil aria-hidden="true" className="size-4" />}
@@ -100,14 +102,14 @@ export const MaterialDetail = () => {
         <section className="flex flex-col gap-5">
             <PageHeaderDetail
                 title={title}
-                backPath="/materials"
+                backPath={materialListPath(location.search)}
                 actions={actions}
             />
 
             <ModuleDetailView
                 state={state}
                 onRetry={retry}
-                backTo="/materials"
+                backTo={materialListPath(location.search)}
                 backLabel={strings.materialDetail.backToList}
                 variant="manage"
             />

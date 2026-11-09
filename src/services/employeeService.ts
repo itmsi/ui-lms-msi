@@ -1,7 +1,6 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { readEnvelope, toApiFailureCode, toPagination } from '@/helpers/apiEnvelope';
 import { apiGatewayPost } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
-import { toApiFailureCode, toPagination } from '@/services/moduleService';
 import type { Employee, EmployeeListOutcome, EmployeeListQuery, EmployeeLookupOutcome } from '@/types/employee';
 
 const LIST_PATH = 'employees/get';

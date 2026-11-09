@@ -6,9 +6,9 @@ export const LoginBrandPanel = () => (
         <BrandPanelDecor />
 
         <div className="relative z-10 flex items-center gap-3">
-            <span className="flex size-12 items-center justify-center">
+            <span className="flex items-center justify-center">
                 {/* <img src="/msi_logo_white.svg" alt="Motorsights" /> */}
-                <img src="/msi-logo-transparent.png" alt="Motorsights" />
+                <img src="/ms-learning-collapse.png" alt="Motorsights" />
             </span>
             <span className="login-serif text-[1.25rem] leading-7 font-medium tracking-tight">{strings.app.name}</span>
         </div>

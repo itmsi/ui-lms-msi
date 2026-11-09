@@ -1,8 +1,7 @@
-import { readEnvelope } from '@/helpers/apiEnvelope';
+import { readEnvelope, toApiFailureCode, toPagination } from '@/helpers/apiEnvelope';
 import { apiGet, apiPost } from '@/helpers/apiHelper';
 import { isRecord } from '@/helpers/authParsers';
 import type {
-    ApiFailureCode,
     LearningModule,
     MaterialLink,
     ModuleChapter,
@@ -11,7 +10,6 @@ import type {
     ModuleListOutcome,
     ModuleListQuery,
     ModuleListResult,
-    ModulePagination,
     ModuleSort,
 } from '@/types/module';
 import { toDescriptionExcerpt } from '@/utils/htmlText';
@@ -63,29 +61,6 @@ const toLearningModule = (value: unknown): LearningModule | null => {
         linkMaterials: toLinkMaterials(value.link_materials),
         category: readString(value.module_category),
     };
-};
-
-export const toPagination = (value: unknown, fallback: { page: number; limit: number }): ModulePagination => {
-    const source = isRecord(value) ? value : {};
-    const readNumber = (candidate: unknown, byDefault: number) =>
-        typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : byDefault;
-
-    return {
-        page: readNumber(source.page, fallback.page),
-        limit: readNumber(source.limit, fallback.limit),
-        total: readNumber(source.total, 0),
-        totalPages: readNumber(source.totalPages, 0),
-    };
-};
-
-export const toApiFailureCode = (error: unknown): ApiFailureCode => {
-    const status = isRecord(error) && typeof error.status === 'number' ? error.status : null;
-
-    if (status === 401 || status === 403) {
-        return 'unauthorized';
-    }
-
-    return status === null ? 'offline' : 'unknown';
 };
 
 export const fetchModules = async (query: ModuleListQuery, signal?: AbortSignal): Promise<ModuleListOutcome> => {

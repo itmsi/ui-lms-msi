@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 
 import PageHeaderDetail from '@/components/patterns/PageHeaderDetail';
 import { PermissionDenied } from '@/components/patterns/PermissionDenied';
@@ -10,14 +10,16 @@ import { RichTextEditor } from '@/components/ui/RichTextEditor';
 import { Select } from '@/components/ui/Select';
 import { useMaterialsAccess } from '@/hooks/useMaterialsAccess';
 import { strings } from '@/locales/id';
-import { BannerField } from '@/pages/Instructor/Materials/components/BannerField';
+import { BannerField } from '@/components/patterns/BannerField';
 import { LessonListField } from '@/pages/Instructor/Materials/components/LessonListField';
 import { LinkListField } from '@/pages/Instructor/Materials/components/LinkListField';
 import { useMaterialEditor } from '@/pages/Instructor/Materials/hooks/useMaterialEditor';
+import { materialDetailPath, materialListPath } from '@/pages/Instructor/Materials/utils/paths';
 import FormActions from '@/components/patterns/FormActions';
 
 export const MaterialEditor = () => {
     const { id } = useParams<{ id: string }>();
+    const location = useLocation();
     const {
         draft,
         errors,
@@ -42,7 +44,7 @@ export const MaterialEditor = () => {
         <section className="flex flex-col gap-5">
             <PageHeaderDetail
                 title={isEditing ? strings.materialEditor.editTitle : strings.materialEditor.createTitle}
-                backPath={isEditing && id !== undefined ? `/materials/${id}` : '/materials'}
+                backPath={isEditing && id !== undefined ? materialDetailPath(id, location.search) : materialListPath(location.search)}
                 subtitle={isEditing ? strings.materialEditor.editSubtitle : strings.materialEditor.createSubtitle}
             />
 
